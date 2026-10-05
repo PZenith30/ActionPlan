@@ -4,11 +4,63 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>แดชบอร์ดติดตามแผนปฏิบัติการ กยท. ปี 2569</title>
+<link rel="preconnect" href="https://ehzbdfdjyyyzoevjhqsb.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<script>
+// ---------- Supabase: เริ่มโหลดข้อมูลทันทีตั้งแต่ต้นหน้า (ขนานกับการโหลดไลบรารี/ฟอนต์) ----------
+// anon key เปิดเผยได้ — ตารางตั้ง RLS ให้อ่านได้อย่างเดียว (ดู supabase/schema.sql)
+const SUPABASE_URL = 'https://ehzbdfdjyyyzoevjhqsb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVoemJkZmRqeXl5em9ldmpocXNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExNjI2MzQsImV4cCI6MjEwNjczODYzNH0.Qc3FZBm18EAIOOCazDOHdIIbnzIW-sjdsf1pSy9iF3I';
+const SUPABASE_HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY };
+function requestSnapshots(){
+  return fetch(SUPABASE_URL + '/rest/v1/sheet_snapshots?select=sheet_name,headers,rows',
+    { headers: SUPABASE_HEADERS, cache: 'no-store' });
+}
+let earlySnapshotsRequest = requestSnapshots();
+earlySnapshotsRequest.catch(function(){}); // error จริงจะแสดงตอน loader รอผล
+
+// โหลดสคริปต์จาก CDN เมื่อจำเป็นต้องใช้ (ครั้งเดียว)
+const scriptLoads = {};
+function loadScriptOnce(src){
+  if(!scriptLoads[src]){
+    scriptLoads[src] = new Promise(function(resolve, reject){
+      const s = document.createElement('script');
+      s.src = src; s.onload = resolve;
+      s.onerror = function(){ delete scriptLoads[src]; reject(new Error('โหลดไลบรารีไม่สำเร็จ: ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  return scriptLoads[src];
+}
+
+// ---------- นับผู้เข้าชม: ส่งหลังหน้าโหลดเสร็จ ไม่หน่วงการแสดงผล ----------
+// เก็บเฉพาะรหัสสุ่มประจำเครื่อง (ไม่ใช่ข้อมูลส่วนบุคคล) + เปิดจาก LINE หรือไม่ + มือถือหรือไม่
+// ฐานข้อมูลไม่นับซ้ำถ้าเครื่องเดิมเปิดซ้ำภายใน 30 นาที (ดู log_page_view ใน supabase/schema.sql)
+window.addEventListener('load', function(){
+  try{
+    let vid = null;
+    try{ vid = localStorage.getItem('acp-visitor'); }catch(e){}
+    if(!vid || !/^[0-9a-f-]{36}$/.test(vid)){
+      vid = (crypto.randomUUID ? crypto.randomUUID() :
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+          const r = Math.random()*16|0; return (c === 'x' ? r : (r&0x3|0x8)).toString(16); }));
+      try{ localStorage.setItem('acp-visitor', vid); }catch(e){}
+    }
+    const ua = navigator.userAgent || '';
+    const src = (new URLSearchParams(location.search).get('src') || (/\bLine\//i.test(ua) ? 'line' : 'web')).slice(0, 20);
+    setTimeout(function(){
+      fetch(SUPABASE_URL + '/rest/v1/rpc/log_page_view', {
+        method: 'POST', keepalive: true,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, SUPABASE_HEADERS),
+        body: JSON.stringify({ p_visitor: vid, p_source: src, p_mobile: /Mobi|Android|iPhone|iPad/i.test(ua) }),
+      }).catch(function(){});
+    }, 1500);
+  }catch(e){}
+});
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --forest-950:#0d2318;
@@ -779,17 +831,18 @@
 
   <div id="loadingOverlay" class="state-overlay">
     <div class="spinner"></div>
-    <div class="state-title">กำลังโหลดข้อมูลจาก Google Sheet...</div>
-    <div class="state-sub">ดึงข้อมูลสดจากชีตยุทธศาสตร์ โครงการ และผลการดำเนินงาน</div>
+    <div class="state-title">กำลังโหลดข้อมูล...</div>
+    <div class="state-sub">ดึงข้อมูลยุทธศาสตร์ โครงการ และผลการดำเนินงานจากฐานข้อมูล</div>
   </div>
 
   <div id="errorOverlay" class="state-overlay" style="display:none;">
     <div class="error-box">
-      <div class="state-title">โหลดข้อมูลจาก Google Sheet ไม่สำเร็จ</div>
+      <div class="state-title">โหลดข้อมูลไม่สำเร็จ</div>
       <div class="state-sub">รายละเอียดข้อผิดพลาด:</div>
       <div class="err-detail"></div>
       <ul>
-        <li>ตรวจสอบว่าตั้งค่าแชร์ชีตเป็น "ทุกคนที่มีลิงก์ดูได้" (Anyone with the link – Viewer)</li>
+        <li>ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต แล้วลองโหลดหน้าใหม่</li>
+        <li>ใน Google Sheet กดเมนู "📁 เมนูระบบ &gt; ส่งข้อมูลขึ้นเว็บ (Supabase) เดี๋ยวนี้" แล้วดูผลในชีต "ประวัติการบันทึก"</li>
         <li>ตรวจสอบว่ามีชีตหลัก: ยุทธศาสตร์, โครงการ, ผลการดำเนินงาน (และชีตเสริม: โครงการสำคัญ, ตัวชี้วัดโครงการ, แผนแม่บท, เชื่อมโยงโครงการ, ผลการดำเนินงานย้อนหลัง)</li>
         <li>ตรวจสอบว่าหัวคอลัมน์ในแต่ละชีตยังตรงกับต้นฉบับ</li>
       </ul>
@@ -1615,7 +1668,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     return getFiltered().slice().sort((a,b)=>a.code.localeCompare(b.code,'th'));
   }
 
-  document.getElementById('exportExcelBtn').addEventListener('click', ()=>{
+  document.getElementById('exportExcelBtn').addEventListener('click', async ()=>{
+    // SheetJS ใหญ่ (~300 KB) และใช้แค่ปุ่มนี้ จึงโหลดตอนกดครั้งแรกแทนการโหลดพร้อมหน้าเว็บ
+    try{
+      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+    }catch(e){}
     if(typeof XLSX === 'undefined'){
       alert('ไม่สามารถโหลดไลบรารีสำหรับสร้างไฟล์ Excel ได้ (ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต) กรุณาลองใหม่อีกครั้ง');
       return;
@@ -2985,29 +3042,12 @@ window.ACPDash = (function(){
 })();
 </script>
 <script>
-// ---------- Google Sheet live data loader ----------
-const GOOGLE_SHEET_ID = '1l35SXQ3UBmN2DNC5s3jErryeoLElwHnkrhALdQT8s0c';
-
-// กำหนดช่วงคอลัมน์ให้ตรงพอดีกับแต่ละชีต (ป้องกันปัญหา Google gviz export พังเมื่อชนคอลัมน์ว่างทางขวา)
-const SHEET_RANGES = {
-  'ยุทธศาสตร์': 'A1:C2000',
-  'โครงการ': 'A1:P5000',
-  'โครงการปี69': 'A1:P5000',
-  'ผลการดำเนินงาน': 'A1:R5000',
-  'โครงการสำคัญ': 'A1:C2000',
-  'โครงการสำคัญปี69': 'A1:C2000',
-  'ตัวชี้วัดโครงการ': 'A1:H5000',
-  'ตัวชี้วัดองค์กร': 'A1:F2000',
-  'ผลการดำเนินงานย้อนหลัง': 'A1:T60000',
-  'แผนแม่บท': 'A1:D500',
-  'เชื่อมโยงโครงการ': 'A1:G5000',
-  'ส่วนงานภายใต้ผู้บริหาร': 'A1:J500',
-  'ส่วนงานภายใต้รองผวก.': 'A1:J500',
-};
+// ---------- Supabase data loader ----------
+// ข้อมูลส่งขึ้นมาจาก Google Sheet โดย Apps Script (ตาราง sheet_snapshots: 1 แถว = 1 ชีต)
+// SUPABASE_URL / SUPABASE_ANON_KEY / requestSnapshots() / earlySnapshotsRequest อยู่ใน <head>
 
 // ชื่อชีตที่รองรับ (ชื่อปัจจุบันก่อน ตามด้วยชื่อเดิม) + หัวคอลัมน์ที่ต้องมี
-// หมายเหตุ: ถ้าชื่อชีตไม่มีอยู่จริง Google จะส่งข้อมูลของ "ชีตแรก" กลับมาแทนโดยไม่แจ้ง error
-// จึงต้องตรวจหัวคอลัมน์ทุกครั้งเพื่อไม่ให้ดึงข้อมูลผิดชีต
+// ตรวจหัวคอลัมน์ทุกครั้งเพื่อไม่ให้ใช้ข้อมูลผิดชีต
 const SHEET_SPECS = {
   strategy:  { names:['ยุทธศาสตร์'],                       required:['Strategy_Code','ชื่อยุทธศาสตร์'] },
   project:   { names:['โครงการ','โครงการปี69'],             required:['PRJ_Code','ชื่อโครงการ','Strategy_Code'] },
@@ -3050,46 +3090,52 @@ async function fetchSheetBySpec(key){
     `(หัวคอลัมน์ที่อ่านได้: ${lastHeaders.slice(0,12).join(', ') || '-'})`);
 }
 
-function sheetCsvUrl(sheetName){
-  const range = SHEET_RANGES[sheetName] || 'A1:Z2000';
-  return `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&range=${range}&sheet=${encodeURIComponent(sheetName)}`;
+// โหลดทุกชีตจาก Supabase ครั้งเดียว แล้วแชร์ผลให้ทุกการเรียก { ชื่อชีต: {headers, rows} }
+let snapshotsPromise = null;
+function loadSnapshots(){
+  if(!snapshotsPromise){
+    snapshotsPromise = (async ()=>{
+      // ใช้คำขอที่เริ่มไว้ตั้งแต่ <head> ครั้งแรก ถ้าลองใหม่หลังพลาดค่อยขอใหม่
+      const req = earlySnapshotsRequest || requestSnapshots();
+      earlySnapshotsRequest = null;
+      const res = await req;
+      if(!res.ok){
+        const detail = await res.text().catch(()=> '');
+        throw new Error(`โหลดข้อมูลจาก Supabase ไม่สำเร็จ (HTTP ${res.status}) ${detail.slice(0,200)}`);
+      }
+      const list = await res.json();
+      if(!list.length){
+        throw new Error('ยังไม่มีข้อมูลในฐานข้อมูล — กดเมนู "📁 เมนูระบบ > ส่งข้อมูลขึ้นเว็บ (Supabase) เดี๋ยวนี้" ใน Google Sheet ก่อน');
+      }
+      const map = {};
+      list.forEach(s => { map[s.sheet_name] = s; });
+      return map;
+    })();
+    snapshotsPromise.catch(()=>{ snapshotsPromise = null; }); // ให้ลองใหม่ได้ถ้าโหลดพลาด
+  }
+  return snapshotsPromise;
 }
 
+// คืนค่าเป็น array ของ object {หัวคอลัมน์: ค่า} พร้อม __fields ตามลำดับคอลัมน์ในชีต
+// (รูปแบบเดียวกับ Papa.parse แบบ header:true ที่ใช้กับ CSV เดิม) — ชีตที่ไม่มีคืนค่า array ว่าง
 async function fetchSheetRows(sheetName){
-  const res = await fetch(sheetCsvUrl(sheetName));
-  if(!res.ok) throw new Error(`โหลดชีต "${sheetName}" ไม่สำเร็จ (HTTP ${res.status})`);
-  let text = await res.text();
-  text = text.replace(/^\uFEFF/, ''); // ตัด BOM ที่ Google Sheets มักแนบมาหน้าไฟล์ CSV
-  if(/^\s*<!DOCTYPE html/i.test(text) || /accounts\.google\.com/i.test(text)){
-    throw new Error(`ไม่สามารถเข้าถึงชีต "${sheetName}" ได้ — ตรวจสอบว่าตั้งค่าแชร์เป็น "ทุกคนที่มีลิงก์ดูได้"`);
-  }
-  const parsed = Papa.parse(text, {
-    header:true,
-    skipEmptyLines:true,
-    transformHeader: h => h.replace(/^\uFEFF/, '').trim(),
-  });
-  const data = parsed.data;
-  data.__fields = (parsed.meta && parsed.meta.fields) || [];
+  const snap = (await loadSnapshots())[sheetName];
+  const fields = snap ? (snap.headers || []).map(h => String(h).trim()) : [];
+  const data = snap ? (snap.rows || []).map(r => {
+    const o = {};
+    fields.forEach((f, i) => { o[f] = r[i] == null ? '' : String(r[i]); });
+    return o;
+  }) : [];
+  data.__fields = fields;
   return data;
 }
 
-// ชีต "ผลการดำเนินงานย้อนหลัง" ไม่ได้ดึงตามชื่อหัวคอลัมน์ (เพราะคอลัมน์ N,O,P เป็นสูตรที่อาจมีชื่อไม่แน่นอน)
-// แต่อ้างอิงตามตำแหน่งคอลัมน์ A-T ตรงๆ ตามโครงสร้างที่สคริปต์ archive เขียนไว้เสมอ
+// ชีต "ผลการดำเนินงานย้อนหลัง" ไม่ได้ใช้ตามชื่อหัวคอลัมน์ (เพราะคอลัมน์ N,O,P เป็นสูตรที่อาจมีชื่อไม่แน่นอน)
+// แต่อ้างอิงตามตำแหน่งคอลัมน์ A-T ตรงๆ ตามโครงสร้างที่สคริปต์ archive เขียนไว้เสมอ (ไม่รวมแถวหัวตาราง)
 async function fetchHistorySheetRaw(sheetName){
-  const range = SHEET_RANGES[sheetName] || 'A1:T20000';
-  const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&headers=0&range=${range}&sheet=${encodeURIComponent(sheetName)}`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error(`โหลดชีต "${sheetName}" ไม่สำเร็จ (HTTP ${res.status})`);
-  let text = await res.text();
-  text = text.replace(/^\uFEFF/, '');
-  if(/^\s*<!DOCTYPE html/i.test(text) || /accounts\.google\.com/i.test(text)){
-    throw new Error(`ไม่สามารถเข้าถึงชีต "${sheetName}" ได้ — ตรวจสอบว่าตั้งค่าแชร์เป็น "ทุกคนที่มีลิงก์ดูได้"`);
-  }
-  const parsed = Papa.parse(text, { header:false, skipEmptyLines:true });
-  // แถวแรกคือหัวตาราง (ถ้ามี) — ตัดออกถ้าคอลัมน์ A ไม่ใช่ตัวเลขปีงบประมาณ
-  const rows = parsed.data;
-  if(rows.length && isNaN(Number(rows[0][0]))) rows.shift();
-  return rows;
+  const snap = (await loadSnapshots())[sheetName];
+  if(!snap) throw new Error(`ไม่พบชีต "${sheetName}" ในฐานข้อมูล`);
+  return (snap.rows || []).map(r => r.map(c => c == null ? '' : String(c)));
 }
 
 // จัดกลุ่มข้อมูลย้อนหลังตามรอบ (ปีงบประมาณ + เดือนรายงาน) และรวมกับข้อมูลโครงการปัจจุบัน (ชื่อ/หน่วยงาน/ยุทธศาสตร์)
