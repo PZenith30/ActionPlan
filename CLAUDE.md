@@ -43,6 +43,8 @@ Loader behaviours worth knowing:
 - `fetchHistorySheetRaw()` returns raw arrays (no header row); `buildHistoryDataset()` reads `ผลการดำเนินงานย้อนหลัง` by column position A–T (layout written by the Apps Script archive; N–P are ARRAYFORMULA columns in the sheet).
 - Each `SHEET_SPECS` entry lists alternate sheet names and `required` headers; a missing sheet yields an empty array and is skipped if `optional`. Keep sheet names in sync with `SYNC_SHEETS` in `AppScript`.
 - Only the latest `Fiscal_Year` found in the projects sheet is kept.
+- Cancelled projects: if any row of a project in `โครงการ` has `สถานะโครงการ` containing "ยกเลิก", `buildDashboardData()` drops the project from `records` (so it's excluded from every stat, chart and history view via `window.ACP_CANCELLED`) and pushes its details (name, owner, budget, `เหตุผลการยกเลิก`) to `window.ACP_CANCELLED_LIST`. The 5th card on the main dashboard (`#cancelledCard`, opens `#cancelModal`) shows that list. Some project codes appear on several rows of the projects sheet.
+- `#kpiGrid` alone has 5 cards: 5 columns at ≥1440px, 3+2 at 1001–1439px, then the shared `.kpi-grid` rules (2 columns with the 5th card full-width, 1 column ≤380px). Other `.kpi-grid`s stay at 4 columns.
 - `normCode()` re-pads numeric project codes to 6 digits (e.g. `010101`), since leading zeros get lost in Sheets.
 - `isYes()` interprets checkbox-like cells (TRUE/Yes/✓/ใช่…).
 - Status levels are Thai strings: `['ดีมาก','ดี','พอใช้','ต้องปรับปรุง']`.

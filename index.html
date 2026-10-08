@@ -251,6 +251,35 @@ window.addEventListener('load', function(){
   .kpi-card.c3 .accent-bar{background:var(--status-good);}
   .kpi-card.c4 .accent-bar{background:var(--status-poor);}
   .kpi-card.c5 .accent-bar{background:var(--bark-700);}
+  /* แดชบอร์ดหลักมี 5 การ์ด (รวมโครงการที่ยกเลิก) — จอเล็กใช้กติกา .kpi-grid เดิม (2 / 1 คอลัมน์) */
+  /* จอกลาง: 2 แถว (3 + 2 การ์ด) ให้ตัวเลขไม่ล้นการ์ด */
+  @media (min-width:1001px) and (max-width:1439px){
+    #kpiGrid{grid-template-columns:repeat(6,1fr);}
+    #kpiGrid > .kpi-card{grid-column:span 2;}
+    #kpiGrid > .kpi-card:nth-child(n+4){grid-column:span 3;}
+  }
+  @media (min-width:1440px){
+    #kpiGrid{grid-template-columns:repeat(5,1fr); gap:14px;}
+    #kpiGrid .kpi-card{padding:18px 18px;}
+    #kpiGrid .kpi-card .value{font-size:clamp(21px, 1.75vw, 30px); white-space:nowrap;}
+    #kpiGrid .kpi-card .value .unit{font-size:clamp(12px, 0.95vw, 15px);}
+  }
+  .kpi-card.clickable{cursor:pointer; transition:box-shadow .15s, transform .15s;}
+  .kpi-card.clickable:hover{box-shadow:var(--shadow-md); transform:translateY(-1px);}
+  .kpi-card.clickable:focus-visible{outline:2px solid var(--forest-600); outline-offset:2px;}
+  .kpi-card .more{margin-top:6px; font-size:12px; font-weight:600; color:var(--bark-700);}
+
+  /* ---------- รายการโครงการที่ยกเลิก (หน้าต่างป๊อปอัป ใช้สไตล์ rm-*) ---------- */
+  .cx-list{list-style:none; margin:0 0 14px; padding:0; display:flex; flex-direction:column; gap:10px;}
+  .cx-item{border:1px solid var(--latex-200); border-left:4px solid var(--bark-700); border-radius:10px; padding:12px 14px; background:var(--latex-50);}
+  .cx-top{display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap;}
+  .cx-code{font-family:'JetBrains Mono',monospace; font-size:12.5px; font-weight:600; color:var(--ink-600);}
+  .cx-budget{font-size:12.5px; color:var(--ink-600); white-space:nowrap;}
+  .cx-name{margin:4px 0 6px; font-weight:600; color:var(--ink-900); line-height:1.45;}
+  .cx-meta{font-size:12.5px; color:var(--ink-600);}
+  .cx-reason{margin-top:6px; font-size:13px; color:var(--ink-900);}
+  .cx-reason b{color:var(--bark-700); font-weight:600;}
+  .cx-empty{padding:18px 0 22px; text-align:center; color:var(--ink-400);}
 
   .dg-card{
     transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
@@ -414,7 +443,7 @@ window.addEventListener('load', function(){
   @page{size:A4 landscape; margin:0;}
   @media print{
     body{background:#fff !important;}
-    body > .page, #reportModal, #reportStage, #reportChartHolder{display:none !important;}
+    body > .page, #reportModal, #cancelModal, #reportStage, #reportChartHolder{display:none !important;}
     #printArea{display:block !important;}
     #printArea.legacy{padding:10mm;}
     #printArea.report .rp-page{break-after:page; page-break-after:always;}
@@ -534,6 +563,7 @@ window.addEventListener('load', function(){
 
   @media (max-width:1000px){
     .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    #kpiGrid .kpi-card.c5{grid-column:1 / -1;}   /* การ์ดที่ 5 เต็มแถว ไม่ให้เหลือครึ่งแถว */
     .panels{grid-template-columns:1fr;}
     .content-area{padding:22px 16px 50px;}
     header.top{padding:20px 0 18px;}
@@ -790,6 +820,7 @@ window.addEventListener('load', function(){
   }
   @media (max-width:380px){
     .kpi-grid{grid-template-columns:minmax(0,1fr);}
+    #kpiGrid .kpi-card.c5{grid-column:auto;}
   }
   .table-scroll-hint{display:none; font-size:11.5px; color:var(--ink-400); padding:8px 14px 0;}
 </style>
@@ -1122,6 +1153,19 @@ window.addEventListener('load', function(){
 </main>
 </div>
 
+<div id="cancelModal" class="rm-backdrop" hidden>
+  <div class="rm-dialog" role="dialog" aria-modal="true" aria-labelledby="cxTitle">
+    <div class="rm-head">
+      <div>
+        <h2 id="cxTitle">🚫 โครงการที่ยกเลิก</h2>
+        <p id="cxSub">อ้างอิงคอลัมน์ "สถานะโครงการ" ในชีตโครงการ — ไม่นับรวมในสถิติและกราฟของแดชบอร์ด</p>
+      </div>
+      <button type="button" class="rm-x" id="cxClose" aria-label="ปิด">×</button>
+    </div>
+    <div class="rm-body" id="cxBody"></div>
+  </div>
+</div>
+
 <div id="reportModal" class="rm-backdrop" hidden>
   <div class="rm-dialog" role="dialog" aria-modal="true" aria-labelledby="rmTitle">
     <div class="rm-head">
@@ -1259,7 +1303,61 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       <div class="value">${nPoor}<span class="unit">โครงการ</span></div>
       <div class="sub">โครงการสำคัญทั้งหมด ${nImportant} โครงการ</div>
     </div>
+    ${cancelledCardHtml()}
   `;
+  bindCancelledCard();
+
+  // ---------- การ์ดโครงการที่ยกเลิก (ชีตโครงการ คอลัมน์ "สถานะโครงการ" มีคำว่า ยกเลิก) ----------
+  // โครงการเหล่านี้ถูกตัดออกจาก PROJECTS ตั้งแต่ตอนโหลดข้อมูล จึงไม่นับในการ์ด/กราฟอื่น
+  function cancelledCardHtml(){
+    const list = window.ACP_CANCELLED_LIST || [];
+    const n = list.length;
+    const budget = list.reduce((a,p)=>a+(p.budget||0),0);
+    const sub = n === 0
+      ? 'ไม่มีโครงการที่ยกเลิกในปีงบประมาณนี้'
+      : (budget > 0 ? `งบประมาณรวม ${fmtBahtShort(budget)} บาท` : 'ไม่นับรวมในสถิติของแดชบอร์ด');
+    return `
+    <div class="kpi-card c5${n ? ' clickable' : ''}" id="cancelledCard"${n ? ' role="button" tabindex="0" aria-haspopup="dialog"' : ''}>
+      <div class="accent-bar"></div>
+      <span class="eyebrow">โครงการที่ยกเลิก</span>
+      <div class="value">${n}<span class="unit">โครงการ</span></div>
+      <div class="sub">${sub}</div>
+      ${n ? '<div class="more">ดูรายชื่อและเหตุผล ›</div>' : ''}
+    </div>`;
+  }
+
+  function bindCancelledCard(){
+    const card = document.getElementById('cancelledCard');
+    const modal = document.getElementById('cancelModal');
+    if(!card || !modal || !card.classList.contains('clickable')) return;
+    const open = ()=>{ renderCancelledList(); modal.hidden = false; document.getElementById('cxClose').focus(); };
+    card.addEventListener('click', open);
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } });
+    if(!modal.dataset.bound){   // ผูกปุ่มปิดครั้งเดียว (renderDashboard ถูกเรียกซ้ำเมื่อเปลี่ยนรอบข้อมูล)
+      modal.dataset.bound = '1';
+      const close = ()=>{ modal.hidden = true; const c = document.getElementById('cancelledCard'); if(c) c.focus(); };
+      document.getElementById('cxClose').addEventListener('click', close);
+      modal.addEventListener('click', e=>{ if(e.target === modal) close(); });
+      document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !modal.hidden) close(); });
+    }
+  }
+
+  function renderCancelledList(){
+    const esc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const list = (window.ACP_CANCELLED_LIST || []).slice().sort((a,b)=>a.code.localeCompare(b.code,'th'));
+    const body = document.getElementById('cxBody');
+    if(!list.length){ body.innerHTML = '<div class="cx-empty">ไม่มีโครงการที่ยกเลิก</div>'; return; }
+    body.innerHTML = '<ul class="cx-list">' + list.map(p => `
+      <li class="cx-item">
+        <div class="cx-top">
+          <span class="cx-code">${esc(p.code)}</span>
+          ${p.budget ? `<span class="cx-budget">งบประมาณ ${fmtBaht(p.budget)} บาท</span>` : ''}
+        </div>
+        <div class="cx-name">${esc(p.name || '-')}</div>
+        <div class="cx-meta">${esc([p.owner, strategyByCode[p.strategy_code]].filter(Boolean).join(' · ') || '-')}</div>
+        <div class="cx-reason"><b>เหตุผลการยกเลิก:</b> ${esc(p.reason || 'ไม่ได้ระบุ')}</div>
+      </li>`).join('') + '</ul>';
+  }
 
   // ---------- Strategy chart ----------
   const stratAgg = {};
@@ -3289,13 +3387,35 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
     if(kc) kpiNameMap[kc] = (r['ชื่อตัวชี้วัดโครงการ']||'').trim();
   });
 
-  const seen = new Set();
-  const projU = [];
+  // โครงการหนึ่งอาจมีหลายแถวในชีตโครงการ — ถ้าแถวใดแถวหนึ่งระบุ "ยกเลิก" ถือว่าทั้งโครงการยกเลิก
+  // (ใช้แถวที่ระบุยกเลิกเป็นข้อมูลแสดงผล เพราะมักเป็นแถวที่มีเหตุผลการยกเลิก)
+  const isCancelledRow = r => /ยกเลิก/.test(String(r['สถานะโครงการ']||''));
+  const cancelledRowByCode = {};
   projectRows.forEach(r=>{
     const code = normCode(r['PRJ_Code']);
+    if(code && isCancelledRow(r) && !cancelledRowByCode[code]) cancelledRowByCode[code] = r;
+  });
+
+  const seen = new Set();
+  const projU = [];
+  projectRows.forEach(r0=>{
+    const code = normCode(r0['PRJ_Code']);
     if(!code || seen.has(code)) return;
-    // ข้ามโครงการที่ถูกยกเลิก (คอลัมน์ "สถานะโครงการ" ในชีตโครงการ)
-    if(/ยกเลิก/.test(String(r['สถานะโครงการ']||''))){ seen.add(code); (window.ACP_CANCELLED = window.ACP_CANCELLED || new Set()).add(code); return; }
+    const r = cancelledRowByCode[code] || r0;
+    // ข้ามโครงการที่ถูกยกเลิก (คอลัมน์ "สถานะโครงการ" ในชีตโครงการ) — เก็บรายละเอียดไว้แสดงในการ์ด "โครงการที่ยกเลิก"
+    if(cancelledRowByCode[code]){
+      seen.add(code);
+      (window.ACP_CANCELLED = window.ACP_CANCELLED || new Set()).add(code);
+      (window.ACP_CANCELLED_LIST = window.ACP_CANCELLED_LIST || []).push({
+        code,
+        name: (r['ชื่อโครงการ']||'').trim(),
+        owner: (r['Owner']||'').trim(),
+        strategy_code: (r['Strategy_Code']||'').trim(),
+        budget: parseNum(r['งบประมาณ']),
+        reason: (r['เหตุผลการยกเลิก']||'').trim(),
+      });
+      return;
+    }
     seen.add(code);
     projU.push(r);
   });
