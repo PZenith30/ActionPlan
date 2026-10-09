@@ -1447,10 +1447,33 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   document.getElementById('progressCount').textContent = progressList.length + ' โครงการ';
   document.getElementById('completionPct').textContent = (donePct*100).toFixed(0)+'%';
 
+  // รอบสุดท้ายของปีที่ปิดแล้ว (window.__yearEndFY) แสดงเป็นผลสิ้นปี: บรรลุ / ไม่บรรลุเป้าหมาย
+  const yeFY = window.__yearEndFY || null;
+  const L_DONE = yeFY ? 'บรรลุเป้าหมาย' : 'สำเร็จ';
+  const L_REST = yeFY ? 'ไม่บรรลุเป้าหมาย' : 'อยู่ระหว่างดำเนินการ';
+  (function setCompletionTexts(){
+    const card = document.getElementById('completionCard');
+    const stratPanel = document.getElementById('completionByStrategyChart').closest('.panel');
+    const listPanel = document.getElementById('completedListPanel');
+    const lbls = card.querySelectorAll('.cstat-lbl');
+    if(yeFY){
+      const Y = yearEndOf(yeFY) || {};
+      card.querySelector('h2').textContent = `ผลสิ้นปีงบประมาณ ${yeFY}`;
+      card.querySelector('.panel-sub').textContent =
+        `ปิดปีงบประมาณ${Y.closedAt ? ' เมื่อ ' + Y.closedAt : 'แล้ว'} · บรรลุเป้าหมายเมื่อทุกตัวชี้วัดสำเร็จ`;
+      card.querySelector('.ring-lbl').textContent = 'บรรลุเป้าหมาย';
+      if(lbls[0]) lbls[0].textContent = 'บรรลุเป้าหมาย';
+      if(lbls[1]) lbls[1].textContent = 'ไม่บรรลุเป้าหมาย';
+      stratPanel.querySelector('h2').textContent = `ผลสิ้นปีงบประมาณ ${yeFY} แยกตามยุทธศาสตร์`;
+      stratPanel.querySelector('.panel-sub').textContent = 'จำนวนโครงการที่ "บรรลุเป้าหมาย" เทียบกับ "ไม่บรรลุเป้าหมาย" ในแต่ละยุทธศาสตร์';
+      if(listPanel) listPanel.querySelector('h2').textContent = `รายชื่อโครงการที่บรรลุเป้าหมาย ปีงบประมาณ ${yeFY}`;
+    }
+  })();
+
   new Chart(document.getElementById('completionRing'), {
     type:'doughnut',
     data:{
-      labels:['สำเร็จ','อยู่ระหว่างดำเนินการ'],
+      labels:[L_DONE, L_REST],
       datasets:[{
         data:[doneList.length, progressList.length],
         backgroundColor:['#1b4332', '#e9e2cd'],
@@ -1483,8 +1506,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     data:{
       labels: compLabels,
       datasets:[
-        { label:'สำเร็จ', data: compCodes.map(c=>compByStrat[c].done), backgroundColor:'#1b4332', borderRadius:4, barPercentage:0.6, stack:'s' },
-        { label:'อยู่ระหว่างดำเนินการ', data: compCodes.map(c=>compByStrat[c].progress), backgroundColor:'#e9e2cd', borderRadius:4, barPercentage:0.6, stack:'s' },
+        { label:L_DONE, data: compCodes.map(c=>compByStrat[c].done), backgroundColor:'#1b4332', borderRadius:4, barPercentage:0.6, stack:'s' },
+        { label:L_REST, data: compCodes.map(c=>compByStrat[c].progress), backgroundColor:'#e9e2cd', borderRadius:4, barPercentage:0.6, stack:'s' },
       ]
     },
     options:{
@@ -2187,16 +2210,24 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
 
   // ข้อมูลโครงการของรอบที่เลือก — รอบย้อนหลังจะเติมคุณลักษณะคงที่ของโครงการ (แผนแม่บท, PA/MOU, ส่วนงาน ฯลฯ) จากข้อมูลปัจจุบัน
   function projectsForPeriod(per){
-    if(per.isLive) return CTX.PROJECTS.slice();
+    if(per.isLive){
+      const P = CTX.PROJECTS.slice();
+      return isYearEndPeriod(per) ? applyYearEnd(P, per.fiscalYear) : P;
+    }
     const hp = CTX.HISTORY_PERIODS[per.idx];
     const live = {}; CTX.PROJECTS.forEach(p=> live[p.code] = p);
-    const cancelled = window.ACP_CANCELLED || new Set();
-    return hp.projects.filter(h=> !cancelled.has(h.code)).map(h=>{
+    // ปีที่ปิดแล้ว: ใช้ข้อมูลโครงการ/สถานะยกเลิกของปีนั้นเอง (ไม่ใช่ของปีปัจจุบัน)
+    const Y = yearEndOf(per.fiscalYear);
+    const isCancelled = Y
+      ? (code => (Y.byCode[code]||{}).result === YE_CANCEL)
+      : (code => (window.ACP_CANCELLED || new Set()).has(code));
+    const out = hp.projects.filter(h=> !isCancelled(h.code)).map(h=>{
       const L = live[h.code] || {};
-      const strat = L.strategy_code || ((CTX.STRATEGIES.find(s=>s.name===h.strategy)||{}).code) || '';
+      const y = (Y && Y.byCode[h.code]) || {};
+      const strat = y.strategy_code || L.strategy_code || ((CTX.STRATEGIES.find(s=>s.name===h.strategy)||{}).code) || '';
       return {
-        code: h.code, name: h.name || L.name || h.code, owner: h.owner || L.owner || '',
-        strategy_code: strat, strategy: h.strategy || L.strategy || '',
+        code: h.code, name: y.name || h.name || L.name || h.code, owner: y.owner || h.owner || L.owner || '',
+        strategy_code: strat, strategy: y.strategy || h.strategy || L.strategy || '',
         budget: h.budget, disbursed: h.disbursed, disburse_pct: h.disburse_pct,
         progress_cum: h.progress_cum, status: h.status || 'ไม่มีข้อมูล',
         progress_pct_cum: h.progress_pct_cum ?? null,
@@ -2211,6 +2242,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         is_pa: !!L.is_pa, is_mou: !!L.is_mou,
       };
     });
+    return isYearEndPeriod(per) ? applyYearEnd(out, per.fiscalYear) : out;
   }
 
   // ---------- คำนวณข้อมูลรายงาน ----------
@@ -2379,8 +2411,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       ch.completion = {w:640, h:250, url: makeChart({
         type:'bar',
         data:{ labels: R.byStrategy.map(g=>wrapLabel(g.name, 22)), datasets:[
-          {label:'สำเร็จ', data:R.byStrategy.map(g=>g.nDone), backgroundColor:'#1b4332', borderRadius:4, barPercentage:0.6, stack:'s'},
-          {label:'อยู่ระหว่างดำเนินการ', data:R.byStrategy.map(g=>g.n-g.nDone), backgroundColor:'#e3dac0', borderRadius:4, barPercentage:0.6, stack:'s'},
+          {label:R.L_DONE, data:R.byStrategy.map(g=>g.nDone), backgroundColor:'#1b4332', borderRadius:4, barPercentage:0.6, stack:'s'},
+          {label:R.L_REST, data:R.byStrategy.map(g=>g.n-g.nDone), backgroundColor:'#e3dac0', borderRadius:4, barPercentage:0.6, stack:'s'},
         ]},
         options:{ plugins:{ legend:legendOpts,
           title:{display:true, text:'ความสำเร็จตามเป้าหมายรายปี แยกตามยุทธศาสตร์ (จำนวนโครงการ)', font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
@@ -2391,7 +2423,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       const done = R.done.length, rest = R.P.length - done;
       ch.ring = {w:400, h:250, url: makeChart({
         type:'doughnut',
-        data:{ labels:[`สำเร็จ (${done})`, `อยู่ระหว่างดำเนินการ (${rest})`], datasets:[{data:[done, rest], backgroundColor:['#1b4332','#e3dac0'], borderWidth:0}]},
+        data:{ labels:[`${R.L_DONE} (${done})`, `${R.L_REST} (${rest})`], datasets:[{data:[done, rest], backgroundColor:['#1b4332','#e3dac0'], borderWidth:0}]},
         options:{ cutout:'70%', plugins:{ legend:legendOpts,
           title:{display:true, text:'โครงการที่บรรลุเป้าหมายทั้งปีแล้ว', font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}} } },
         plugins:[{ id:'ringCenter', afterDraw(c){
@@ -2399,7 +2431,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           const x=c.ctx; x.save(); x.textAlign='center'; x.textBaseline='middle';
           x.fillStyle='#123423'; x.font='700 30px Kanit, Sarabun';
           x.fillText(R.P.length ? Math.round(done/R.P.length*100)+'%' : '-', m.x, m.y-6);
-          x.fillStyle='#7d8b83'; x.font='12px Sarabun'; x.fillText('สำเร็จแล้ว', m.x, m.y+18); x.restore();
+          x.fillStyle='#7d8b83'; x.font='12px Sarabun'; x.fillText(R.yearEnd ? 'บรรลุเป้าหมาย' : 'สำเร็จแล้ว', m.x, m.y+18); x.restore();
         }}]
       }, 400, 250)};
     }
@@ -2423,8 +2455,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       ch.dg = {w:1000, h:Math.max(220, 70 + g.length*42), url: makeChart({
         type:'bar',
         data:{ labels: g.map(x=>x.name), datasets:[
-          {label:'สำเร็จ', data:g.map(x=>x.nDone), backgroundColor:'#1b4332', borderRadius:4, stack:'s', barPercentage:0.55},
-          {label:'อยู่ระหว่างดำเนินการ', data:g.map(x=>x.n-x.nDone), backgroundColor:'#e3dac0', borderRadius:4, stack:'s', barPercentage:0.55},
+          {label:R.L_DONE, data:g.map(x=>x.nDone), backgroundColor:'#1b4332', borderRadius:4, stack:'s', barPercentage:0.55},
+          {label:R.L_REST, data:g.map(x=>x.n-x.nDone), backgroundColor:'#e3dac0', borderRadius:4, stack:'s', barPercentage:0.55},
         ]},
         options:{ indexAxis:'y', plugins:{ legend:legendOpts,
           title:{display:true, text:'จำนวนโครงการแยกตามส่วนงานภายใต้ผู้บริหาร', font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
@@ -2609,6 +2641,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const P = projectsForPeriod(per);
     if(!P.length) throw new Error('ไม่พบข้อมูลโครงการในรอบที่เลือก');
     const R = computeReport(P);
+    R.yearEnd = isYearEndPeriod(per);   // รอบสุดท้ายของปีที่ปิดแล้ว → ป้าย "บรรลุ / ไม่บรรลุเป้าหมาย"
+    R.L_DONE = R.yearEnd ? 'บรรลุเป้าหมาย' : 'สำเร็จ';
+    R.L_REST = R.yearEnd ? 'ไม่บรรลุเป้าหมาย' : 'อยู่ระหว่างดำเนินการ';
     const charts = buildCharts(R, topics);
     const meta = { fy: per.fiscalYear, label: periodLabel(per), generatedAt: nowThai() };
     // ใช้ชื่อไฟล์ภาษาอังกฤษ/ตัวเลข เพื่อให้ทุกเบราว์เซอร์บันทึกชื่อไฟล์ได้ถูกต้อง
@@ -2681,7 +2716,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     wb.creator = 'ACP Dashboard'; wb.created = new Date();
     const FONT = 'Tahoma';
     const COL = {forest:'FF1B4332', head:'FF255C42', latex:'FFF3EFE3', zebra:'FFFAF8F2', line:'FFDCD6C4', ink:'FF1B2420', muted:'FF7D8B83'};
-    const STATUS_X = {'ดีมาก':['FFE3F1E8','FF2F7A4F'],'ดี':['FFE3EEF5','FF3D7EA6'],'พอใช้':['FFF7EEDC','FFA97F28'],'ต้องปรับปรุง':['FFF6E3DE','FFB5533C'],'สำเร็จ':['FFE3F1E8','FF2F7A4F']};
+    const STATUS_X = {'ดีมาก':['FFE3F1E8','FF2F7A4F'],'ดี':['FFE3EEF5','FF3D7EA6'],'พอใช้':['FFF7EEDC','FFA97F28'],'ต้องปรับปรุง':['FFF6E3DE','FFB5533C'],'สำเร็จ':['FFE3F1E8','FF2F7A4F'],'บรรลุเป้าหมาย':['FFE3F1E8','FF2F7A4F'],'ไม่บรรลุเป้าหมาย':['FFF6E3DE','FFB5533C']};
     const thin = {style:'thin', color:{argb:COL.line}};
     const border = {top:thin, left:thin, bottom:thin, right:thin};
     const F_PCT = '0.0%', F_BAHT = '#,##0';
@@ -2855,7 +2890,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:'% ความก้าวหน้าจากเป้าหมายสะสม', get:p=>num(p.progress_pct_cum), fmt:F_PCT},
         {h:'สถานะ (ความก้าวหน้าจากเป้าหมายสะสม)', get:p=>p.status_pct_cum, status:true},
         {h:'% ความก้าวหน้าจากเป้าหมายทั้งปี', get:p=>num(p.progress_year), fmt:F_PCT},
-        {h:'สถานะเทียบเป้าทั้งปี', get:p=>p.completion, status:true},
+        {h:'สถานะเทียบเป้าทั้งปี', get:p=>p.year_end_result || p.completion, status:true},
         {h:'ตัวชี้วัดที่น่าเป็นห่วงที่สุด', get:p=>p.risk_kpi_name},
         {h:'ส่วนงาน', get:p=>p.dg_area_label},
         {h:'PA', get:p=>p.is_pa?'✓':'', align:'center'},
@@ -3091,10 +3126,14 @@ window.ACPDash = (function(){
     // ล้างกราฟเดิมและคืนโครงสร้างหน้าเริ่มต้น แล้ววาดใหม่ด้วยข้อมูลของรอบที่เลือก
     if(window.Chart && Chart.instances) Object.values(Chart.instances).forEach(c=>{ try{ c.destroy(); }catch(e){} });
     $('dashboardContent').innerHTML = SNAPSHOT;
-    const projects = per.isLive ? LIVE.records : window.ACPReport.projectsForPeriod(per);
+    // รอบสุดท้ายของปีที่ปิดแล้วจะใช้ผลสิ้นปี (projectsForPeriod จัดการให้สำหรับข้อมูลย้อนหลัง)
+    const projects = per.isLive
+      ? (isYearEndPeriod(per) ? applyYearEnd(LIVE.records, per.fiscalYear) : LIVE.records)
+      : window.ACPReport.projectsForPeriod(per);
     const label = window.ACPReport.periodLabel(per);
     window.__dashPeriodKey = per.key;
     window.__dashPeriodLabel = per.isLive ? '' : label;
+    window.__yearEndFY = isYearEndPeriod(per) ? String(per.fiscalYear) : null;
 
     renderDashboard(projects, LIVE.strategies, LIVE.orgKpis, LIVE.historyPeriods, LIVE.masterPlans);
     activateView(activeView);
@@ -3123,7 +3162,12 @@ window.ACPDash = (function(){
     if(pa && pa.parentElement !== document.body) document.body.appendChild(pa);
     SNAPSHOT = $('dashboardContent').innerHTML;
 
-    renderDashboard(data.records, data.strategies, data.orgKpis, data.historyPeriods, data.masterPlans);
+    // ข้อมูลปัจจุบันของปีที่ปิดแล้ว (ก่อนเริ่มใส่ข้อมูลปีใหม่) แสดงผลสิ้นปี
+    const liveFY = window.LIVE_FISCAL_YEAR;
+    const liveIsYearEnd = isYearEndPeriod({isLive:true, fiscalYear: liveFY});
+    window.__yearEndFY = liveIsYearEnd ? String(liveFY) : null;
+    renderDashboard(liveIsYearEnd ? applyYearEnd(data.records, liveFY) : data.records,
+      data.strategies, data.orgKpis, data.historyPeriods, data.masterPlans);
     if(window.initReportBuilder) window.initReportBuilder({PROJECTS:data.records, STRATEGIES:data.strategies, HISTORY_PERIODS:data.historyPeriods, MASTER_PLANS:data.masterPlans});
 
     fillYears();
@@ -3156,7 +3200,50 @@ const SHEET_SPECS = {
   mp:        { names:['แผนแม่บท'],                          required:['MP_Code','ชื่อแผนแม่บท'], optional:true },
   link:      { names:['เชื่อมโยงโครงการ'],                  required:['PRJ_Code','MP_Code'], optional:true },
   exec:      { names:['ส่วนงานภายใต้ผู้บริหาร','ส่วนงานภายใต้รองผวก.'], required:[], optional:true, check: f => f.length>=2 && f.slice(1).some(x=>/ผวก|ผู้ว่าการ/.test(x)) },
+  yearEnd:   { names:['ผลสิ้นปีงบประมาณ'],                  required:['Fiscal_Year','PRJ_Code','ผลสิ้นปี'], optional:true },
 };
+
+// ---------- ผลสิ้นปีงบประมาณ ----------
+// ชีต "ผลสิ้นปีงบประมาณ" สร้างโดยเมนู "ปิดปีงบประมาณ" ใน Apps Script (1 แถว = 1 โครงการ ต่อปี)
+// ปีที่ปิดแล้ว: ใช้ชื่อ/หน่วยงาน/ยุทธศาสตร์/สถานะยกเลิกของปีนั้นเมื่อดูข้อมูลย้อนหลัง
+// และรอบสุดท้ายของปี (กันยายน หรือข้อมูลปัจจุบันถ้ายังเป็นปีเดียวกัน) แสดง "บรรลุ / ไม่บรรลุเป้าหมาย" ตามผลที่ปิดไว้
+const YE_PASS = 'บรรลุเป้าหมาย', YE_FAIL = 'ไม่บรรลุเป้าหมาย', YE_CANCEL = 'ยกเลิก';
+window.ACP_YEAR_END = window.ACP_YEAR_END || {};   // { '2569': { closedAt, byCode: { code: {...} } } }
+
+function buildYearEnd(rows){
+  const out = {};
+  (rows||[]).forEach(r=>{
+    const fy = String(r['Fiscal_Year']||'').replace(/[^0-9]/g,'');
+    const code = normCode(r['PRJ_Code']);
+    if(!fy || !code) return;
+    const Y = out[fy] || (out[fy] = { closedAt: (r['วันที่ปิดปี']||'').trim(), byCode: {} });
+    Y.byCode[code] = {
+      name: (r['ชื่อโครงการ']||'').trim(),
+      owner: (r['Owner']||'').trim(),
+      strategy_code: (r['Strategy_Code']||'').trim(),
+      strategy: (r['ชื่อยุทธศาสตร์']||'').trim(),
+      kpiTotal: parseNum(r['ตัวชี้วัดทั้งหมด']),
+      kpiDone: parseNum(r['ตัวชี้วัดที่บรรลุ']),
+      result: (r['ผลสิ้นปี']||'').trim(),
+    };
+  });
+  return out;
+}
+function yearEndOf(fy){ return fy == null ? null : (window.ACP_YEAR_END[String(fy)] || null); }
+// รอบที่แสดงผลสิ้นปี: รอบกันยายนของปีที่ปิดแล้ว หรือข้อมูลปัจจุบันของปีที่ปิดแล้ว
+function isYearEndPeriod(per){
+  return !!(per && yearEndOf(per.fiscalYear) && (per.isLive || per.monthName === 'กันยายน'));
+}
+// แทนสถานะความสำเร็จด้วยผลสิ้นปี ('สำเร็จ' = บรรลุเป้าหมาย เพื่อให้ตัวนับเดิมทำงานได้เหมือนเดิม)
+function applyYearEnd(projects, fy){
+  const Y = yearEndOf(fy);
+  if(!Y) return projects;
+  return projects.map(p=>{
+    const y = Y.byCode[p.code];
+    if(!y || y.result === YE_CANCEL) return p;
+    return Object.assign({}, p, { completion: y.result === YE_PASS ? 'สำเร็จ' : YE_FAIL, year_end_result: y.result });
+  });
+}
 
 // รหัสโครงการเป็นตัวเลขนำหน้าด้วย 0 (เช่น 010101) — ป้องกันกรณี 0 ด้านหน้าหายจากการแปลงเป็นตัวเลข
 function normCode(v){
@@ -3560,6 +3647,8 @@ async function loadAndRender(){
       fetchSheetBySpec('link'),
     ]);
     const execRows = await fetchSheetBySpec('exec');
+    // ผลสิ้นปีของทุกปีที่ปิดแล้ว (ไม่กรองตามปีปัจจุบัน)
+    window.ACP_YEAR_END = buildYearEnd(await fetchSheetBySpec('yearEnd'));
 
     // ---- ถ้าชีตมีหลายปีงบประมาณ (คอลัมน์ Fiscal_Year) ใช้เฉพาะปีล่าสุด ----
     const fyOf = r => parseInt(String(r['Fiscal_Year']||'').replace(/[^0-9]/g,''), 10);

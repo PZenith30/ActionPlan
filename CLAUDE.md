@@ -48,6 +48,8 @@ Loader behaviours worth knowing:
 - `normCode()` re-pads numeric project codes to 6 digits (e.g. `010101`), since leading zeros get lost in Sheets.
 - `isYes()` interprets checkbox-like cells (TRUE/Yes/✓/ใช่…).
 - Status levels are Thai strings: `['ดีมาก','ดี','พอใช้','ต้องปรับปรุง']`.
+- Annual completion ("โครงการที่บรรลุเป้าหมายทั้งปี"): a project is `สำเร็จ` only if **every** KPI row has `สถานะโครงการ (ผลเทียบเป้าทั้งปี)` = `สำเร็จ` (history: column P). The user confirmed this rule (Oct 2026) — don't switch to averages/majority. Projects with some KPIs done are counted as `อยู่ระหว่างดำเนินการ`.
+- Year-end close: the Apps Script menu **ปิดปีงบประมาณ** (`closeFiscalYear` → `buildYearEndRows`) writes one row per project of the latest `Fiscal_Year` to the sheet `ผลสิ้นปีงบประมาณ` (`ผลสิ้นปี` = `บรรลุเป้าหมาย` / `ไม่บรรลุเป้าหมาย` / `ยกเลิก`, same rule as above) and syncs it. In `index.html`, `buildYearEnd()` → `window.ACP_YEAR_END[fy]`. For a closed year, `projectsForPeriod()` takes name/owner/strategy/cancelled from that year's rows (not from the current year's project list), and the **final** period (`กันยายน`, or live data while the live year is the closed year, per `isYearEndPeriod()`) gets `applyYearEnd()`: `completion` stays `'สำเร็จ'` for passed projects (so existing counters work) and becomes `'ไม่บรรลุเป้าหมาย'` otherwise. `window.__yearEndFY` switches the dashboard's completion texts; reports use `R.yearEnd` / `R.L_DONE` / `R.L_REST`.
 
 ## Files that must stay out of the repo
 
