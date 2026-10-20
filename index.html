@@ -317,7 +317,11 @@ window.addEventListener('load', function(){
     font-family:'Kanit',sans-serif; font-size:16px; font-weight:600; margin:0 0 2px; color:var(--ink-900);
   }
   .panel .panel-sub{font-size:12.5px; color:var(--ink-400); margin-bottom:14px;}
-  .chart-wrap{position:relative;}
+  .chart-wrap{position:relative; min-width:0;}
+  /* กล่องใน grid ต้องหดตามคอลัมน์ได้ทุกขนาดจอ — ไม่งั้นกราฟ Chart.js ที่เคยถูกวาดกว้าง (เช่น ย่อ/ขยายหน้าต่าง
+     หรือเปลี่ยนซูม) จะดันกล่องให้ล้นเกินคอลัมน์และไม่หดกลับ ทำให้การ์ดแต่ละแถวกว้างไม่เท่ากัน */
+  .panels > *, .kpi-grid > *{min-width:0;}
+  .chart-wrap canvas{max-width:100%;}
 
   /* ---------- filter bar ---------- */
   .filter-bar{
