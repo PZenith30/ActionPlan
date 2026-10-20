@@ -1253,8 +1253,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const fmtPct = n => n==null || isNaN(n) ? '-' : (n*100).toFixed(1)+'%';
 
   const statusClass = s => ({
-    'ดีมาก':'great', 'ดี':'good', 'พอใช้':'fair', 'ต้องปรับปรุง':'poor'
+    'ดีมาก':'great', 'ดี':'good', 'พอใช้':'fair', 'ต้องปรับปรุง':'poor',
+    'บรรลุเป้าหมาย':'great', 'ไม่บรรลุเป้าหมาย':'poor'
   }[s] || 'none');
+
+  // รอบสิ้นปีของปีที่ปิดแล้ว: ใช้ร้อยละจากเป้าหมายทั้งปี + ผลสิ้นปีเป็นตัวหลัก (ดู headProgress / headStatus)
+  const YE_MODE = !!window.__yearEndFY;
+  const hProg = p => headProgress(p, YE_MODE);
+  const hStat = p => headStatus(p, YE_MODE);
+  const HL = headLabels(YE_MODE);
 
   // สีของแถบความก้าวหน้าอิงจากตัวเลข % เอง (ไม่ใช่สถานะโดยรวมของโครงการ)
   const pctColorClass = v => {
@@ -1273,8 +1280,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const totalDisbursed = PROJECTS.reduce((a,p)=>a+(p.disbursed||0),0);
   const disburseRate = totalDisbursed/totalBudget;
   const nProjects = PROJECTS.length;
-  const nPoor = PROJECTS.filter(p=>p.status==='ต้องปรับปรุง').length;
-  const nGreat = PROJECTS.filter(p=>p.status==='ดีมาก' || p.status==='ดี').length;
+  const nPoor = YE_MODE ? PROJECTS.filter(p=>hStat(p)===YE_FAIL).length : PROJECTS.filter(p=>p.status==='ต้องปรับปรุง').length;
+  const nGreat = YE_MODE ? PROJECTS.filter(p=>hStat(p)===YE_PASS).length : PROJECTS.filter(p=>p.status==='ดีมาก' || p.status==='ดี').length;
   const nImportant = PROJECTS.filter(p=>p.important).length;
 
   const kpiGrid = document.getElementById('kpiGrid');
@@ -1293,13 +1300,13 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     </div>
     <div class="kpi-card c3">
       <div class="accent-bar"></div>
-      <span class="eyebrow">โครงการผลงานดี-ดีมาก</span>
+      <span class="eyebrow">${YE_MODE ? 'โครงการบรรลุเป้าหมาย' : 'โครงการผลงานดี-ดีมาก'}</span>
       <div class="value">${nGreat}<span class="unit">/ ${nProjects} โครงการ</span></div>
       <div class="sub">${((nGreat/nProjects)*100).toFixed(0)}% ของโครงการทั้งหมด</div>
     </div>
     <div class="kpi-card c4">
       <div class="accent-bar"></div>
-      <span class="eyebrow">โครงการต้องเร่งปรับปรุง</span>
+      <span class="eyebrow">${YE_MODE ? 'โครงการไม่บรรลุเป้าหมาย' : 'โครงการต้องเร่งปรับปรุง'}</span>
       <div class="value">${nPoor}<span class="unit">โครงการ</span></div>
       <div class="sub">โครงการสำคัญทั้งหมด ${nImportant} โครงการ</div>
     </div>
@@ -1412,17 +1419,24 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   });
 
   // ---------- Status donut ----------
-  const statusOrder = ['ดีมาก','ดี','พอใช้','ต้องปรับปรุง'];
+  // รอบสิ้นปี: แบ่งโครงการตามช่วงร้อยละความก้าวหน้าจากเป้าหมายทั้งปี แทนสถานะผลเทียบแผนสะสม
   const statusColors = {'ดีมาก':'#2f7a4f','ดี':'#3d7ea6','พอใช้':'#c8933c','ต้องปรับปรุง':'#b5533c'};
-  const statusCounts = statusOrder.map(s=> PROJECTS.filter(p=>p.status===s).length);
+  const donut = YE_MODE
+    ? yearPctBandCounts(PROJECTS)
+    : ['ดีมาก','ดี','พอใช้','ต้องปรับปรุง'].map(s=>({label:s, color:statusColors[s], n:PROJECTS.filter(p=>p.status===s).length}));
+  if(YE_MODE){
+    const sp = document.getElementById('statusChart').closest('.panel');
+    sp.querySelector('h2').textContent = 'ความก้าวหน้าจากเป้าหมายทั้งปี';
+    sp.querySelector('.panel-sub').textContent = 'จำนวนโครงการ แยกตามช่วงร้อยละความก้าวหน้าจากเป้าหมายทั้งปี (ผลสิ้นปี)';
+  }
 
   new Chart(document.getElementById('statusChart'), {
     type:'doughnut',
     data:{
-      labels: statusOrder,
+      labels: donut.map(d=>d.label),
       datasets:[{
-        data: statusCounts,
-        backgroundColor: statusOrder.map(s=>statusColors[s]),
+        data: donut.map(d=>d.n),
+        backgroundColor: donut.map(d=>d.color),
         borderWidth:2,
         borderColor:'#fff'
       }]
@@ -1607,8 +1621,13 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const totalBudget = projs.reduce((a,p)=>a+(p.budget||0),0);
     const totalDisbursed = projs.reduce((a,p)=>a+(p.disbursed||0),0);
     const disburseRate = totalBudget>0 ? totalDisbursed/totalBudget : null;
-    const nGood = projs.filter(p=>p.status==='ดีมาก'||p.status==='ดี').length;
-    const nPoor = projs.filter(p=>p.status==='ต้องปรับปรุง').length;
+    // รอบกันยายนของปีที่ปิดแล้ว: นับตามผลสิ้นปี (บรรลุ / ไม่บรรลุเป้าหมาย)
+    const Yp = isYearEndPeriod(period) ? yearEndOf(period.fiscalYear) : null;
+    const yeRes = p => ((Yp && Yp.byCode[p.code]) || {}).result;
+    const nGood = Yp ? projs.filter(p=>yeRes(p)===YE_PASS).length : projs.filter(p=>p.status==='ดีมาก'||p.status==='ดี').length;
+    const nPoor = Yp ? projs.filter(p=>yeRes(p)===YE_FAIL).length : projs.filter(p=>p.status==='ต้องปรับปรุง').length;
+    const lblGood = Yp ? 'โครงการบรรลุเป้าหมาย' : 'โครงการผลงานดี-ดีมาก';
+    const lblPoor = Yp ? 'โครงการไม่บรรลุเป้าหมาย' : 'โครงการต้องเร่งปรับปรุง';
     annualHistorySummary.innerHTML = `
       <div class="kpi-card c1">
         <div class="accent-bar"></div>
@@ -1624,13 +1643,13 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       </div>
       <div class="kpi-card c3">
         <div class="accent-bar"></div>
-        <span class="eyebrow">โครงการผลงานดี-ดีมาก</span>
+        <span class="eyebrow">${lblGood}</span>
         <div class="value">${nGood}<span class="unit">/ ${n} โครงการ</span></div>
         <div class="sub">${n? ((nGood/n)*100).toFixed(0):0}% ของโครงการในรอบนี้</div>
       </div>
       <div class="kpi-card c4">
         <div class="accent-bar"></div>
-        <span class="eyebrow">โครงการต้องเร่งปรับปรุง</span>
+        <span class="eyebrow">${lblPoor}</span>
         <div class="value">${nPoor}<span class="unit">โครงการ</span></div>
         <div class="sub">บันทึกเมื่อ ${period.timestamp || '-'}</div>
       </div>
@@ -1900,12 +1919,22 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     }
 
     const mpBody = document.getElementById('mpSummaryBody');
+    // หัวคอลัมน์ตามโหมด (รอบสิ้นปี = ร้อยละจากเป้าหมายทั้งปี / ผลสิ้นปี)
+    const mpHead = mpBody.closest('table').querySelectorAll('thead th');
+    if(mpHead[4]) mpHead[4].textContent = HL.avg;
+    const mpDrillHead = document.querySelectorAll('#mpDrilldownPanel thead th');
+    if(mpDrillHead[4]) mpDrillHead[4].textContent = HL.pct;
+    if(mpDrillHead[5]) mpDrillHead[5].textContent = HL.status;
+    if(YE_MODE){
+      const sub = mpBody.closest('.panel').querySelector('.panel-sub');
+      if(sub) sub.textContent = 'ผลสิ้นปีงบประมาณ ' + window.__yearEndFY + ' — ความก้าวหน้าเฉลี่ยจากเป้าหมายทั้งปีของโครงการ จัดกลุ่มตามแผนแม่บทที่เชื่อมโยง';
+    }
     mpBody.innerHTML = groupList.map(g=>{
       const n = g.projects.length;
       const totalBudget = g.projects.reduce((a,p)=>a+(p.budget||0),0);
       const totalDisbursed = g.projects.reduce((a,p)=>a+(p.disbursed||0),0);
       const disburseRate = totalBudget>0 ? totalDisbursed/totalBudget : null;
-      const avgProgress = n ? g.projects.reduce((a,p)=>a+(p.progress_cum||0),0)/n : null;
+      const avgProgress = n ? g.projects.reduce((a,p)=>a+(hProg(p)||0),0)/n : null;
       return `
         <tr class="mp-row" data-mp="${g.code}" style="cursor:pointer; border-bottom:1px solid var(--latex-200);">
           <td style="padding:11px 14px; font-weight:500; color:var(--ink-900);">${g.name}</td>
@@ -1927,15 +1956,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         document.getElementById('mpDrilldownSub').textContent = `พบ ${g.projects.length} โครงการที่เชื่อมโยงกับแผนแม่บทนี้`;
         const body = document.getElementById('mpDrilldownBody');
         body.innerHTML = g.projects.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p=>{
-          const sc = statusClass(p.status);
+          const st = hStat(p), pr = hProg(p);
           return `
             <tr>
               <td class="code">${p.code}</td>
               <td class="name"><div class="nm">${p.important?'<span class="star">★</span>':''}${p.name}</div><div class="strat">${p.strategy||''}</div></td>
               <td class="owner">${p.owner}</td>
               <td class="num">${fmtBaht(p.budget)}</td>
-              <td>${tapBarHtml(p.progress_cum, pctColorClass(p.progress_cum))}</td>
-              <td style="text-align:center"><span class="badge ${sc}">${p.status}</span></td>
+              <td>${tapBarHtml(pr, pctColorClass(pr))}</td>
+              <td style="text-align:center"><span class="badge ${statusClass(st)}">${st}</span></td>
             </tr>
           `;
         }).join('');
@@ -1967,14 +1996,14 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       const projs = dgGroups[label];
       const n = projs.length;
       const totalBudget = projs.reduce((a,p)=>a+(p.budget||0),0);
-      const avgProgress = n ? projs.reduce((a,p)=>a+(p.progress_cum||0),0)/n : null;
+      const avgProgress = n ? projs.reduce((a,p)=>a+(hProg(p)||0),0)/n : null;
       const cls = DG_COLORS[label] || 'c4';
       return `
         <div class="kpi-card ${cls} dg-card" data-dg="${label}" style="cursor:pointer;">
           <div class="accent-bar"></div>
           <span class="eyebrow">${label}</span>
           <div class="value">${n}<span class="unit">โครงการ</span></div>
-          <div class="sub">งบประมาณรวม ${fmtBahtShort(totalBudget)} บาท &middot; ความก้าวหน้าเฉลี่ย ${fmtPct(avgProgress)}</div>
+          <div class="sub">งบประมาณรวม ${fmtBahtShort(totalBudget)} บาท &middot; ${HL.avg} ${fmtPct(avgProgress)}</div>
         </div>
       `;
     }).join('');
@@ -2000,6 +2029,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           <div class="mp-tags">
             ${p.is_pa ? '<span class="mp-tag pa-tag">PA</span>' : ''}
             ${p.is_mou ? '<span class="mp-tag mou-tag">MOU</span>' : ''}
+            ${YE_MODE ? `<span class="badge ${statusClass(hStat(p))}">${hStat(p)}</span>` : ''}
           </div>
           <div class="pm-detail">
             <div class="pm-stat"><div class="k">ความก้าวหน้าจากเป้าหมายทั้งปี</div>
@@ -2076,12 +2106,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
 
     function renderDgDrilldown(label, opts){
       const projs = dgGroups[label] || [];
+      const dgHead = document.querySelectorAll('#dgDrilldownPanel thead th');
+      if(dgHead[5]) dgHead[5].textContent = HL.status;
       document.getElementById('dgDrilldownTitle').textContent = label;
       document.getElementById('dgDrilldownSub').textContent = `พบ ${projs.length} โครงการภายใต้ส่วนงานนี้`;
       document.getElementById('dgDrilldownBody').innerHTML = projs
         .slice().sort((a,b)=>a.code.localeCompare(b.code,'th'))
         .map(p=>{
-          const sc = statusClass(p.status);
+          // ตารางนี้แสดงทั้ง 2 ร้อยละอยู่แล้ว — รอบสิ้นปีเปลี่ยนเฉพาะป้ายสถานะเป็นผลสิ้นปี
+          const st = hStat(p);
           return `
             <tr>
               <td class="code">${p.code}</td>
@@ -2089,7 +2122,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
               <td class="owner">${p.owner}</td>
               <td class="num">${fmtBaht(p.budget)}</td>
               <td>${tapBarHtml(p.progress_cum, pctColorClass(p.progress_cum))}</td>
-              <td style="text-align:center"><span class="badge ${sc}">${p.status}</span></td>
+              <td style="text-align:center"><span class="badge ${statusClass(st)}">${st}</span></td>
               <td>${tapBarHtml(p.progress_year, pctColorClass(p.progress_year))}</td>
               <td style="text-align:center">${p.is_pa?'<span class="mp-tag pa-tag">PA</span> ':''}${p.is_mou?'<span class="mp-tag mou-tag">MOU</span>':''}</td>
             </tr>
@@ -2148,7 +2181,13 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   };
   const REPORT_TITLE = 'รายงานผลการดำเนินงานตามแผนปฏิบัติการ การยางแห่งประเทศไทย';
   const STATUS_ORDER = ['ดีมาก','ดี','พอใช้','ต้องปรับปรุง'];
-  const STATUS_COLORS = {'ดีมาก':'#2f7a4f','ดี':'#3d7ea6','พอใช้':'#c8933c','ต้องปรับปรุง':'#b5533c','ไม่มีข้อมูล':'#9a9488'};
+  const STATUS_COLORS = {'ดีมาก':'#2f7a4f','ดี':'#3d7ea6','พอใช้':'#c8933c','ต้องปรับปรุง':'#b5533c','ไม่มีข้อมูล':'#9a9488',
+    'บรรลุเป้าหมาย':'#2f7a4f','ไม่บรรลุเป้าหมาย':'#b5533c'};
+  // รายงานของรอบสิ้นปี (ปีที่ปิดแล้ว): ใช้ร้อยละจากเป้าหมายทั้งปี + ผลสิ้นปีเป็นตัวหลัก — ตั้งค่าใน prepare() ก่อนคำนวณ
+  let YE = false;
+  const hP = p => headProgress(p, YE);
+  const hS = p => headStatus(p, YE);
+  const T = (normal, yearEnd) => YE ? yearEnd : normal;   // ข้อความหัวตาราง/กราฟตามโหมด
 
   let CTX = null;
 
@@ -2176,7 +2215,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     return Math.round(n).toLocaleString('th-TH');
   };
   const fmtPct = n => num(n)==null ? '-' : (n*100).toFixed(1)+'%';
-  const statusClass = s => ({'ดีมาก':'great','ดี':'good','พอใช้':'fair','ต้องปรับปรุง':'poor'}[s] || 'none');
+  const statusClass = s => ({'ดีมาก':'great','ดี':'good','พอใช้':'fair','ต้องปรับปรุง':'poor','บรรลุเป้าหมาย':'great','ไม่บรรลุเป้าหมาย':'poor'}[s] || 'none');
   const pctClass = v => num(v)==null ? 'none' : v>=1 ? 'great' : v>=0.9 ? 'good' : v>=0.8 ? 'fair' : 'poor';
   const PCT_COLORS = {great:'#2f7a4f', good:'#d9a916', fair:'#e07b39', poor:'#b5533c', none:'#9a9488'};
   const byCode = (a,b)=> String(a.code).localeCompare(String(b.code),'th');
@@ -2252,17 +2291,18 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     return Object.assign(g, {
       n, budget, disbursed,
       rate: budget>0 ? disbursed/budget : null,
-      avgProgress: n ? sum(ps, p=>p.progress_cum)/n : null,
-      nGood: ps.filter(p=>p.status==='ดีมาก'||p.status==='ดี').length,
-      nFair: ps.filter(p=>p.status==='พอใช้').length,
-      nPoor: ps.filter(p=>p.status==='ต้องปรับปรุง').length,
+      avgProgress: n ? sum(ps, p=>hP(p))/n : null,
+      // รอบสิ้นปี: ดี-ดีมาก -> บรรลุเป้าหมาย, ต้องปรับปรุง -> ไม่บรรลุเป้าหมาย, พอใช้ -> ไม่ใช้ ('-')
+      nGood: YE ? ps.filter(p=>hS(p)===YE_PASS).length : ps.filter(p=>p.status==='ดีมาก'||p.status==='ดี').length,
+      nFair: YE ? '-' : ps.filter(p=>p.status==='พอใช้').length,
+      nPoor: YE ? ps.filter(p=>hS(p)===YE_FAIL).length : ps.filter(p=>p.status==='ต้องปรับปรุง').length,
       nDone: ps.filter(p=>p.completion==='สำเร็จ').length,
     });
   }
 
   function computeReport(P){
     const all = aggGroup({name:'รวมทั้งหมด', projects:P});
-    const statusCounts = STATUS_ORDER.map(s=>({status:s, n:P.filter(p=>p.status===s).length}));
+    const statusCounts = (YE ? [YE_PASS, YE_FAIL] : STATUS_ORDER).map(s=>({status:s, n:P.filter(p=>hS(p)===s).length}));
     const nOther = P.length - statusCounts.reduce((a,x)=>a+x.n,0);
     if(nOther>0) statusCounts.push({status:'ไม่มีข้อมูล', n:nOther});
 
@@ -2399,12 +2439,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           scales:{ x:{ticks:{callback:v=>fmtShort(v), font:F(10.5), color:'#7d8b83'}, grid:{color:'#eee6d4'}}, y:{ticks:{font:F(11.5), color:'#1b2420'}, grid:{display:false}} } }
       }, 640, 250)};
 
-      const sc = R.statusCounts.filter(x=>x.n>0);
+      // รอบสิ้นปี: แบ่งตามช่วงร้อยละความก้าวหน้าจากเป้าหมายทั้งปี (เหมือนกราฟบนแดชบอร์ด)
+      const sc = R.yearEnd
+        ? R.yearBands.filter(x=>x.n>0).map(x=>({status:x.label, n:x.n, color:x.color}))
+        : R.statusCounts.filter(x=>x.n>0).map(x=>({status:x.status, n:x.n, color:STATUS_COLORS[x.status]}));
       ch.status = {w:400, h:250, url: makeChart({
         type:'doughnut',
-        data:{ labels: sc.map(x=>`${x.status} (${x.n})`), datasets:[{ data: sc.map(x=>x.n), backgroundColor: sc.map(x=>STATUS_COLORS[x.status]), borderColor:'#fff', borderWidth:2 }]},
+        data:{ labels: sc.map(x=>`${x.status} (${x.n})`), datasets:[{ data: sc.map(x=>x.n), backgroundColor: sc.map(x=>x.color), borderColor:'#fff', borderWidth:2 }]},
         options:{ cutout:'50%', plugins:{ legend:legendOpts,
-          title:{display:true, text:'สถานะความก้าวหน้าโครงการ (ผลเทียบแผนสะสม)', font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
+          title:{display:true, text:R.yearEnd ? 'ความก้าวหน้าจากเป้าหมายทั้งปี (จำนวนโครงการ)' : 'สถานะความก้าวหน้าโครงการ (ผลเทียบแผนสะสม)', font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
           rpValueLabels:{formatter:v=>String(v), size:12} } }
       }, 400, 250)};
 
@@ -2441,11 +2484,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       ch.mp = {w:1000, h, url: makeChart({
         type:'bar',
         data:{ labels: g.map(x=>wrapLabel(x.name, 40, 1)), datasets:[
-          {label:'ความก้าวหน้าเฉลี่ย (ผลเทียบแผนสะสม)', data:g.map(x=> x.avgProgress==null?null:+(x.avgProgress*100).toFixed(1)), backgroundColor:g.map(x=>PCT_COLORS[pctClass(x.avgProgress)]), borderRadius:4, barPercentage:0.7},
+          {label:headLabels(YE).avgLong, data:g.map(x=> x.avgProgress==null?null:+(x.avgProgress*100).toFixed(1)), backgroundColor:g.map(x=>PCT_COLORS[pctClass(x.avgProgress)]), borderRadius:4, barPercentage:0.7},
         ]},
         options:{ indexAxis:'y', layout:{padding:{right:60}},
           plugins:{ legend:{display:false},
-            title:{display:true, text:'ความก้าวหน้าเฉลี่ยของโครงการ แยกตามแผนแม่บท (%)', font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
+            title:{display:true, text:T('ความก้าวหน้าเฉลี่ยของโครงการ แยกตามแผนแม่บท (%)', 'ความก้าวหน้าเฉลี่ยจากเป้าหมายทั้งปี แยกตามแผนแม่บท (%)'), font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
             rpValueLabels:{formatter:v=>v.toFixed(1)+'%', size:11} },
           scales:{ x:{beginAtZero:true, suggestedMax:100, ticks:{callback:v=>v+'%', font:F(10.5), color:'#7d8b83'}, grid:{color:'#eee6d4'}}, y:{ticks:{font:F(11.5), color:'#1b2420'}, grid:{display:false}} } }
       }, 1000, h)};
@@ -2489,18 +2532,18 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       B.push({kind:'html', html:`<div class="rp-kpis">
         ${kpiCard('c1','งบประมาณรวมทั้งแผน', fmtShort(a.budget), 'บาท', `รวม ${a.n} โครงการ · ${R.byStrategy.length} ยุทธศาสตร์`)}
         ${kpiCard('c2','เบิกจ่ายสะสม', fmtPct(a.rate), '', `${fmtShort(a.disbursed)} บาท จากวงเงินที่จัดสรร`)}
-        ${kpiCard('c3','โครงการผลงานดี-ดีมาก', a.nGood, `/ ${a.n} โครงการ`, `${a.n?Math.round(a.nGood/a.n*100):0}% ของโครงการทั้งหมด`)}
-        ${kpiCard('c4','โครงการต้องเร่งปรับปรุง', a.nPoor, 'โครงการ', `โครงการสำคัญทั้งหมด ${R.nImportant} โครงการ`)}
+        ${kpiCard('c3',T('โครงการผลงานดี-ดีมาก','โครงการบรรลุเป้าหมาย'), a.nGood, `/ ${a.n} โครงการ`, `${a.n?Math.round(a.nGood/a.n*100):0}% ของโครงการทั้งหมด`)}
+        ${kpiCard('c4',T('โครงการต้องเร่งปรับปรุง','โครงการไม่บรรลุเป้าหมาย'), a.nPoor, 'โครงการ', `โครงการสำคัญทั้งหมด ${R.nImportant} โครงการ`)}
         ${kpiCard('c5','บรรลุเป้าหมายทั้งปีแล้ว', R.done.length, 'โครงการ', `${a.n?Math.round(R.done.length/a.n*100):0}% ของโครงการทั้งหมด`)}
       </div>`});
       B.push({kind:'html', html:`<div class="rp-charts">${imgBlock(charts.strategy,'flex:640;')}${imgBlock(charts.status,'flex:400;')}</div>`});
       B.push({kind:'html', html:`<div class="rp-charts">${imgBlock(charts.completion,'flex:640;')}${imgBlock(charts.ring,'flex:400;')}</div>`});
       B.push({kind:'table', title:'สรุปความก้าวหน้ารายยุทธศาสตร์',
-        cols:[['ยุทธศาสตร์',26],['จำนวน',7,'r'],['งบประมาณ (บาท)',12,'r'],['เบิกจ่าย (บาท)',12,'r'],['% เบิกจ่าย',8,'r'],['ดี-ดีมาก',7,'r'],['พอใช้',6,'r'],['ต้องปรับปรุง',8,'r'],['สำเร็จทั้งปี',7,'r'],['ความก้าวหน้าเฉลี่ย',12,'c']],
+        cols:[['ยุทธศาสตร์',26],['จำนวน',7,'r'],['งบประมาณ (บาท)',12,'r'],['เบิกจ่าย (บาท)',12,'r'],['% เบิกจ่าย',8,'r'],[T('ดี-ดีมาก','บรรลุเป้าหมาย'),7,'r'],[T('พอใช้','—'),6,'r'],[T('ต้องปรับปรุง','ไม่บรรลุเป้าหมาย'),8,'r'],['สำเร็จทั้งปี',7,'r'],[headLabels(YE).avg,12,'c']],
         rows:[...R.byStrategy, R.all].map((g,i,arr)=>`<tr class="${i===arr.length-1?'rp-total':''}"><td>${esc(g.name)}</td><td class="r">${g.n}</td><td class="r">${fmtBaht(g.budget)}</td><td class="r">${fmtBaht(g.disbursed)}</td><td class="r">${fmtPct(g.rate)}</td><td class="r">${g.nGood}</td><td class="r">${g.nFair}</td><td class="r">${g.nPoor}</td><td class="r">${g.nDone}</td><td>${bar(g.avgProgress)}</td></tr>`)});
       B.push({kind:'table', title:`รายชื่อโครงการที่บรรลุเป้าหมายทั้งปีแล้ว (${R.done.length} โครงการ)`,
-        cols:[['ลำดับ',5,'c'],['รหัสโครงการ',11],['ชื่อโครงการ',42],['หน่วยงาน',14],['งบประมาณ (บาท)',12,'r'],['% เทียบแผนสะสม',16,'c']],
-        rows:R.done.map((p,i)=>`<tr><td class="c">${i+1}</td><td class="mono">${esc(p.code)}</td><td>${nameCell(p, true)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(p.progress_cum)}</td></tr>`)});
+        cols:[['ลำดับ',5,'c'],['รหัสโครงการ',11],['ชื่อโครงการ',42],['หน่วยงาน',14],['งบประมาณ (บาท)',12,'r'],[T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'),16,'c']],
+        rows:R.done.map((p,i)=>`<tr><td class="c">${i+1}</td><td class="mono">${esc(p.code)}</td><td>${nameCell(p, true)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td></tr>`)});
     }
 
     if(topics.includes('annual')){
@@ -2518,14 +2561,14 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       if(histNote) B.push({kind:'html', html:histNote});
       if(charts.mp) B.push({kind:'html', html:`<div class="rp-charts">${imgBlock(charts.mp,'flex:1;max-height:330px;object-fit:contain;')}</div>`});
       B.push({kind:'table', title:'สรุปความก้าวหน้าแผนแม่บท',
-        cols:[['แผนแม่บท',34],['จำนวนโครงการ',9,'r'],['งบประมาณ (บาท)',13,'r'],['เบิกจ่าย (บาท)',13,'r'],['% เบิกจ่าย',8,'r'],['ต้องปรับปรุง',8,'r'],['ความก้าวหน้าเฉลี่ย',15,'c']],
+        cols:[['แผนแม่บท',34],['จำนวนโครงการ',9,'r'],['งบประมาณ (บาท)',13,'r'],['เบิกจ่าย (บาท)',13,'r'],['% เบิกจ่าย',8,'r'],[T('ต้องปรับปรุง','ไม่บรรลุเป้าหมาย'),8,'r'],[headLabels(YE).avg,15,'c']],
         rows:R.byMasterPlan.map(g=>`<tr><td>${esc(g.name)}</td><td class="r">${g.n}</td><td class="r">${fmtBaht(g.budget)}</td><td class="r">${fmtBaht(g.disbursed)}</td><td class="r">${fmtPct(g.rate)}</td><td class="r">${g.nPoor}</td><td>${bar(g.avgProgress)}</td></tr>`)});
       if(R.crossLinked.length) B.push({kind:'table', title:`โครงการที่เชื่อมโยงหลายแผนแม่บท (${R.crossLinked.length} โครงการ)`,
         cols:[['รหัสโครงการ',11],['ชื่อโครงการ',38],['หน่วยงาน',13],['แผนแม่บทที่เชื่อมโยง',38]],
         rows:R.crossLinked.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td>${p.master_plans.map(m=>`<span class="rp-tag">${esc(m.name)}</span>`).join(' ')}</td></tr>`)});
       R.byMasterPlan.forEach(g=> B.push({kind:'table', title:`${g.name} (${g.n} โครงการ)`,
-        cols:[['รหัสโครงการ',11],['ชื่อโครงการ',40],['หน่วยงาน',13],['งบประมาณ (บาท)',12,'r'],['% เทียบแผนสะสม',13,'c'],['สถานะ',11,'c']],
-        rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(p.progress_cum)}</td><td class="c">${pill(p.status)}</td></tr>`)}));
+        cols:[['รหัสโครงการ',11],['ชื่อโครงการ',40],['หน่วยงาน',13],['งบประมาณ (บาท)',12,'r'],[T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'),13,'c'],[T('สถานะ','ผลสิ้นปี'),11,'c']],
+        rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)}));
     }
 
     if(topics.includes('dgarea')){
@@ -2536,14 +2579,14 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         ${kpiCard('c5','โครงการภายใต้ PA / MOU', R.paMou.length, 'โครงการ', R.paMouGroups.map(g=>`${g.name} ${g.n}`).join(' · ') || 'ไม่มีข้อมูล')}</div>`});
       if(charts.dg) B.push({kind:'html', html:`<div class="rp-charts">${imgBlock(charts.dg,'flex:1;max-height:250px;object-fit:contain;')}</div>`});
       B.push({kind:'table', title:'สรุปรายส่วนงาน',
-        cols:[['ส่วนงาน',24],['จำนวนโครงการ',10,'r'],['งบประมาณ (บาท)',14,'r'],['% เบิกจ่าย',9,'r'],['ดี-ดีมาก',8,'r'],['ต้องปรับปรุง',9,'r'],['สำเร็จทั้งปี',9,'r'],['ความก้าวหน้าเฉลี่ย',17,'c']],
+        cols:[['ส่วนงาน',24],['จำนวนโครงการ',10,'r'],['งบประมาณ (บาท)',14,'r'],['% เบิกจ่าย',9,'r'],[T('ดี-ดีมาก','บรรลุเป้าหมาย'),8,'r'],[T('ต้องปรับปรุง','ไม่บรรลุเป้าหมาย'),9,'r'],['สำเร็จทั้งปี',9,'r'],[headLabels(YE).avg,17,'c']],
         rows:R.byDg.map(g=>`<tr><td>${esc(g.name)}</td><td class="r">${g.n}</td><td class="r">${fmtBaht(g.budget)}</td><td class="r">${fmtPct(g.rate)}</td><td class="r">${g.nGood}</td><td class="r">${g.nPoor}</td><td class="r">${g.nDone}</td><td>${bar(g.avgProgress)}</td></tr>`)});
       R.byDg.forEach(g=> B.push({kind:'table', title:`${g.name} (${g.n} โครงการ)`,
-        cols:[['รหัสโครงการ',10],['ชื่อโครงการ',35],['หน่วยงาน',11],['งบประมาณ (บาท)',11,'r'],['% เทียบแผนสะสม',11,'c'],['สถานะ',9,'c'],['% จากเป้าหมายทั้งปี',11,'c'],['PA / MOU',8,'c']],
-        rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(p.progress_cum)}</td><td class="c">${pill(p.status)}</td><td>${bar(p.progress_year)}</td><td class="c">${p.is_pa?'<span class="rp-tag pa">PA</span> ':''}${p.is_mou?'<span class="rp-tag mou">MOU</span>':''}</td></tr>`)}));
+        cols:[['รหัสโครงการ',10],['ชื่อโครงการ',35],['หน่วยงาน',11],['งบประมาณ (บาท)',11,'r'],['% เทียบแผนสะสม',11,'c'],[T('สถานะ','ผลสิ้นปี'),9,'c'],['% จากเป้าหมายทั้งปี',11,'c'],['PA / MOU',8,'c']],
+        rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(p.progress_cum)}</td><td class="c">${pill(hS(p))}</td><td>${bar(p.progress_year)}</td><td class="c">${p.is_pa?'<span class="rp-tag pa">PA</span> ':''}${p.is_mou?'<span class="rp-tag mou">MOU</span>':''}</td></tr>`)}));
       R.paMouGroups.forEach(g=> B.push({kind:'table', title:`โครงการภายใต้ PA / MOU — ${g.name} (${g.n} โครงการ · งบประมาณ ${fmtShort(g.budget)} บาท)`,
-        cols:[['รหัสโครงการ',10],['ชื่อโครงการ',36],['หน่วยงาน',11],['ส่วนงาน',14],['งบประมาณ (บาท)',11,'r'],['% เทียบแผนสะสม',10,'c'],['สถานะ',8,'c']],
-        rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td>${esc(p.dg_area_label)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(p.progress_cum)}</td><td class="c">${pill(p.status)}</td></tr>`)}));
+        cols:[['รหัสโครงการ',10],['ชื่อโครงการ',36],['หน่วยงาน',11],['ส่วนงาน',14],['งบประมาณ (บาท)',11,'r'],[T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'),10,'c'],[T('สถานะ','ผลสิ้นปี'),8,'c']],
+        rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td>${esc(p.dg_area_label)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)}));
       if(!R.paMou.length) B.push({kind:'html', html:'<div class="rp-note">ยังไม่มีโครงการที่ระบุว่าอยู่ภายใต้ PA หรือ MOU ในชีตข้อมูล</div>'});
     }
     return B;
@@ -2640,8 +2683,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     }
     const P = projectsForPeriod(per);
     if(!P.length) throw new Error('ไม่พบข้อมูลโครงการในรอบที่เลือก');
+    YE = isYearEndPeriod(per);          // ต้องตั้งก่อน computeReport (ค่าเฉลี่ย/จำนวนตามสถานะขึ้นกับโหมด)
     const R = computeReport(P);
-    R.yearEnd = isYearEndPeriod(per);   // รอบสุดท้ายของปีที่ปิดแล้ว → ป้าย "บรรลุ / ไม่บรรลุเป้าหมาย"
+    R.yearEnd = YE;                     // รอบสุดท้ายของปีที่ปิดแล้ว → ป้าย "บรรลุ / ไม่บรรลุเป้าหมาย"
+    R.yearBands = yearPctBandCounts(P);
     R.L_DONE = R.yearEnd ? 'บรรลุเป้าหมาย' : 'สำเร็จ';
     R.L_REST = R.yearEnd ? 'ไม่บรรลุเป้าหมาย' : 'อยู่ระหว่างดำเนินการ';
     const charts = buildCharts(R, topics);
@@ -2824,11 +2869,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       {h:'งบประมาณ (บาท)', get:g=>g.budget, fmt:F_BAHT},
       {h:'เบิกจ่าย (บาท)', get:g=>g.disbursed, fmt:F_BAHT},
       {h:'% เบิกจ่าย', get:g=>g.rate, fmt:F_PCT},
-      {h:'ดี-ดีมาก', get:g=>g.nGood, fmt:'0'},
-      {h:'พอใช้', get:g=>g.nFair, fmt:'0'},
-      {h:'ต้องปรับปรุง', get:g=>g.nPoor, fmt:'0'},
+      {h:T('ดี-ดีมาก','บรรลุเป้าหมาย'), get:g=>g.nGood, fmt:'0'},
+      {h:T('พอใช้','—'), get:g=>g.nFair, fmt:'0'},
+      {h:T('ต้องปรับปรุง','ไม่บรรลุเป้าหมาย'), get:g=>g.nPoor, fmt:'0'},
       {h:'สำเร็จทั้งปี', get:g=>g.nDone, fmt:'0'},
-      {h:'ความก้าวหน้าเฉลี่ย', get:g=>g.avgProgress, fmt:F_PCT},
+      {h:headLabels(YE).avg, get:g=>g.avgProgress, fmt:F_PCT},
     ];
 
     if(topics.includes('dashboard')){
@@ -2843,17 +2888,24 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         ['เบิกจ่ายสะสม', a.disbursed, F_BAHT, 'บาท'],
         ['อัตราการเบิกจ่าย', a.rate, F_PCT, '%'],
         ['จำนวนโครงการทั้งหมด', a.n, '0', 'โครงการ'],
-        ['โครงการผลงานดี-ดีมาก', a.nGood, '0', 'โครงการ'],
-        ['โครงการต้องเร่งปรับปรุง', a.nPoor, '0', 'โครงการ'],
+        [T('โครงการผลงานดี-ดีมาก','โครงการบรรลุเป้าหมาย'), a.nGood, '0', 'โครงการ'],
+        [T('โครงการต้องเร่งปรับปรุง','โครงการไม่บรรลุเป้าหมาย'), a.nPoor, '0', 'โครงการ'],
         ['โครงการสำคัญ', R.nImportant, '0', 'โครงการ'],
         ['โครงการที่บรรลุเป้าหมายทั้งปีแล้ว', R.done.length, '0', 'โครงการ'],
         ['สัดส่วนโครงการที่บรรลุเป้าหมายทั้งปี', a.n ? R.done.length/a.n : null, F_PCT, '%'],
       ], {title:'ตัวชี้วัดสรุป (KPI)'});
       row = table(ws, row, [
-        {h:'สถานะ (ผลเทียบแผนสะสม)', get:x=>x.status, status:true},
+        {h:T('สถานะ (ผลเทียบแผนสะสม)','ผลสิ้นปี'), get:x=>x.status, status:true},
         {h:'จำนวนโครงการ', get:x=>x.n, fmt:'0'},
         {h:'สัดส่วน', get:x=>a.n ? x.n/a.n : null, fmt:F_PCT},
-      ], R.statusCounts, {title:'สถานะความก้าวหน้าโครงการ'});
+      ], R.statusCounts, {title:T('สถานะความก้าวหน้าโครงการ','ผลสิ้นปีงบประมาณ')});
+      if(R.yearEnd){
+        row = table(ws, row, [
+          {h:'ช่วงร้อยละความก้าวหน้าจากเป้าหมายทั้งปี', get:x=>x.label},
+          {h:'จำนวนโครงการ', get:x=>x.n, fmt:'0'},
+          {h:'สัดส่วน', get:x=>a.n ? x.n/a.n : null, fmt:F_PCT},
+        ], R.yearBands, {title:'ความก้าวหน้าจากเป้าหมายทั้งปี'});
+      }
       row = table(ws, row, grpCols('ยุทธศาสตร์'), R.byStrategy, {title:'สรุปความก้าวหน้ารายยุทธศาสตร์', total:a});
       row = sectionTitle(ws, row, 'กราฟแดชบอร์ด');
       const rA = image(ws, row, 0, charts.strategy, 0.95);
@@ -2869,7 +2921,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:'หน่วยงาน', get:p=>p.owner},
         {h:'ยุทธศาสตร์', get:p=>p.strategy},
         {h:'งบประมาณ (บาท)', get:p=>p.budget, fmt:F_BAHT},
-        {h:'% เทียบแผนสะสม', get:p=>p.progress_cum, fmt:F_PCT},
+        {h:T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'), get:p=>hP(p), fmt:F_PCT},
       ], R.done, {title:`โครงการที่บรรลุเป้าหมายทั้งปี (${R.done.length} โครงการ)`, freeze:true, filter:true});
     }
 
@@ -2922,7 +2974,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:'งบประมาณ (บาท)', get:x=>x.p.budget, fmt:F_BAHT},
         {h:'% เบิกจ่าย', get:x=>pctDisb(x.p), fmt:F_PCT},
         {h:'% เทียบแผนสะสม', get:x=>num(x.p.progress_cum), fmt:F_PCT},
-        {h:'สถานะ', get:x=>x.p.status, status:true},
+        {h:T('สถานะ','ผลสิ้นปี'), get:x=>hS(x.p), status:true},
         {h:'% เป้าหมายทั้งปี', get:x=>num(x.p.progress_year), fmt:F_PCT},
       ], detail, {title:'รายละเอียดโครงการแยกตามแผนแม่บท'});
     }
@@ -2936,7 +2988,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:'จำนวนโครงการ', get:g=>g.n, fmt:'0'},
         {h:'งบประมาณ (บาท)', get:g=>g.budget, fmt:F_BAHT},
         {h:'% เบิกจ่าย', get:g=>g.rate, fmt:F_PCT},
-        {h:'ความก้าวหน้าเฉลี่ย', get:g=>g.avgProgress, fmt:F_PCT},
+        {h:headLabels(YE).avg, get:g=>g.avgProgress, fmt:F_PCT},
       ], R.paMouGroups, {title:`สรุปโครงการภายใต้ PA / MOU (${R.paMou.length} โครงการ)`});
       const rows = [];
       R.byDg.forEach(g=> g.projects.forEach(p=> rows.push(p)));
@@ -2948,7 +3000,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:'ยุทธศาสตร์', get:p=>p.strategy},
         {h:'งบประมาณ (บาท)', get:p=>p.budget, fmt:F_BAHT},
         {h:'% เทียบแผนสะสม', get:p=>num(p.progress_cum), fmt:F_PCT},
-        {h:'สถานะ', get:p=>p.status, status:true},
+        {h:T('สถานะ','ผลสิ้นปี'), get:p=>hS(p), status:true},
         {h:'% เป้าหมายทั้งปี', get:p=>num(p.progress_year), fmt:F_PCT},
         {h:'PA', get:p=>p.is_pa?'✓':'', align:'center'},
         {h:'MOU', get:p=>p.is_mou?'✓':'', align:'center'},
@@ -3243,6 +3295,39 @@ function applyYearEnd(projects, fy){
     if(!y || y.result === YE_CANCEL) return p;
     return Object.assign({}, p, { completion: y.result === YE_PASS ? 'สำเร็จ' : YE_FAIL, year_end_result: y.result });
   });
+}
+
+// ร้อยละ / สถานะ "หลัก" ของโครงการที่ใช้ในการ์ด กราฟ และตารางสรุป (แดชบอร์ด + รายงาน)
+//   ระหว่างปี: ร้อยละความก้าวหน้าเทียบแผนสะสม + สถานะผลเทียบแผนสะสม (ดีมาก/ดี/พอใช้/ต้องปรับปรุง)
+//   รอบสิ้นปีของปีที่ปิดแล้ว (ye = true): ร้อยละความก้าวหน้าจากเป้าหมายทั้งปี + ผลสิ้นปี (บรรลุ/ไม่บรรลุเป้าหมาย)
+function headProgress(p, ye){ return ye ? p.progress_year : p.progress_cum; }
+function headStatus(p, ye){
+  if(!ye) return p.status;
+  return p.year_end_result || (p.completion === 'สำเร็จ' ? YE_PASS : YE_FAIL);
+}
+const HEAD_LABELS = {
+  false: { pct:'% ความก้าวหน้าเทียบแผนสะสม', avg:'ความก้าวหน้าเฉลี่ย', avgLong:'ความก้าวหน้าเฉลี่ย (ผลเทียบแผนสะสม)', status:'สถานะ' },
+  true:  { pct:'% ความก้าวหน้าจากเป้าหมายทั้งปี', avg:'ความก้าวหน้าเฉลี่ย (เป้าหมายทั้งปี)', avgLong:'ความก้าวหน้าเฉลี่ย (จากเป้าหมายทั้งปี)', status:'ผลสิ้นปี' },
+};
+function headLabels(ye){ return HEAD_LABELS[!!ye]; }
+
+// ช่วงร้อยละความก้าวหน้าจากเป้าหมายทั้งปี — เกณฑ์เดียวกับสีแถบความก้าวหน้า (pctColorClass)
+const YEAR_PCT_BANDS = [
+  { label:'ครบ 100%',     color:'#2f7a4f', test: v => v >= 1 },
+  { label:'90–99%',       color:'#d9a916', test: v => v >= 0.9 },
+  { label:'80–89%',       color:'#e07b39', test: v => v >= 0.8 },
+  { label:'ต่ำกว่า 80%',  color:'#b5533c', test: v => true },
+];
+function yearPctBandCounts(projects){
+  const out = YEAR_PCT_BANDS.map(b => ({ label:b.label, color:b.color, n:0 }));
+  let none = 0;
+  projects.forEach(p => {
+    const v = p.progress_year;
+    if(v == null || isNaN(v)){ none++; return; }
+    out[YEAR_PCT_BANDS.findIndex(b => b.test(v))].n++;
+  });
+  if(none) out.push({ label:'ไม่มีข้อมูล', color:'#9a9488', n:none });
+  return out;
 }
 
 // รหัสโครงการเป็นตัวเลขนำหน้าด้วย 0 (เช่น 010101) — ป้องกันกรณี 0 ด้านหน้าหายจากการแปลงเป็นตัวเลข
