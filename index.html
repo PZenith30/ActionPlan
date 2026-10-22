@@ -1284,9 +1284,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const totalDisbursed = PROJECTS.reduce((a,p)=>a+(p.disbursed||0),0);
   const disburseRate = totalDisbursed/totalBudget;
   const nProjects = PROJECTS.length;
-  const nPoor = YE_MODE ? PROJECTS.filter(p=>hStat(p)===YE_FAIL).length : PROJECTS.filter(p=>p.status==='ต้องปรับปรุง').length;
+  const poorList = YE_MODE ? PROJECTS.filter(p=>hStat(p)===YE_FAIL) : PROJECTS.filter(p=>p.status==='ต้องปรับปรุง');
+  const nPoor = poorList.length;
+  const nPoorImportant = poorList.filter(p=>p.important).length;   // โครงการสำคัญที่อยู่ในกลุ่มนี้ (ไม่ใช่ทั้งแผน)
   const nGreat = YE_MODE ? PROJECTS.filter(p=>hStat(p)===YE_PASS).length : PROJECTS.filter(p=>p.status==='ดีมาก' || p.status==='ดี').length;
-  const nImportant = PROJECTS.filter(p=>p.important).length;
 
   const kpiGrid = document.getElementById('kpiGrid');
   kpiGrid.innerHTML = `
@@ -1312,7 +1313,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       <div class="accent-bar"></div>
       <span class="eyebrow">${YE_MODE ? 'โครงการไม่บรรลุเป้าหมาย' : 'โครงการต้องเร่งปรับปรุง'}</span>
       <div class="value">${nPoor}<span class="unit">โครงการ</span></div>
-      <div class="sub">โครงการสำคัญทั้งหมด ${nImportant} โครงการ</div>
+      <div class="sub">${nProjects ? ((nPoor/nProjects)*100).toFixed(0) : 0}% ของโครงการทั้งหมด · เป็นโครงการสำคัญ ${nPoorImportant} โครงการ</div>
     </div>
     ${cancelledCardHtml()}
   `;
@@ -2537,7 +2538,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         ${kpiCard('c1','งบประมาณรวมทั้งแผน', fmtShort(a.budget), 'บาท', `รวม ${a.n} โครงการ · ${R.byStrategy.length} ยุทธศาสตร์`)}
         ${kpiCard('c2','เบิกจ่ายสะสม', fmtPct(a.rate), '', `${fmtShort(a.disbursed)} บาท จากวงเงินที่จัดสรร`)}
         ${kpiCard('c3',T('โครงการผลงานดี-ดีมาก','โครงการบรรลุเป้าหมาย'), a.nGood, `/ ${a.n} โครงการ`, `${a.n?Math.round(a.nGood/a.n*100):0}% ของโครงการทั้งหมด`)}
-        ${kpiCard('c4',T('โครงการต้องเร่งปรับปรุง','โครงการไม่บรรลุเป้าหมาย'), a.nPoor, 'โครงการ', `โครงการสำคัญทั้งหมด ${R.nImportant} โครงการ`)}
+        ${kpiCard('c4',T('โครงการต้องเร่งปรับปรุง','โครงการไม่บรรลุเป้าหมาย'), a.nPoor, 'โครงการ', `${a.n?Math.round(a.nPoor/a.n*100):0}% ของโครงการทั้งหมด · เป็นโครงการสำคัญ ${R.P.filter(p=>p.important && (YE ? hS(p)===YE_FAIL : p.status==='ต้องปรับปรุง')).length} โครงการ`)}
         ${kpiCard('c5','บรรลุเป้าหมายทั้งปีแล้ว', R.done.length, 'โครงการ', `${a.n?Math.round(R.done.length/a.n*100):0}% ของโครงการทั้งหมด`)}
       </div>`});
       B.push({kind:'html', html:`<div class="rp-charts">${imgBlock(charts.strategy,'flex:640;')}${imgBlock(charts.status,'flex:400;')}</div>`});
