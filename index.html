@@ -294,6 +294,16 @@ window.addEventListener('load', function(){
   .dg-card.selected .eyebrow{color:var(--forest-800);}
 
   #dgDrilldownPanel.flash{ animation:panelFlash 0.6s ease; }
+  /* ปุ่มเลือกส่วนงานภายใต้สายงาน (หน้า "แผนปฏิบัติการตามสายงาน") */
+  .dg-units{display:flex; flex-wrap:wrap; gap:6px; padding:12px 22px 2px;}
+  .dg-unit{appearance:none; border:1px solid var(--line); background:#fff; color:var(--ink-600); font:inherit; font-size:12.5px;
+    border-radius:999px; padding:4px 12px; cursor:pointer; line-height:1.5; transition:background .15s, border-color .15s;}
+  .dg-unit b{font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--ink-900); margin-inline-start:4px;}
+  .dg-unit:hover:not(:disabled){border-color:var(--forest-600); background:var(--latex-50);}
+  .dg-unit:focus-visible{outline:2px solid var(--forest-600); outline-offset:2px;}
+  .dg-unit.active{background:var(--forest-800); border-color:var(--forest-800); color:#fff;}
+  .dg-unit.active b{color:#fff;}
+  .dg-unit:disabled{border-style:dashed; opacity:.6; cursor:default;}
   @keyframes panelFlash{
     0%{ box-shadow:0 0 0 3px rgba(27,67,50,0.35); }
     100%{ box-shadow:var(--shadow-sm); }
@@ -1121,6 +1131,7 @@ window.addEventListener('load', function(){
             <div class="panel-sub" id="dgDrilldownSub"></div>
           </div>
         </div>
+        <div id="dgUnitChips" class="dg-units" role="group" aria-label="เลือกส่วนงาน"></div>
         <div style="overflow-x:auto; max-height:520px; overflow-y:auto; margin-top:10px;">
           <table>
             <thead>
@@ -1197,7 +1208,8 @@ window.addEventListener('load', function(){
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dashboard" checked><span><b>1. ภาพรวมแดชบอร์ด</b><small>KPI · กราฟงบประมาณ/การเบิกจ่าย · สถานะโครงการ · สรุปรายยุทธศาสตร์ · โครงการที่บรรลุเป้าหมาย</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="annual" checked><span><b>2. ความก้าวหน้าแผนปฏิบัติการประจำปี</b><small>ตารางรายโครงการครบทุกคอลัมน์ ความก้าวหน้า และสถานะ</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="masterplan" checked><span><b>3. ความก้าวหน้าแผนแม่บท</b><small>สรุปรายแผนแม่บท · กราฟ · โครงการที่เชื่อมโยงหลายแผน · รายละเอียดรายแผน</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>4. ความก้าวหน้า PA และ MOU</b><small>สรุปรายส่วนงานภายใต้ผู้บริหาร · โครงการภายใต้ PA / MOU</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>4. แผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>5. ความก้าวหน้า PA และ MOU</b><small>สรุปโครงการภายใต้ PA / MOU · รายชื่อโครงการแยกกลุ่ม</small></span></label>
         </div>
       </div>
       <div class="rm-orient"><span class="pg"></span> รูปแบบหน้า: กระดาษ A4 แนวนอน (Landscape) ทั้ง PDF และ Excel</div>
@@ -2114,12 +2126,36 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       });
     }
 
+
     function renderDgDrilldown(label, opts){
-      const projs = dgGroups[label] || [];
+      const all = dgGroups[label] || [];
+      const units = lineUnits(label, all);   // ส่วนงานที่ไม่มีโครงการแสดงเป็นปุ่มเส้นประ กดไม่ได้
+      const nWith = units.filter(u=>u.n>0).length;
+      const escH = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       const dgHead = document.querySelectorAll('#dgDrilldownPanel thead th');
       if(dgHead[5]) dgHead[5].textContent = HL.status;
       document.getElementById('dgDrilldownTitle').textContent = label;
-      document.getElementById('dgDrilldownSub').textContent = `พบ ${projs.length} โครงการภายใต้ส่วนงานนี้`;
+
+      const chips = document.getElementById('dgUnitChips');
+      chips.innerHTML = `<button type="button" class="dg-unit active" data-unit="" aria-pressed="true">ทั้งหมด <b>${all.length}</b></button>` +
+        units.map(u => `<button type="button" class="dg-unit" data-unit="${escH(u.key)}" aria-pressed="false"${u.n ? '' : ' disabled title="ไม่มีโครงการในแผนปฏิบัติการปีนี้"'}>${escH(u.name)} <b>${u.n}</b></button>`).join('');
+      chips.querySelectorAll('.dg-unit').forEach(btn => btn.addEventListener('click', ()=>{
+        chips.querySelectorAll('.dg-unit').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+        btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
+        showUnit(btn.dataset.unit);
+      }));
+      showUnit('');
+
+      function showUnit(key){
+        const projs = key ? all.filter(p => normOwner(p.owner) === key) : all;
+        const u = units.find(x => x.key === key);
+        document.getElementById('dgDrilldownSub').textContent = key
+          ? `ส่วนงาน ${u ? u.name : key} · ${projs.length} โครงการ`
+          : `พบ ${all.length} โครงการ จาก ${nWith} ส่วนงาน · ส่วนงานภายใต้สายงานนี้ทั้งหมด ${units.length} ส่วนงาน (กดเลือกเพื่อดูโครงการของแต่ละส่วนงาน)`;
+        renderRows(projs);
+      }
+
+      function renderRows(projs){
       document.getElementById('dgDrilldownBody').innerHTML = projs
         .slice().sort((a,b)=>a.code.localeCompare(b.code,'th'))
         .map(p=>{
@@ -2138,6 +2174,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
             </tr>
           `;
         }).join('');
+      }
 
       if(opts && opts.scroll){
         const panel = document.getElementById('dgDrilldownPanel');
@@ -2187,7 +2224,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     dashboard:  '1. ภาพรวมแดชบอร์ด',
     annual:     '2. ความก้าวหน้าแผนปฏิบัติการประจำปี',
     masterplan: '3. ความก้าวหน้าแผนแม่บท',
-    dgarea:     '4. ความก้าวหน้า PA และ MOU',
+    lineorg:    '4. แผนปฏิบัติการตามสายงาน',
+    dgarea:     '5. ความก้าวหน้า PA และ MOU',
   };
   const REPORT_TITLE = 'รายงานผลการดำเนินงานตามแผนปฏิบัติการ การยางแห่งประเทศไทย';
   const STATUS_ORDER = ['ดีมาก','ดี','พอใช้','ต้องปรับปรุง'];
@@ -2348,6 +2386,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       return (ia<0?99:ia) - (ib<0?99:ib);
     }).map(aggGroup);
     byDg.forEach(g=> g.projects.sort(byCode));
+    // ส่วนงานภายใต้แต่ละสายงาน (ลำดับเดียวกับหน้าเว็บ) — รวมส่วนงานที่ไม่มีโครงการ (n = 0)
+    byDg.forEach(g=>{
+      g.units = lineUnits(g.name, g.projects).map(u=> aggGroup({name:u.name, projects:u.projects.slice().sort(byCode)}));
+    });
 
     const pm = P.filter(p=>p.is_pa || p.is_mou).sort(byCode);
     const paMouGroups = [
@@ -2503,7 +2545,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           scales:{ x:{beginAtZero:true, suggestedMax:100, ticks:{callback:v=>v+'%', font:F(10.5), color:'#7d8b83'}, grid:{color:'#eee6d4'}}, y:{ticks:{font:F(11.5), color:'#1b2420'}, grid:{display:false}} } }
       }, 1000, h)};
     }
-    if(topics.includes('dgarea') && R.byDg.length){
+    if(topics.includes('lineorg') && R.byDg.length){
       const g = R.byDg;
       ch.dg = {w:1000, h:Math.max(220, 70 + g.length*42), url: makeChart({
         type:'bar',
@@ -2512,7 +2554,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           {label:R.L_REST, data:g.map(x=>x.n-x.nDone), backgroundColor:'#e3dac0', borderRadius:4, stack:'s', barPercentage:0.55},
         ]},
         options:{ indexAxis:'y', plugins:{ legend:legendOpts,
-          title:{display:true, text:'จำนวนโครงการแยกตามส่วนงานภายใต้ผู้บริหาร', font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
+          title:{display:true, text:'จำนวนโครงการแยกตามสายงานผู้บริหาร', font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
           rpValueLabels:{formatter:v=>String(v), inside:true, insideColors:['#fff','#4d5a52'], size:11} },
           scales:{ x:{stacked:true, beginAtZero:true, ticks:{precision:0, font:F(10.5), color:'#7d8b83'}, grid:{color:'#eee6d4'}}, y:{stacked:true, ticks:{font:F(12), color:'#1b2420'}, grid:{display:false}} } }
       }, 1000, Math.max(220, 70 + g.length*42))};
@@ -2581,19 +2623,34 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)}));
     }
 
-    if(topics.includes('dgarea')){
-      B.push({kind:'section', title:TOPICS.dgarea, sub:'ความก้าวหน้าแยกตามส่วนงานภายใต้ผู้บริหาร (ผู้ว่าการ กยท. และรองผู้ว่าการ) และโครงการภายใต้ PA / MOU'});
+    // ---------- 4. แผนปฏิบัติการตามสายงาน: สายงาน -> ส่วนงาน -> โครงการ (ตรงกับหน้าเว็บ) ----------
+    if(topics.includes('lineorg')){
+      B.push({kind:'section', title:TOPICS.lineorg, sub:'ความก้าวหน้าแยกตามสายงานผู้บริหาร (ผู้ว่าการ กยท. และรองผู้ว่าการ) และส่วนงานภายใต้แต่ละสายงาน'});
       if(histNote) B.push({kind:'html', html:histNote});
       const cls = DG_CLASS_GLOBAL;
-      B.push({kind:'html', html:`<div class="rp-kpis">${R.byDg.map(g=>kpiCard(cls[g.name]||'c4', esc(g.name), g.n, 'โครงการ', `งบประมาณ ${fmtShort(g.budget)} บาท · ก้าวหน้าเฉลี่ย ${fmtPct(g.avgProgress)}`)).join('')}
-        ${kpiCard('c5','โครงการภายใต้ PA / MOU', R.paMou.length, 'โครงการ', R.paMouGroups.map(g=>`${g.name} ${g.n}`).join(' · ') || 'ไม่มีข้อมูล')}</div>`});
+      B.push({kind:'html', html:`<div class="rp-kpis">${R.byDg.map(g=>kpiCard(cls[g.name]||'c4', esc(g.name), g.n, 'โครงการ', `งบประมาณ ${fmtShort(g.budget)} บาท · ก้าวหน้าเฉลี่ย ${fmtPct(g.avgProgress)} · ${g.units.filter(u=>u.n>0).length} ส่วนงาน`)).join('')}</div>`});
       if(charts.dg) B.push({kind:'html', html:`<div class="rp-charts">${imgBlock(charts.dg,'flex:1;max-height:250px;object-fit:contain;')}</div>`});
-      B.push({kind:'table', title:'สรุปรายส่วนงาน',
-        cols:[['ส่วนงาน',24],['จำนวนโครงการ',10,'r'],['งบประมาณ (บาท)',14,'r'],['% เบิกจ่าย',9,'r'],[T('ดี-ดีมาก','บรรลุเป้าหมาย'),8,'r'],[T('ต้องปรับปรุง','ไม่บรรลุเป้าหมาย'),9,'r'],['สำเร็จทั้งปี',9,'r'],[headLabels(YE).avg,17,'c']],
-        rows:R.byDg.map(g=>`<tr><td>${esc(g.name)}</td><td class="r">${g.n}</td><td class="r">${fmtBaht(g.budget)}</td><td class="r">${fmtPct(g.rate)}</td><td class="r">${g.nGood}</td><td class="r">${g.nPoor}</td><td class="r">${g.nDone}</td><td>${bar(g.avgProgress)}</td></tr>`)});
-      R.byDg.forEach(g=> B.push({kind:'table', title:`${g.name} (${g.n} โครงการ)`,
-        cols:[['รหัสโครงการ',10],['ชื่อโครงการ',35],['หน่วยงาน',11],['งบประมาณ (บาท)',11,'r'],['% เทียบแผนสะสม',11,'c'],[T('สถานะ','ผลสิ้นปี'),9,'c'],['% จากเป้าหมายทั้งปี',11,'c'],['PA / MOU',8,'c']],
-        rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(p.progress_cum)}</td><td class="c">${pill(hS(p))}</td><td>${bar(p.progress_year)}</td><td class="c">${p.is_pa?'<span class="rp-tag pa">PA</span> ':''}${p.is_mou?'<span class="rp-tag mou">MOU</span>':''}</td></tr>`)}));
+      const sumCols = first => [[first,24],['จำนวนโครงการ',10,'r'],['งบประมาณ (บาท)',14,'r'],['% เบิกจ่าย',9,'r'],[T('ดี-ดีมาก','บรรลุเป้าหมาย'),8,'r'],[T('ต้องปรับปรุง','ไม่บรรลุเป้าหมาย'),9,'r'],['สำเร็จทั้งปี',9,'r'],[headLabels(YE).avg,17,'c']];
+      const sumRow = g => g.n
+        ? `<tr><td>${esc(g.name)}</td><td class="r">${g.n}</td><td class="r">${fmtBaht(g.budget)}</td><td class="r">${fmtPct(g.rate)}</td><td class="r">${g.nGood}</td><td class="r">${g.nPoor}</td><td class="r">${g.nDone}</td><td>${bar(g.avgProgress)}</td></tr>`
+        : `<tr><td>${esc(g.name)}</td><td class="r">0</td><td class="rp-small" colspan="6" style="color:#9a9488;">ไม่มีโครงการในแผนปฏิบัติการปีนี้</td></tr>`;
+      B.push({kind:'table', title:'สรุปรายสายงาน', cols:sumCols('สายงาน'), rows:R.byDg.map(sumRow)});
+      R.byDg.forEach(g=>{
+        const withProj = g.units.filter(u=>u.n>0).length;
+        B.push({kind:'table', title:`${g.name} — สรุปรายส่วนงาน (${g.n} โครงการ จาก ${withProj} ส่วนงาน · ส่วนงานภายใต้สายงานทั้งหมด ${g.units.length})`,
+          cols:sumCols('ส่วนงาน'), rows:g.units.map(sumRow)});
+        g.units.filter(u=>u.n>0).forEach(u=> B.push({kind:'table', title:`${g.name} · ${u.name} (${u.n} โครงการ)`,
+          cols:[['รหัสโครงการ',10],['ชื่อโครงการ',37],['งบประมาณ (บาท)',11,'r'],['% เทียบแผนสะสม',11,'c'],[T('สถานะ','ผลสิ้นปี'),9,'c'],['% จากเป้าหมายทั้งปี',11,'c'],['PA / MOU',8,'c']],
+          rows:u.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(p.progress_cum)}</td><td class="c">${pill(hS(p))}</td><td>${bar(p.progress_year)}</td><td class="c">${p.is_pa?'<span class="rp-tag pa">PA</span> ':''}${p.is_mou?'<span class="rp-tag mou">MOU</span>':''}</td></tr>`)}));
+      });
+    }
+
+    // ---------- 5. ความก้าวหน้า PA และ MOU ----------
+    if(topics.includes('dgarea')){
+      B.push({kind:'section', title:TOPICS.dgarea, sub:'โครงการภายใต้ PA / MOU (ที่มา: คอลัมน์ "โครงการภายใต้ PA" และ "โครงการภายใต้ MOU" ในชีต "โครงการ")'});
+      if(histNote) B.push({kind:'html', html:histNote});
+      B.push({kind:'html', html:`<div class="rp-kpis">${kpiCard('c5','โครงการภายใต้ PA / MOU', R.paMou.length, 'โครงการ', R.paMouGroups.map(g=>`${g.name} ${g.n}`).join(' · ') || 'ไม่มีข้อมูล')}
+        ${R.paMouGroups.map(g=>kpiCard('c1', esc(g.name), g.n, 'โครงการ', `งบประมาณ ${fmtShort(g.budget)} บาท · ก้าวหน้าเฉลี่ย ${fmtPct(g.avgProgress)}`)).join('')}</div>`});
       R.paMouGroups.forEach(g=> B.push({kind:'table', title:`โครงการภายใต้ PA / MOU — ${g.name} (${g.n} โครงการ · งบประมาณ ${fmtShort(g.budget)} บาท)`,
         cols:[['รหัสโครงการ',10],['ชื่อโครงการ',36],['หน่วยงาน',11],['ส่วนงาน',14],['งบประมาณ (บาท)',11,'r'],[T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'),10,'c'],[T('สถานะ','ผลสิ้นปี'),8,'c']],
         rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td>${esc(p.dg_area_label)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)}));
@@ -2989,11 +3046,38 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       ], detail, {title:'รายละเอียดโครงการแยกตามแผนแม่บท'});
     }
 
+    // ---------- 4. แผนปฏิบัติการตามสายงาน ----------
+    if(topics.includes('lineorg')){
+      const {ws, row:r0} = newSheet('สายงาน', [26,24,46,16,22,16,14,13,14,14,8,8], TOPICS.lineorg);
+      let row = table(ws, r0, grpCols('สายงาน'), R.byDg, {title:'สรุปความก้าวหน้ารายสายงานผู้บริหาร', total:R.all});
+      if(charts.dg){ row = sectionTitle(ws, row, 'กราฟจำนวนโครงการแยกตามสายงาน'); row = image(ws, row, 0, charts.dg, 0.9); }
+      // สรุปรายส่วนงานภายใต้แต่ละสายงาน (รวมส่วนงานที่ไม่มีโครงการ) — ลำดับเดียวกับหน้าเว็บ
+      const unitRows = [];
+      R.byDg.forEach(g=> g.units.forEach(u=> unitRows.push(Object.assign({}, u, {line:g.name}))));
+      row = table(ws, row, [{h:'สายงาน', get:x=>x.line}].concat(grpCols('ส่วนงาน')), unitRows,
+        {title:'สรุปรายส่วนงานภายใต้สายงาน', filter:true});
+      const rows = [];
+      R.byDg.forEach(g=> g.units.forEach(u=> u.projects.forEach(p=> rows.push({line:g.name, unit:u.name, p}))));
+      table(ws, row, [
+        {h:'สายงาน', get:x=>x.line},
+        {h:'ส่วนงาน', get:x=>x.unit},
+        {h:'ชื่อโครงการ', get:x=>(x.p.important?'★ ':'')+x.p.name},
+        {h:'รหัสโครงการ', get:x=>x.p.code},
+        {h:'ยุทธศาสตร์', get:x=>x.p.strategy},
+        {h:'งบประมาณ (บาท)', get:x=>x.p.budget, fmt:F_BAHT},
+        {h:'% เบิกจ่าย', get:x=>pctDisb(x.p), fmt:F_PCT},
+        {h:'% เทียบแผนสะสม', get:x=>num(x.p.progress_cum), fmt:F_PCT},
+        {h:T('สถานะ','ผลสิ้นปี'), get:x=>hS(x.p), status:true},
+        {h:'% เป้าหมายทั้งปี', get:x=>num(x.p.progress_year), fmt:F_PCT},
+        {h:'PA', get:x=>x.p.is_pa?'✓':'', align:'center'},
+        {h:'MOU', get:x=>x.p.is_mou?'✓':'', align:'center'},
+      ], rows, {title:'รายละเอียดโครงการแยกตามสายงานและส่วนงาน', filter:true});
+    }
+
+    // ---------- 5. ความก้าวหน้า PA และ MOU ----------
     if(topics.includes('dgarea')){
-      const {ws, row:r0} = newSheet('PA-MOU', [26,14,46,16,22,16,14,13,14,8,8], TOPICS.dgarea);
-      let row = table(ws, r0, grpCols('ส่วนงาน'), R.byDg, {title:'สรุปความก้าวหน้ารายส่วนงานภายใต้ผู้บริหาร', total:R.all});
-      if(charts.dg){ row = sectionTitle(ws, row, 'กราฟจำนวนโครงการแยกตามส่วนงาน'); row = image(ws, row, 0, charts.dg, 0.9); }
-      row = table(ws, row, [
+      const {ws, row:r0} = newSheet('PA-MOU', [22,14,46,16,24,16,14,14,14,8,8], TOPICS.dgarea);
+      let row = table(ws, r0, [
         {h:'กลุ่ม', get:g=>g.name},
         {h:'จำนวนโครงการ', get:g=>g.n, fmt:'0'},
         {h:'งบประมาณ (บาท)', get:g=>g.budget, fmt:F_BAHT},
@@ -3001,20 +3085,20 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:headLabels(YE).avg, get:g=>g.avgProgress, fmt:F_PCT},
       ], R.paMouGroups, {title:`สรุปโครงการภายใต้ PA / MOU (${R.paMou.length} โครงการ)`});
       const rows = [];
-      R.byDg.forEach(g=> g.projects.forEach(p=> rows.push(p)));
+      R.paMouGroups.forEach(g=> g.projects.forEach(p=> rows.push({grp:g.name, p})));
       table(ws, row, [
-        {h:'ส่วนงาน', get:p=>p.dg_area_label},
-        {h:'รหัสโครงการ', get:p=>p.code},
-        {h:'ชื่อโครงการ', get:p=>(p.important?'★ ':'')+p.name},
-        {h:'หน่วยงาน', get:p=>p.owner},
-        {h:'ยุทธศาสตร์', get:p=>p.strategy},
-        {h:'งบประมาณ (บาท)', get:p=>p.budget, fmt:F_BAHT},
-        {h:'% เทียบแผนสะสม', get:p=>num(p.progress_cum), fmt:F_PCT},
-        {h:T('สถานะ','ผลสิ้นปี'), get:p=>hS(p), status:true},
-        {h:'% เป้าหมายทั้งปี', get:p=>num(p.progress_year), fmt:F_PCT},
-        {h:'PA', get:p=>p.is_pa?'✓':'', align:'center'},
-        {h:'MOU', get:p=>p.is_mou?'✓':'', align:'center'},
-      ], rows, {title:'รายละเอียดโครงการแยกตามส่วนงาน', filter:true});
+        {h:'กลุ่ม', get:x=>x.grp},
+        {h:'รหัสโครงการ', get:x=>x.p.code},
+        {h:'ชื่อโครงการ', get:x=>(x.p.important?'★ ':'')+x.p.name},
+        {h:'หน่วยงาน', get:x=>x.p.owner},
+        {h:'สายงาน', get:x=>x.p.dg_area_label},
+        {h:'งบประมาณ (บาท)', get:x=>x.p.budget, fmt:F_BAHT},
+        {h:'% เบิกจ่าย', get:x=>pctDisb(x.p), fmt:F_PCT},
+        {h:T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'), get:x=>num(hP(x.p)), fmt:F_PCT},
+        {h:T('สถานะ','ผลสิ้นปี'), get:x=>hS(x.p), status:true},
+        {h:'PA', get:x=>x.p.is_pa?'✓':'', align:'center'},
+        {h:'MOU', get:x=>x.p.is_mou?'✓':'', align:'center'},
+      ], rows, {title:'รายชื่อโครงการภายใต้ PA / MOU', filter:true});
     }
 
     const buf = await wb.xlsx.writeBuffer();
@@ -3328,6 +3412,18 @@ const YEAR_PCT_BANDS = [
   { label:'80–89%',       color:'#e07b39', test: v => v >= 0.8 },
   { label:'ต่ำกว่า 80%',  color:'#b5533c', test: v => true },
 ];
+// ส่วนงานภายใต้สายงาน (ใช้ทั้งหน้า "แผนปฏิบัติการตามสายงาน" และรายงาน):
+// รายชื่อจากชีต "ส่วนงานภายใต้ผู้บริหาร" (window.ACP_EXEC_UNITS) + ส่วนงานที่มีโครงการแต่ไม่อยู่ในชีต
+// เรียงตามจำนวนโครงการ มากไปน้อย (เท่ากันคงลำดับตามชีต) — ส่วนงานที่ไม่มีโครงการอยู่ท้ายสุด
+function lineUnits(label, projs){
+  const units = [], seen = {};
+  const add = (name, k) => { if(k && !seen[k]){ seen[k] = { key:k, name, n:0, projects:[] }; units.push(seen[k]); } };
+  ((window.ACP_EXEC_UNITS || {})[label] || []).forEach(u => add(u, normOwner(u)));
+  (projs || []).forEach(p => add(p.owner, normOwner(p.owner)));
+  (projs || []).forEach(p => { const u = seen[normOwner(p.owner)]; if(u){ u.n++; u.projects.push(p); } });
+  return units.map((u,i)=>({u,i})).sort((a,b)=> (b.u.n - a.u.n) || (a.i - b.i)).map(x=>x.u);
+}
+
 function yearPctBandCounts(projects){
   const out = YEAR_PCT_BANDS.map(b => ({ label:b.label, color:b.color, n:0 }));
   let none = 0;
@@ -3800,12 +3896,19 @@ async function loadAndRender(){
       const fields = execRows.__fields || Object.keys(execRows[0]);
       const ownerCol = fields[0];
       const ownerToExec = {};
+      // รายชื่อส่วนงานภายใต้แต่ละสายงาน (ตามลำดับในชีต) — ใช้แสดงปุ่มเลือกส่วนงานในหน้า "แผนปฏิบัติการตามสายงาน"
+      const execUnits = {};
       execRows.forEach(r=>{
         const o = normOwner(r[ownerCol]);
         if(!o) return;
         const hit = fields.slice(1).find(f => isYes(r[f]));
-        if(hit) ownerToExec[o] = normExecLabel(hit);
+        if(hit){
+          const lab = normExecLabel(hit);
+          ownerToExec[o] = lab;
+          (execUnits[lab] = execUnits[lab] || []).push(String(r[ownerCol]).trim());
+        }
       });
+      window.ACP_EXEC_UNITS = execUnits;
       fields.slice(1).map(normExecLabel).forEach(l=>{ if(l && !DG_ORDER_GLOBAL.includes(l)) DG_ORDER_GLOBAL.push(l); });
       let mapped = 0;
       records.forEach(rec=>{
