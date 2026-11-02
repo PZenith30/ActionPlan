@@ -427,6 +427,25 @@ window.addEventListener('load', function(){
   .tap-bar .pct-lbl{
     position:absolute; right:-2px; top:16px; font-size:10.5px; font-family:'JetBrains Mono',monospace; color:var(--ink-400);
   }
+  /* แถบความก้าวหน้าแบบบรรทัดเดียว (แถบยืดเต็มช่อง + ตัวเลขด้านขวา) — ใช้ในตารางสรุปแผนแม่บท */
+  .tap-inline{display:flex; align-items:center; gap:12px;}
+  .tap-inline .tap-bar{flex:1 1 auto; width:auto; min-width:60px;}
+  .tap-inline .v{flex:0 0 56px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-600);}
+
+  /* ตารางสรุปความก้าวหน้าแผนแม่บท: คอลัมน์ตัวเลขกระชับ ชื่อแผนแม่บทใช้พื้นที่ที่เหลือ */
+  .mp-sum{width:100%; table-layout:fixed; font-size:13px;}
+  .mp-sum col.c-n{width:120px;} .mp-sum col.c-budget{width:180px;} .mp-sum col.c-rate{width:110px;} .mp-sum col.c-prog{width:34%;}
+  .mp-sum th, .mp-sum td{padding:10px 16px;}
+  .mp-sum th.r, .mp-sum td.r{text-align:right;}
+  .mp-sum td.r{font-family:'JetBrains Mono',monospace; white-space:nowrap;}
+  .mp-sum td.nm{font-weight:500; color:var(--ink-900);}
+  .mp-sum tr.mp-row{cursor:pointer;}
+  .mp-sum tr.mp-row:hover{background:var(--latex-50);}
+  @media (max-width:900px){
+    .panel table.mp-sum{min-width:780px;}
+    .mp-sum col.c-n{width:88px;} .mp-sum col.c-budget{width:140px;} .mp-sum col.c-rate{width:84px;} .mp-sum col.c-prog{width:30%;}
+    .mp-sum th, .mp-sum td{padding:9px 10px;}
+  }
   .tap-bar.great .fill{background-color:var(--pct-great);}
   .tap-bar.good .fill{background-color:var(--pct-good);}
   .tap-bar.fair .fill{background-color:var(--pct-fair);}
@@ -1083,14 +1102,17 @@ window.addEventListener('load', function(){
         <h2>สรุปความก้าวหน้าแผนแม่บท</h2>
         <div class="panel-sub">ภาพรวมความก้าวหน้าโครงการ จัดกลุ่มตามแผนแม่บทที่เชื่อมโยง (ที่มา: ชีต "เชื่อมโยงโครงการ") &middot; คลิกแถวเพื่อดูรายละเอียดโครงการ</div>
         <div style="overflow-x:auto; margin-top:14px;">
-          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <table class="mp-sum">
+            <colgroup>
+              <col><col class="c-n"><col class="c-budget"><col class="c-rate"><col class="c-prog">
+            </colgroup>
             <thead>
               <tr>
-                <th style="text-align:left; padding:10px 14px; background:var(--latex-100); font-size:11.5px; text-transform:uppercase; color:var(--ink-600); border-bottom:1px solid var(--line);">แผนแม่บท</th>
-                <th style="text-align:right; padding:10px 14px; background:var(--latex-100); font-size:11.5px; text-transform:uppercase; color:var(--ink-600); border-bottom:1px solid var(--line);">จำนวนโครงการ</th>
-                <th style="text-align:right; padding:10px 14px; background:var(--latex-100); font-size:11.5px; text-transform:uppercase; color:var(--ink-600); border-bottom:1px solid var(--line);">งบประมาณ (บาท)</th>
-                <th style="text-align:right; padding:10px 14px; background:var(--latex-100); font-size:11.5px; text-transform:uppercase; color:var(--ink-600); border-bottom:1px solid var(--line);">เบิกจ่าย %</th>
-                <th style="text-align:center; padding:10px 14px; background:var(--latex-100); font-size:11.5px; text-transform:uppercase; color:var(--ink-600); border-bottom:1px solid var(--line);">ความก้าวหน้าเฉลี่ย</th>
+                <th>แผนแม่บท</th>
+                <th class="r">จำนวนโครงการ</th>
+                <th class="r">งบประมาณ (บาท)</th>
+                <th class="r">% เบิกจ่าย</th>
+                <th class="prog">ความก้าวหน้าเฉลี่ย</th>
               </tr>
             </thead>
             <tbody id="mpSummaryBody"></tbody>
@@ -1964,12 +1986,12 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       const disburseRate = totalBudget>0 ? totalDisbursed/totalBudget : null;
       const avgProgress = n ? g.projects.reduce((a,p)=>a+(hProg(p)||0),0)/n : null;
       return `
-        <tr class="mp-row" data-mp="${g.code}" style="cursor:pointer; border-bottom:1px solid var(--latex-200);">
-          <td style="padding:11px 14px; font-weight:500; color:var(--ink-900);">${g.name}</td>
-          <td style="padding:11px 14px; text-align:right; font-family:'JetBrains Mono',monospace;">${n}</td>
-          <td style="padding:11px 14px; text-align:right; font-family:'JetBrains Mono',monospace;">${fmtBaht(totalBudget)}</td>
-          <td style="padding:11px 14px; text-align:right; font-family:'JetBrains Mono',monospace;">${fmtPct(disburseRate)}</td>
-          <td style="padding:11px 14px;">${tapBarHtml(avgProgress, pctColorClass(avgProgress))}</td>
+        <tr class="mp-row" data-mp="${g.code}">
+          <td class="nm">${g.name}</td>
+          <td class="r">${n}</td>
+          <td class="r">${fmtBaht(totalBudget)}</td>
+          <td class="r">${fmtPct(disburseRate)}</td>
+          <td><div class="tap-inline"><div class="tap-bar ${pctColorClass(avgProgress)}"><div class="fill" style="width:${avgProgress==null?0:Math.max(0,Math.min(100,avgProgress*100))}%"></div></div><span class="v">${avgProgress==null?'-':(avgProgress*100).toFixed(1)+'%'}</span></div></td>
         </tr>
       `;
     }).join('');
