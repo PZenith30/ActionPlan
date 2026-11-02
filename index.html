@@ -372,17 +372,23 @@ window.addEventListener('load', function(){
   table{width:100%; border-collapse:collapse; font-size:13px;}
   thead th{
     text-align:left; background:var(--latex-100); color:var(--ink-600);
-    font-weight:600; font-size:11.5px; letter-spacing:0.03em; text-transform:uppercase;
+    font-weight:600; font-size:11.5px; letter-spacing:0.02em; text-transform:uppercase;
     padding:11px 14px; border-bottom:1px solid var(--line); white-space:normal;
-    cursor:pointer; position:sticky; top:0; vertical-align:bottom;
+    cursor:pointer; position:sticky; top:0; vertical-align:middle;
+    line-height:1.4; text-wrap:balance;   /* หัวคอลัมน์หลายบรรทัดแบ่งยาวเท่าๆ กัน */
     z-index:5; box-shadow:0 1px 0 var(--line);
   }
+  thead th.nw{white-space:nowrap;}                 /* หัวสั้น: ไม่ตัดบรรทัด (รหัสโครงการ, งบประมาณ, PA / MOU) */
+  thead th[data-key="name"]{min-width:220px;}
+  /* ความกว้างขั้นต่ำให้หัว 2 บรรทัดไม่ถูกบีบเป็น 3 บรรทัด */
+  thead th[data-key="master_plans_label"]{min-width:130px;}
+  thead th[data-key="status"]{min-width:140px;}
+  thead th[data-key="status_pct_cum"]{min-width:160px;}
+  thead th[data-key="progress_cum"], thead th[data-key="progress_pct_cum"], thead th[data-key="progress_year"]{min-width:150px;}
   thead th:hover{color:var(--forest-800);}
   thead th .arrow{font-size:9px; margin-inline-start:3px; opacity:0.5;}
-  thead th .th-source{
-    font-size:9.5px; font-weight:500; text-transform:none; letter-spacing:0;
-    color:var(--ink-400); opacity:0.75; margin-top:3px; white-space:normal; max-width:170px;
-  }
+  /* บรรทัด "ที่มา: ..." ทำให้หัวตารางสูงไม่เท่ากัน — ซ่อนไว้ ดูที่มาได้จาก tooltip (title) ของหัวคอลัมน์ */
+  thead th .th-source{display:none;}
   tbody tr{border-bottom:1px solid var(--latex-200);}
   tbody tr:hover{background:var(--latex-50);}
   tbody td{padding:11px 14px; vertical-align:middle;}
@@ -453,7 +459,7 @@ window.addEventListener('load', function(){
   #printArea .print-meta{font-size:12px; color:#555; margin-bottom:16px;}
   #printArea table{width:100%; border-collapse:collapse; font-size:11px;}
   #printArea th, #printArea td{border:1px solid #ccc; padding:5px 7px; text-align:left;}
-  #printArea th{background:#f0ede2; font-weight:700;}
+  #printArea th{background:#f0ede2; font-weight:700; vertical-align:middle; text-wrap:balance;}
   @page{size:A4 landscape; margin:0;}
   @media print{
     body{background:#fff !important;}
@@ -734,7 +740,7 @@ window.addEventListener('load', function(){
   .rp-ttl{font-family:'Kanit',sans-serif; font-weight:600; font-size:13px; color:#123423; margin:0 0 5px;}
   .rp-ttl span{font-family:'Sarabun',sans-serif; font-weight:500; font-size:11px; color:#7d8b83;}
   .rp-tbl{width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; line-height:1.35;}
-  .rp-tbl th{background:#1b4332; color:#fff; font-weight:600; padding:4px 5px; text-align:left; border:1px solid #1b4332; line-height:1.3; vertical-align:middle;}
+  .rp-tbl th{background:#1b4332; color:#fff; font-weight:600; padding:5px 6px; text-align:left; border:1px solid #1b4332; line-height:1.3; vertical-align:middle; text-wrap:balance; overflow-wrap:normal; word-break:normal;}
   .rp-tbl td{padding:3px 5px; border:1px solid #e3dccb; vertical-align:middle; word-wrap:break-word; overflow-wrap:anywhere;}
   .rp-tbl tbody tr:nth-child(even) td{background:#faf8f2;}
   .rp-tbl tr.rp-total td{background:#f3efe3 !important; font-weight:700;}
@@ -1035,27 +1041,27 @@ window.addEventListener('load', function(){
           <table>
             <thead>
               <tr>
-                <th data-key="code">รหัสโครงการ<span class="arrow">▾</span></th>
+                <th data-key="code" class="nw">รหัสโครงการ<span class="arrow">▾</span></th>
                 <th data-key="name">ชื่อโครงการ<span class="arrow">▾</span></th>
-                <th data-key="owner" style="width:130px;">หน่วยงาน<span class="arrow">▾</span></th>
-                <th data-key="master_plans_label" style="width:160px;">แผนแม่บทที่เกี่ยวข้อง<span class="arrow">▾</span></th>
-                <th data-key="budget" style="text-align:right">งบประมาณ (บาท)<span class="arrow">▾</span></th>
+                <th data-key="owner" class="nw" style="width:110px;">หน่วยงาน<span class="arrow">▾</span></th>
+                <th data-key="master_plans_label" style="width:150px;">แผนแม่บท<br>ที่เกี่ยวข้อง<span class="arrow">▾</span></th>
+                <th data-key="budget" class="nw" style="text-align:right">งบประมาณ (บาท)<span class="arrow">▾</span></th>
                 <th data-key="progress_cum" style="text-align:center">
-                  % ความก้าวหน้าเทียบแผนสะสม<span class="arrow">▾</span>
+                  % ความก้าวหน้า<br>เทียบแผนสะสม<span class="arrow">▾</span>
                 </th>
                 <th data-key="status" style="text-align:center" title="ที่มา: คอลัมน์ &quot;สถานะโครงการ (ผลเทียบแผนสะสม)&quot;">
-                  สถานะโครงการ (ผลเทียบแผนสะสม)<span class="arrow">▾</span>
+                  สถานะ<br>(ผลเทียบแผนสะสม)<span class="arrow">▾</span>
                   <div class="th-source">ที่มา: สถานะโครงการ (ผลเทียบแผนสะสม)</div>
                 </th>
                 <th data-key="progress_pct_cum" style="text-align:center">
-                  % ความก้าวหน้าจากเป้าหมายสะสม<span class="arrow">▾</span>
+                  % ความก้าวหน้า<br>จากเป้าหมายสะสม<span class="arrow">▾</span>
                 </th>
                 <th data-key="status_pct_cum" style="text-align:center" title="ที่มา: คอลัมน์ &quot;สถานะโครงการ (ร้อยละความก้าวหน้า จากเป้าหมายสะสม)&quot;">
-                  สถานะโครงการ (ความก้าวหน้าจากเป้าหมายสะสม)<span class="arrow">▾</span>
+                  สถานะ<br>(จากเป้าหมายสะสม)<span class="arrow">▾</span>
                   <div class="th-source">ที่มา: สถานะโครงการ (ร้อยละความก้าวหน้า จากเป้าหมายสะสม)</div>
                 </th>
                 <th data-key="progress_year" style="text-align:center">
-                  % ความก้าวหน้าจากเป้าหมายทั้งปี<span class="arrow">▾</span>
+                  % ความก้าวหน้า<br>จากเป้าหมายทั้งปี<span class="arrow">▾</span>
                 </th>
               </tr>
             </thead>
@@ -1107,9 +1113,9 @@ window.addEventListener('load', function(){
           <table>
             <thead>
               <tr>
-                <th>รหัสโครงการ</th><th>ชื่อโครงการ</th><th style="width:130px;">หน่วยงาน</th>
-                <th style="text-align:right">งบประมาณ (บาท)</th>
-                <th style="text-align:center">% ความก้าวหน้าเทียบแผนสะสม</th>
+                <th class="nw">รหัสโครงการ</th><th>ชื่อโครงการ</th><th class="nw" style="width:110px;">หน่วยงาน</th>
+                <th class="nw" style="text-align:right">งบประมาณ (บาท)</th>
+                <th style="text-align:center">% ความก้าวหน้า<br>เทียบแผนสะสม</th>
                 <th style="text-align:center">สถานะ</th>
               </tr>
             </thead>
@@ -1136,12 +1142,12 @@ window.addEventListener('load', function(){
           <table>
             <thead>
               <tr>
-                <th>รหัสโครงการ</th><th>ชื่อโครงการ</th><th style="width:130px;">หน่วยงาน</th>
-                <th style="text-align:right">งบประมาณ (บาท)</th>
-                <th style="text-align:center">% ความก้าวหน้าเทียบแผนสะสม</th>
+                <th class="nw">รหัสโครงการ</th><th>ชื่อโครงการ</th><th class="nw" style="width:110px;">หน่วยงาน</th>
+                <th class="nw" style="text-align:right">งบประมาณ (บาท)</th>
+                <th style="text-align:center">% ความก้าวหน้า<br>เทียบแผนสะสม</th>
                 <th style="text-align:center">สถานะ</th>
-                <th style="text-align:center">% ความก้าวหน้าจากเป้าหมายทั้งปี</th>
-                <th style="text-align:center">PA / MOU</th>
+                <th style="text-align:center">% ความก้าวหน้า<br>จากเป้าหมายทั้งปี</th>
+                <th class="nw" style="text-align:center">PA / MOU</th>
               </tr>
             </thead>
             <tbody id="dgDrilldownBody"></tbody>
@@ -1943,9 +1949,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const mpBody = document.getElementById('mpSummaryBody');
     // หัวคอลัมน์ตามโหมด (รอบสิ้นปี = ร้อยละจากเป้าหมายทั้งปี / ผลสิ้นปี)
     const mpHead = mpBody.closest('table').querySelectorAll('thead th');
-    if(mpHead[4]) mpHead[4].textContent = HL.avg;
+    if(mpHead[4]) mpHead[4].innerHTML = thBreak(HL.avg);
     const mpDrillHead = document.querySelectorAll('#mpDrilldownPanel thead th');
-    if(mpDrillHead[4]) mpDrillHead[4].textContent = HL.pct;
+    if(mpDrillHead[4]) mpDrillHead[4].innerHTML = thBreak(HL.pct);
     if(mpDrillHead[5]) mpDrillHead[5].textContent = HL.status;
     if(YE_MODE){
       const sub = mpBody.closest('.panel').querySelector('.panel-sub');
@@ -2689,7 +2695,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       const total = b.cols.reduce((a,c)=>a+c[1],0);
       wrap.innerHTML = `${b.title?`<div class="rp-ttl">${esc(b.title)}${cont?' <span>(ต่อ)</span>':''}</div>`:(cont?'<div class="rp-ttl"><span>(ต่อ)</span></div>':'')}
         <table class="rp-tbl"><colgroup>${b.cols.map(c=>`<col style="width:${(c[1]/total*100).toFixed(2)}%">`).join('')}</colgroup>
-        <thead><tr>${b.cols.map(c=>`<th class="${c[2]||''}">${esc(c[0])}</th>`).join('')}</tr></thead><tbody></tbody></table>`;
+        <thead><tr>${b.cols.map(c=>`<th class="${c[2]||''}">${thBreak(esc(c[0]))}</th>`).join('')}</tr></thead><tbody></tbody></table>`;
       cur.body.appendChild(wrap);
       return {el:wrap, tbody:wrap.querySelector('tbody')};
     };
@@ -3404,6 +3410,13 @@ const HEAD_LABELS = {
   true:  { pct:'% ความก้าวหน้าจากเป้าหมายทั้งปี', avg:'ความก้าวหน้าเฉลี่ย (เป้าหมายทั้งปี)', avgLong:'ความก้าวหน้าเฉลี่ย (จากเป้าหมายทั้งปี)', status:'ผลสิ้นปี' },
 };
 function headLabels(ye){ return HEAD_LABELS[!!ye]; }
+// หัวคอลัมน์ยาว → แบ่ง 2 บรรทัดที่จุดที่อ่านง่าย (ใช้กับ innerHTML ของ <th>; ข้อความในโค้ดเป็นค่าคงที่ ไม่มีข้อมูลจากผู้ใช้)
+function thBreak(s){
+  return String(s)
+    .replace(/^(% ความก้าวหน้า)(.+)$/, '$1<br>$2')
+    .replace(/^(ความก้าวหน้าเฉลี่ย) (\(.+\))$/, '$1<br>$2')
+    .replace(/^(ไม่)?บรรลุเป้าหมาย$/, '$1บรรลุ<br>เป้าหมาย');   // ไม่ให้ตัดเป็น "บรรลุเป้า / หมาย"
+}
 
 // ช่วงร้อยละความก้าวหน้าจากเป้าหมายทั้งปี — เกณฑ์เดียวกับสีแถบความก้าวหน้า (pctColorClass)
 const YEAR_PCT_BANDS = [
