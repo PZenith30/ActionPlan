@@ -33,7 +33,7 @@ The user edits the dashboard in the local file `Note` (git-ignored). `index.html
 ## Architecture of `index.html`
 
 Several `<script>` blocks, in order:
-1. View switching (`activateView`) for the left nav: `view-dashboard`, `view-annual`, `view-masterplan`, `view-dgarea` (PA/MOU, grouped by executive).
+1. View switching (`activateView`) for the left nav: `view-dashboard`, `view-annual`, `view-masterplan`, `view-lineorg` (แผนปฏิบัติการตามสายงาน: executive cards `#dgAreaCards` + per-project table `#dgDrilldownPanel`), `view-dgarea` (PA/MOU lists only). Both of the last two are filled by `renderDgAreaView()` via element ids, so moving markup between sections needs no JS change. The report topic `dgarea` still covers both executives and PA/MOU.
 2. Report generator IIFE (PDF/Excel, A4 landscape): picks fiscal year + month from current data or the history sheet; topics in `TOPICS`.
 3. `window.ACPDash` — rendering module; `ACPDash.start({records, strategies, orgKpis, historyPeriods, masterPlans})` draws everything.
 4. Loader (last block): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SHEET_SPECS`, then `loadAndRender()` → `fetchSheetBySpec()` per sheet → `buildDashboardData()` / `buildOrgKpis()` / `buildHistoryDataset()` → `ACPDash.start()`. Errors show `#errorOverlay`.

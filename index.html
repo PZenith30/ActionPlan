@@ -892,6 +892,7 @@ window.addEventListener('load', function(){
         <button class="nav-item active" data-view="view-dashboard"><span class="ico">📊</span> แดชบอร์ด</button>
         <button class="nav-item" data-view="view-annual"><span class="ico">📋</span> ความก้าวหน้าแผนปฏิบัติการประจำปี</button>
         <button class="nav-item" data-view="view-masterplan"><span class="ico">🗂️</span> ความก้าวหน้าแผนแม่บท</button>
+        <button class="nav-item" data-view="view-lineorg"><span class="ico">🏢</span> แผนปฏิบัติการตามสายงาน</button>
         <button class="nav-item" data-view="view-dgarea"><span class="ico">🎯</span> ความก้าวหน้า PA และ MOU</button>
       </nav>
     </aside>
@@ -1109,7 +1110,7 @@ window.addEventListener('load', function(){
 
     </section>
 
-    <section id="view-dgarea" class="view">
+    <section id="view-lineorg" class="view">
 
       <div class="kpi-grid" id="dgAreaCards" style="margin-bottom:24px;"></div>
 
@@ -1137,7 +1138,11 @@ window.addEventListener('load', function(){
         </div>
       </div>
 
-      <div class="panel" style="margin-bottom:24px; margin-top:24px;">
+    </section>
+
+    <section id="view-dgarea" class="view">
+
+      <div class="panel" style="margin-bottom:24px;">
         <h2>🔖 โครงการภายใต้ PA และ MOU</h2>
         <div class="panel-sub">ที่มา: คอลัมน์ "โครงการภายใต้ PA" และ "โครงการภายใต้ MOU" ในชีต "โครงการ" &middot; คลิกการ์ดเพื่อดูความก้าวหน้าและงบประมาณ &middot; <span id="paMouCount"></span></div>
         <div id="paMouSummaryCards" class="kpi-grid pm-summary-grid"></div>
