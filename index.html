@@ -3,7 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>แดชบอร์ดติดตามแผนปฏิบัติการ กยท. ปี 2569</title>
+<title>แดชบอร์ดติดตามแผนปฏิบัติการ การยางแห่งประเทศไทย</title>
+<!-- การ์ดตัวอย่างเวลาแชร์ลิงก์ (LINE / Facebook) และไอคอนแท็บ — รูปอยู่ใน repo (og-image.png, favicon.png, apple-touch-icon.png) -->
+<meta name="description" content="ติดตามผลการดำเนินงานตามแผนปฏิบัติการ การยางแห่งประเทศไทย รายโครงการ ยุทธศาสตร์ แผนแม่บท และสายงาน · อัปเดตรายเดือน · จัดทำโดย กองประเมินผล ฝ่ายยุทธศาสตร์องค์กร">
+<meta name="theme-color" content="#123423">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="การยางแห่งประเทศไทย">
+<meta property="og:title" content="แดชบอร์ดติดตามแผนปฏิบัติการ การยางแห่งประเทศไทย">
+<meta property="og:description" content="ความก้าวหน้ารายโครงการ ยุทธศาสตร์ แผนแม่บท และสายงาน · อัปเดตรายเดือน · ดาวน์โหลดรายงาน PDF / Excel ได้">
+<meta property="og:url" content="https://action-plan-zeta.vercel.app/">
+<meta property="og:image" content="https://action-plan-zeta.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="แดชบอร์ดติดตามแผนปฏิบัติการ การยางแห่งประเทศไทย">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://ehzbdfdjyyyzoevjhqsb.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +28,7 @@ const SUPABASE_URL = 'https://ehzbdfdjyyyzoevjhqsb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVoemJkZmRqeXl5em9ldmpocXNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExNjI2MzQsImV4cCI6MjEwNjczODYzNH0.Qc3FZBm18EAIOOCazDOHdIIbnzIW-sjdsf1pSy9iF3I';
 const SUPABASE_HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY };
 function requestSnapshots(){
-  return fetch(SUPABASE_URL + '/rest/v1/sheet_snapshots?select=sheet_name,headers,rows',
+  return fetch(SUPABASE_URL + '/rest/v1/sheet_snapshots?select=sheet_name,headers,rows,synced_at',
     { headers: SUPABASE_HEADERS, cache: 'no-store' });
 }
 let earlySnapshotsRequest = requestSnapshots();
@@ -894,7 +908,7 @@ window.addEventListener('load', function(){
       </div>
       <div>
         <h1>ติดตามแผนปฏิบัติการ การยางแห่งประเทศไทย</h1>
-        <p>Corporate Action Plan Dashboard &middot; ประจำปีงบประมาณ 2569</p>
+        <p>Corporate Action Plan Dashboard<span id="hdrFY"></span></p>
       </div>
     </div>
     <div class="top-actions">
@@ -1315,19 +1329,16 @@ document.addEventListener('click', e=>{
 function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER_PLANS){
   document.getElementById('dashboardContent').style.display = '';
 
-  // ---------- หัวข้อไตรมาส/วันที่ (คำนวณจากวันที่ปัจจุบันจริง แทนค่าตายตัว) ----------
-  (function setFiscalQuarterBadge(){
-    const now = new Date();
-    const m = now.getMonth(); // 0=ม.ค. ... 11=ธ.ค.
-    const fiscalYear = now.getFullYear() + 543 + (m >= 9 ? 1 : 0);
-    let quarter;
-    if(m >= 9) quarter = 1;        // ต.ค.-ธ.ค.
-    else if(m <= 2) quarter = 2;   // ม.ค.-มี.ค.
-    else if(m <= 5) quarter = 3;   // เม.ย.-มิ.ย.
-    else quarter = 4;              // ก.ค.-ก.ย.
+  // ---------- ป้ายปีงบประมาณ / วันที่ข้อมูล: ใช้ปีของข้อมูล และเวลาที่ส่งข้อมูลขึ้นเว็บจริง (ไม่ใช่วันที่ของเครื่อง) ----------
+  // (รอบข้อมูลย้อนหลัง ACPDash.show() จะเขียนทับด้วยชื่อรอบและวันที่บันทึก)
+  (function setDataBadge(){
     const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-    document.getElementById('fyQuarterLabel').textContent = `ไตรมาส ${quarter} ปีงบ ${fiscalYear}`;
-    document.getElementById('fyDateLabel').textContent = `ข้อมูล ณ ${now.getDate()} ${months[m]} ${now.getFullYear()+543}`;
+    const fy = window.LIVE_FISCAL_YEAR || '';
+    const t = window.ACP_SYNCED_AT;
+    document.getElementById('fyQuarterLabel').textContent = fy ? `ปีงบประมาณ ${fy}` : 'ข้อมูลล่าสุด';
+    document.getElementById('fyDateLabel').textContent = t
+      ? `ข้อมูลอัปเดต ${t.getDate()} ${months[t.getMonth()]} ${t.getFullYear()+543} · ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')} น.`
+      : 'ข้อมูลล่าสุด';
   })();
 
   const fmtBaht = n => n==null ? '-' : Math.round(n).toLocaleString('th-TH');
@@ -1950,7 +1961,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
 
     document.getElementById('printArea').className = 'legacy';
     document.getElementById('printArea').innerHTML = `
-      <h1>รายงานผลการดำเนินงานตามแผนปฏิบัติการประจำปี 2569 — การยางแห่งประเทศไทย</h1>
+      <h1>รายงานผลการดำเนินงานตามแผนปฏิบัติการประจำปี ${window.__viewFY || window.LIVE_FISCAL_YEAR || ""} — การยางแห่งประเทศไทย</h1>
       <div class="print-meta">ช่วงเวลา: ${periodLabel} &middot; จำนวน ${rows.length} โครงการ &middot; พิมพ์เมื่อ ${printedAt}</div>
       <table>
         <thead>
@@ -3346,6 +3357,7 @@ window.ACPDash = (function(){
     window.__dashPeriodKey = per.key;
     window.__dashPeriodLabel = per.isLive ? '' : label;
     window.__yearEndFY = isYearEndPeriod(per) ? String(per.fiscalYear) : null;
+    window.__viewFY = per.fiscalYear;   // ปีงบของรอบที่กำลังดู (ใช้ในหัวรายงานแบบพิมพ์)
 
     renderDashboard(projects, LIVE.strategies, LIVE.orgKpis, LIVE.historyPeriods, LIVE.masterPlans);
     activateView(activeView);
@@ -3369,6 +3381,14 @@ window.ACPDash = (function(){
 
   function start(data){
     LIVE = data;
+    // ปีงบประมาณจากข้อมูล (ไม่เขียนตายตัว) — ชื่อแท็บ และหัวเว็บ
+    const fyNow = window.LIVE_FISCAL_YEAR;
+    window.__viewFY = fyNow;
+    if(fyNow){
+      document.title = `แดชบอร์ดติดตามแผนปฏิบัติการ กยท. ปีงบประมาณ ${fyNow}`;
+      const h = document.getElementById('hdrFY');
+      if(h) h.textContent = ` · ประจำปีงบประมาณ ${fyNow}`;
+    }
     // ให้ printArea อยู่นอกส่วนที่จะถูกวาดใหม่ แล้วเก็บโครงสร้างหน้าเริ่มต้นไว้ใช้ตอนเปลี่ยนรอบ
     const pa = $('printArea');
     if(pa && pa.parentElement !== document.body) document.body.appendChild(pa);
@@ -3558,6 +3578,9 @@ function loadSnapshots(){
       }
       const map = {};
       list.forEach(s => { map[s.sheet_name] = s; });
+      // เวลาที่ส่งข้อมูลขึ้นเว็บล่าสุด (ทุกชีตส่งพร้อมกันในคำขอเดียว) — แสดงบนหัวเว็บ
+      const times = list.map(s => Date.parse(s.synced_at)).filter(t => !isNaN(t));
+      window.ACP_SYNCED_AT = times.length ? new Date(Math.max.apply(null, times)) : null;
       return map;
     })();
     snapshotsPromise.catch(()=>{ snapshotsPromise = null; }); // ให้ลองใหม่ได้ถ้าโหลดพลาด

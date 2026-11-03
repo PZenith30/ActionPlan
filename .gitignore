@@ -8,5 +8,9 @@ Note
 # เครื่องมือ/ไฟล์ชั่วคราว
 *.ps1
 *.png
+# รูปที่หน้าเว็บใช้จริง (การ์ดลิงก์ LINE / ไอคอนแท็บ) — ต้องขึ้น repo
+!og-image.png
+!favicon.png
+!apple-touch-icon.png
 scratchpad/
 .vercel
