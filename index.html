@@ -202,6 +202,20 @@ window.addEventListener('load', function(){
   .nav-item.active{background:var(--latex-100); color:var(--forest-800); border-left-color:var(--forest-700); font-weight:700;}
   .nav-item .ico{font-size:16px; flex-shrink:0;}
   .content-area{flex:1; min-width:0; padding:28px 40px 60px;}
+
+  /* ---------- ผู้จัดทำและช่องทางติดต่อ ---------- */
+  .side-credit{margin:26px 16px 0; padding:14px 14px 12px; border:1px solid var(--line); border-radius:12px;
+    background:var(--latex-50); font-size:12px; line-height:1.5; color:var(--ink-600);}
+  .side-credit .sc-k{font-size:10.5px; letter-spacing:.06em; color:var(--ink-400); margin-bottom:4px;}
+  .side-credit .sc-org{font-family:'Kanit',sans-serif; font-weight:600; font-size:14px; color:var(--forest-800); line-height:1.3;}
+  .side-credit .sc-sub{font-size:11.5px; color:var(--ink-400); margin-bottom:10px;}
+  .side-credit .sc-contacts{border-top:1px dashed var(--line); padding-top:9px; display:flex; flex-direction:column; gap:3px;}
+  .side-credit .sc-row{display:flex; align-items:center; gap:7px; color:var(--ink-600); text-decoration:none; font-family:'JetBrains Mono','Sarabun',monospace; font-size:11.5px;}
+  .side-credit a.sc-row:hover{color:var(--forest-700); text-decoration:underline;}
+  .side-credit .sc-i{flex:0 0 34px; font-family:'Sarabun',sans-serif; font-size:11px; color:var(--ink-400);}
+  .side-credit .sc-line{display:inline-block; margin-top:10px;}
+  .side-credit .sc-line img{display:block; height:32px; width:auto;}
+  .foot-credit{display:none;}
   .view{display:none;}
   .view.active{display:block;}
 
@@ -217,6 +231,11 @@ window.addEventListener('load', function(){
     }
     .nav-item.active{border-left-color:transparent; border-bottom-color:var(--forest-700);}
     .content-area{padding:20px 16px 40px;}
+    .side-credit{display:none;}
+    .foot-credit{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); color:var(--ink-600);}
+    .foot-credit b{color:var(--forest-800); font-weight:600;}
+    .foot-credit a{color:var(--forest-700);}
+    .foot-credit .foot-line img{display:block; height:28px; width:auto;}
   }
 
   /* ---------- KPI strip ---------- */
@@ -930,6 +949,17 @@ window.addEventListener('load', function(){
         <button class="nav-item" data-view="view-lineorg"><span class="ico">🏢</span> แผนปฏิบัติการตามสายงาน</button>
         <button class="nav-item" data-view="view-dgarea"><span class="ico">🎯</span> ความก้าวหน้า PA และ MOU</button>
       </nav>
+      <!-- ผู้จัดทำและช่องทางติดต่อ (จอคอมฯ; บนมือถือแสดงท้ายหน้าแทน) -->
+      <div class="side-credit" aria-label="ผู้จัดทำและช่องทางติดต่อ">
+        <div class="sc-k">จัดทำและดูแลโดย</div>
+        <div class="sc-org">กองประเมินผล</div>
+        <div class="sc-sub">ฝ่ายยุทธศาสตร์องค์กร</div>
+        <div class="sc-contacts">
+          <a class="sc-row" href="tel:+6624332222,343" title="กดเพื่อโทร 02-433-2222 ต่อ 343"><span class="sc-i">โทร</span>02-433-2222 ต่อ 343</a>
+          <div class="sc-row"><span class="sc-i">VoIP</span>10605</div>
+        </div>
+        <a class="sc-line" href="https://lin.ee/qaGihYx" target="_blank" rel="noopener"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/th.png" alt="เพิ่มเพื่อน LINE" height="32" loading="lazy"></a>
+      </div>
     </aside>
 
     <div class="content-area">
@@ -1192,7 +1222,15 @@ window.addEventListener('load', function(){
 
     <div id="printArea"></div>
 
-    <footer>ที่มาข้อมูล: Google Sheet แผนปฏิบัติการและผลการดำเนินงานโครงการ ของการยางแห่งประเทศไทย &middot; ข้อมูลจะอัปเดตอัตโนมัติเป็นรายเดือน</footer>
+    <footer>
+      <div>ที่มาข้อมูล: Google Sheet แผนปฏิบัติการและผลการดำเนินงานโครงการ ของการยางแห่งประเทศไทย &middot; ข้อมูลจะอัปเดตอัตโนมัติเป็นรายเดือน</div>
+      <!-- ผู้จัดทำ: แสดงเฉพาะมือถือ (จอคอมฯ อยู่ในกล่องใต้เมนูซ้าย) -->
+      <div class="foot-credit">
+        <span>จัดทำและดูแลโดย <b>กองประเมินผล ฝ่ายยุทธศาสตร์องค์กร</b></span>
+        <span>โทร <a href="tel:+6624332222,343">02-433-2222 ต่อ 343</a> &middot; VoIP 10605</span>
+        <a class="foot-line" href="https://lin.ee/qaGihYx" target="_blank" rel="noopener"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/th.png" alt="เพิ่มเพื่อน LINE" height="28" loading="lazy"></a>
+      </div>
+    </footer>
 
     </div>
   </div>
@@ -2704,7 +2742,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           <div class="rp-sec">${esc(section)}</div>
         </div>
         <div class="rp-body"></div>
-        <div class="rp-foot"><span>ที่มาข้อมูล: Google Sheet แผนปฏิบัติการและผลการดำเนินงานโครงการ ของการยางแห่งประเทศไทย · จัดทำเมื่อ ${esc(meta.generatedAt)}</span><span class="rp-pno"></span></div>`;
+        <div class="rp-foot"><span>ที่มาข้อมูล: Google Sheet แผนปฏิบัติการและผลการดำเนินงานโครงการ ของการยางแห่งประเทศไทย · จัดทำเมื่อ ${esc(meta.generatedAt)}<br>จัดทำและดูแลโดย กองประเมินผล ฝ่ายยุทธศาสตร์องค์กร · โทร 02-433-2222 ต่อ 343 · VoIP 10605</span><span class="rp-pno"></span></div>`;
       stage.appendChild(el);
       cur = {el, body: el.querySelector('.rp-body')};
       pages.push(cur);
