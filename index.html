@@ -496,6 +496,63 @@ window.addEventListener('load', function(){
   .mp-sum th.r, .mp-sum td.r{text-align:right;}
   .mp-sum td.r{font-family:'JetBrains Mono',monospace; white-space:nowrap;}
   .mp-sum td.nm{font-weight:500; color:var(--ink-900);}
+  /* หมวด SE-AM ของแผนแม่บท (CBE_Code ในชีตแผนแม่บท) */
+  .cbe-tag{display:inline-block; min-width:34px; margin-right:8px; padding:2px 7px; border-radius:6px; font-size:10.5px; font-weight:600; letter-spacing:.02em; text-align:center; vertical-align:1px; font-family:"JetBrains Mono",monospace; background:var(--latex-200); color:var(--bark-700);}
+  /* ความเชื่อมโยงยุทธศาสตร์ (view-strategy) */
+  .st-note{margin:12px 0 16px; padding:10px 14px; border-radius:8px; background:var(--latex-50); border:1px dashed var(--line); font-size:12.5px; line-height:1.6; color:var(--ink-600);}
+  .st-note b{color:var(--ink-900); font-weight:600;}
+  .st-warn{color:var(--amber-600);}
+  .st-empty{padding:24px; text-align:center; color:var(--ink-400); font-size:13px;}
+  .st-tree{display:flex; flex-direction:column; gap:12px;}
+  .st-node{border:1px solid var(--latex-200); border-radius:12px; background:#fff; overflow:hidden;}
+  .st-node > summary{list-style:none; cursor:pointer; display:grid; grid-template-columns:auto minmax(0,1fr) auto minmax(150px,220px); align-items:center; gap:6px 14px; padding:14px 18px; background:var(--latex-50);}
+  .st-node > summary::-webkit-details-marker{display:none;}
+  .st-node[open] > summary{border-bottom:1px solid var(--latex-200);}
+  .st-node > summary:focus-visible{outline:2px solid var(--forest-600); outline-offset:-2px;}
+  .st-lbl{font-family:'Kanit',sans-serif; font-size:12px; font-weight:600; color:#fff; background:var(--forest-600); padding:3px 10px; border-radius:999px; white-space:nowrap;}
+  .st-nm{font-family:'Kanit',sans-serif; font-size:15px; font-weight:600; color:var(--ink-900); min-width:0;}
+  .st-meta{font-size:12px; color:var(--ink-600); white-space:nowrap;}
+  .st-org{padding:14px 18px 6px;}
+  .st-org + .st-org{border-top:1px dashed var(--latex-200);}
+  .st-org-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px 18px; flex-wrap:wrap; margin-bottom:10px;}
+  .st-org-t{min-width:0; flex:1 1 320px;}
+  .st-org-t .eyebrow{font-size:11px; color:var(--ink-400); font-family:'JetBrains Mono',monospace;}
+  .st-org-nm{font-weight:600; font-size:13.5px; color:var(--ink-900); line-height:1.5;}
+  .st-org-side{display:flex; align-items:center; gap:8px 12px; flex-wrap:wrap;}
+  .st-target{font-size:12px; font-weight:600; color:var(--bark-700); background:var(--latex-200); padding:3px 10px; border-radius:6px; white-space:nowrap;}
+  .st-counts{display:flex; gap:4px; flex-wrap:wrap;}
+  .st-counts .badge{padding:2px 8px; font-size:11px;}
+  .st-tbl-wrap{overflow-x:auto;}
+  .st-tbl{width:100%; table-layout:fixed; font-size:13px; min-width:860px;}
+  .st-tbl col.c-t{width:130px;} .st-tbl col.c-n{width:76px;} .st-tbl col.c-b{width:130px;} .st-tbl col.c-p{width:190px;} .st-tbl col.c-s{width:190px;}
+  .st-tbl th, .st-tbl td{padding:9px 12px; vertical-align:middle;}
+  .st-tbl th.r{text-align:right;}
+  .st-row{cursor:pointer;}
+  .st-row:hover, .st-row.open{background:var(--latex-50);}
+  .st-row:focus-visible{outline:2px solid var(--forest-600); outline-offset:-2px;}
+  .st-y-nm{display:flex; gap:6px; font-weight:500; color:var(--ink-900); line-height:1.5;}
+  .st-caret{color:var(--ink-400); font-size:11px; transition:transform .15s; flex:0 0 auto; margin-top:3px;}
+  .st-row.open .st-caret{transform:rotate(90deg);}
+  .st-code{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-400); font-weight:400;}
+  .st-si{font-size:11.5px; color:var(--ink-400); margin:2px 0 0 17px; line-height:1.5;}
+  .st-detail > td{padding:0 0 12px 28px; background:var(--latex-50);}
+  .st-ptbl{width:100%; font-size:12.5px; background:#fff; border:1px solid var(--latex-200); border-radius:8px;}
+  .st-ptbl th, .st-ptbl td{padding:8px 10px;}
+  .st-ptbl td.mono{font-family:'JetBrains Mono',monospace; font-size:12px; white-space:nowrap;}
+  .st-ptbl .star{color:var(--amber-600);}
+  .st-kpis{display:flex; flex-direction:column; gap:1px; margin-top:3px;}
+  .st-kpis span{font-size:11.5px; color:var(--ink-400); line-height:1.45;}
+  .st-kpis span::before{content:"• ";}
+  .st-direct{display:inline-block; margin-left:4px; padding:1px 7px; border-radius:999px; font-size:10.5px; font-weight:600; background:rgba(52,115,85,0.12); color:var(--forest-600); white-space:nowrap;}
+  @media (max-width:900px){
+    .st-node > summary{grid-template-columns:auto minmax(0,1fr); padding:12px 14px;}
+    .st-node > summary .st-meta{grid-column:1 / -1;}
+    .st-node > summary .st-bar{grid-column:1 / -1;}
+    .st-org{padding:12px 14px 4px;}
+    .st-detail > td{padding-left:8px;}
+    .panel table.st-tbl{min-width:1000px;}
+    .panel table.st-ptbl{min-width:0;}
+  }
   .mp-sum tr.mp-row{cursor:pointer;}
   .mp-sum tr.mp-row:hover{background:var(--latex-50);}
   @media (max-width:900px){
@@ -982,6 +1039,7 @@ window.addEventListener('load', function(){
     <aside class="sidebar">
       <nav class="side-nav">
         <button class="nav-item active" data-view="view-dashboard"><span class="ico">📊</span> แดชบอร์ด</button>
+        <button class="nav-item" data-view="view-strategy"><span class="ico">🧭</span> ความเชื่อมโยงยุทธศาสตร์</button>
         <button class="nav-item" data-view="view-annual"><span class="ico">📋</span> ความก้าวหน้าแผนปฏิบัติการประจำปี</button>
         <button class="nav-item" data-view="view-masterplan"><span class="ico">🗂️</span> ความก้าวหน้าแผนแม่บท</button>
         <button class="nav-item" data-view="view-lineorg"><span class="ico">🏢</span> แผนปฏิบัติการตามสายงาน</button>
@@ -1165,6 +1223,25 @@ window.addEventListener('load', function(){
 
     </section>
 
+    <section id="view-strategy" class="view">
+
+      <div class="kpi-grid" id="stCards" style="margin-bottom:24px;"></div>
+
+      <div class="panel" style="margin-bottom:24px;">
+        <h2>ความเชื่อมโยงยุทธศาสตร์สู่โครงการ</h2>
+        <div class="panel-sub" id="stSub">ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์ / ตัวชี้วัดรายปี → โครงการ</div>
+        <div class="st-note" id="stNote"></div>
+        <div id="stTree" class="st-tree"></div>
+      </div>
+
+      <div class="panel" id="stUnlinkedPanel" style="display:none;">
+        <h2>โครงการที่ยังไม่เชื่อมโยงตัวชี้วัดรายปี</h2>
+        <div class="panel-sub" id="stUnlinkedSub"></div>
+        <div id="stUnlinked" class="mp-crosslink-list"></div>
+      </div>
+
+    </section>
+
     <section id="view-masterplan" class="view">
 
       <div class="panel" style="margin-bottom:24px;">
@@ -1341,6 +1418,8 @@ window.addEventListener('load', function(){
           <dt>ร้อยละการเบิกจ่าย</dt><dd>เบิกจ่ายสะสม ÷ งบประมาณ — ค่ารวมของกลุ่มคำนวณจากผลรวมเบิกจ่าย ÷ ผลรวมงบประมาณ (ไม่ใช่ค่าเฉลี่ยของร้อยละ)</dd>
           <dt>แผนแม่บท</dt><dd>จากชีตเชื่อมโยงโครงการ — 1 โครงการอาจตอบหลายแผนแม่บท จึงถูกนับในทุกแผนที่เชื่อมโยง</dd>
           <dt>สายงานและส่วนงาน</dt><dd>จากชีตส่วนงานภายใต้ผู้บริหาร จับคู่กับหน่วยงานเจ้าของโครงการ</dd>
+          <dt>ความเชื่อมโยงยุทธศาสตร์</dt><dd>ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี จากชีตเชื่อมโยงตัวชี้วัด · โครงการเชื่อมกับตัวชี้วัดรายปีผ่านตัวชี้วัดโครงการ (KPI_Year_Code) — ความก้าวหน้าของแต่ละตัวชี้วัดคือค่าเฉลี่ยของโครงการที่ตอบตัวชี้วัดนั้น ไม่ใช่ผลจริงของตัวชี้วัด และโครงการที่ตอบหลายตัวชี้วัดถูกนับในทุกตัว</dd>
+          <dt>หมวด SE-AM ของแผนแม่บท</dt><dd>ป้าย CG / SP / DT … หน้าชื่อแผนแม่บท มาจากคอลัมน์ CBE_Code ในชีตแผนแม่บท</dd>
         </dl>
       </section>
     </div>
@@ -1380,10 +1459,11 @@ window.addEventListener('load', function(){
         <label class="rm-check all"><input type="checkbox" id="rmAll" checked> เลือกทุกหัวข้อ</label>
         <div class="rm-topics">
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dashboard" checked><span><b>1. ภาพรวมแดชบอร์ด</b><small>KPI · กราฟงบประมาณ/การเบิกจ่าย · สถานะโครงการ · สรุปรายยุทธศาสตร์ · โครงการที่บรรลุเป้าหมาย</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="annual" checked><span><b>2. ความก้าวหน้าแผนปฏิบัติการประจำปี</b><small>ตารางรายโครงการครบทุกคอลัมน์ ความก้าวหน้า และสถานะ</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="masterplan" checked><span><b>3. ความก้าวหน้าแผนแม่บท</b><small>สรุปรายแผนแม่บท · กราฟ · โครงการที่เชื่อมโยงหลายแผน · รายละเอียดรายแผน</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>4. แผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>5. ความก้าวหน้า PA และ MOU</b><small>สรุปโครงการภายใต้ PA / MOU · รายชื่อโครงการแยกกลุ่ม</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="strategy" checked><span><b>2. ความเชื่อมโยงยุทธศาสตร์</b><small>ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี → โครงการ · สรุปรายตัวชี้วัด · รายชื่อโครงการที่ตอบแต่ละตัวชี้วัด</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="annual" checked><span><b>3. ความก้าวหน้าแผนปฏิบัติการประจำปี</b><small>ตารางรายโครงการครบทุกคอลัมน์ ความก้าวหน้า และสถานะ</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="masterplan" checked><span><b>4. ความก้าวหน้าแผนแม่บท</b><small>สรุปรายแผนแม่บท · กราฟ · โครงการที่เชื่อมโยงหลายแผน · รายละเอียดรายแผน</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>5. แผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>6. ความก้าวหน้า PA และ MOU</b><small>สรุปโครงการภายใต้ PA / MOU · รายชื่อโครงการแยกกลุ่ม</small></span></label>
         </div>
       </div>
       <div class="rm-orient"><span class="pg"></span> รูปแบบหน้า: กระดาษ A4 แนวนอน (Landscape) ทั้ง PDF และ Excel</div>
@@ -2092,10 +2172,116 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     window.print();
   });
 
+  // ---------- มุมมอง: ความเชื่อมโยงยุทธศาสตร์ (ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี → โครงการ) ----------
+  // ความก้าวหน้าเป็นค่าสรุปจากโครงการที่ตอบตัวชี้วัด ไม่ใช่ผลจริงของตัวชี้วัด (ชีตตัวชี้วัดมีแต่ค่าเป้าหมาย)
+  (function renderStrategyView(){
+    const host = document.getElementById('stTree');
+    if(!host) return;
+    const tree = buildStrategyTree(PROJECTS);
+    if(!tree || !tree.strategies.length){
+      host.innerHTML = '<div class="st-empty">ยังไม่มีข้อมูลการเชื่อมโยงตัวชี้วัด (ชีต "ตัวชี้วัดโครงการ" / "เชื่อมโยงโครงการ")</div>';
+      document.getElementById('stCards').innerHTML = '';
+      document.getElementById('stUnlinkedPanel').style.display = 'none';
+      return;
+    }
+    const e = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const avg = ps => ps.length ? ps.reduce((a,p)=>a+(hProg(p)||0),0)/ps.length : null;
+    const sum = (ps, f) => ps.reduce((a,p)=>a+(f(p)||0),0);
+    const bar = v => `<div class="tap-inline"><div class="tap-bar ${pctColorClass(v)}"><div class="fill" style="width:${v==null?0:Math.max(0,Math.min(100,v*100))}%"></div></div><span class="v">${v==null?'-':(v*100).toFixed(1)+'%'}</span></div>`;
+    // จำนวนโครงการตามสถานะ (สิ้นปี = บรรลุ/ไม่บรรลุ · 2570+ = ปกติ/เฝ้าระวัง/วิกฤต · 2569 = ดี-ดีมาก/พอใช้/ต้องปรับปรุง)
+    const counts = ps => YE_MODE
+      ? [['great', 'บรรลุ', ps.filter(p=>hStat(p)===YE_PASS).length], ['poor', 'ไม่บรรลุ', ps.filter(p=>hStat(p)===YE_FAIL).length]]
+      : [['great', SCH.labels.good, ps.filter(p=>SCH.good.includes(p.status)).length],
+         ['fair', SCH.labels.watch, ps.filter(p=>SCH.watch.includes(p.status)).length],
+         ['poor', SCH.labels.poor, ps.filter(p=>SCH.poor.includes(p.status)).length]];
+    const countChips = ps => `<div class="st-counts">${counts(ps).map(([c,l,n])=>`<span class="badge ${n?c:'none'}">${e(l)} ${n}</span>`).join('')}</div>`;
+    const c = tree.counts;
+    const linkedPct = c.total ? Math.round(c.linked/c.total*100) : 0;
+    document.getElementById('stCards').innerHTML = `
+      <div class="kpi-card c1"><div class="accent-bar"></div><span class="eyebrow">ยุทธศาสตร์</span>
+        <div class="value">${c.st}<span class="unit">ยุทธศาสตร์</span></div><div class="sub">ตัวชี้วัดองค์กร ${c.org} ตัว</div></div>
+      <div class="kpi-card c2"><div class="accent-bar"></div><span class="eyebrow">ตัวชี้วัดรายปี</span>
+        <div class="value">${c.year}<span class="unit">ตัวชี้วัด</span></div><div class="sub">${c.si ? `ภายใต้ ${c.si} กลยุทธ์` : 'ตัวชี้วัดที่มีโครงการตอบ'}</div></div>
+      <div class="kpi-card c3"><div class="accent-bar"></div><span class="eyebrow">โครงการที่เชื่อมโยงตัวชี้วัด</span>
+        <div class="value">${c.linked}<span class="unit">/ ${c.total} โครงการ</span></div><div class="sub">${linkedPct}% ของโครงการทั้งหมด</div></div>
+      <div class="kpi-card c4"><div class="accent-bar"></div><span class="eyebrow">ยังไม่เชื่อมโยงตัวชี้วัด</span>
+        <div class="value">${c.total - c.linked}<span class="unit">โครงการ</span></div><div class="sub">${c.total - c.linked ? 'ดูรายชื่อด้านล่าง' : 'ทุกโครงการเชื่อมโยงแล้ว'}</div></div>`;
+    document.getElementById('stNote').innerHTML =
+      `ความก้าวหน้าและสถานะในหน้านี้ <b>สรุปจากโครงการที่ตอบตัวชี้วัด</b> (${e(HL.avg)} ของโครงการ) ยังไม่ใช่ผลจริงของตัวชี้วัดองค์กร/รายปี · ` +
+      `โครงการที่ตอบหลายตัวชี้วัดรายปีนับในทุกตัวชี้วัดนั้น · กดแถวตัวชี้วัดเพื่อดูรายชื่อโครงการ` +
+      (tree.hasNames ? '' : '<br><span class="st-warn">ชื่อกลยุทธ์และตัวชี้วัดรายปีจะแสดงหลังส่งชีต "กลุยุทธ์", "ตัวชี้วัดรายปี" และ "เชื่อมโยงตัวชี้วัด" ขึ้นเว็บ (ตอนนี้แสดงเป็นรหัส)</span>');
+
+    const projRows = it => it.projects.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p=>{
+      const k = it.kpis[p.code] || [];
+      const direct = (window.ACP_LINKS.prjOrg||{})[p.code];
+      return `<tr><td class="mono">${e(p.code)}</td>
+        <td>${p.important ? '<span class="star">★</span> ' : ''}${e(p.name)}${direct ? ` <span class="st-direct" title="ระบุในชีตเชื่อมโยงโครงการ">ตอบ ${e(direct)} โดยตรง</span>` : ''}${k.length ? `<div class="st-kpis">${k.map(x=>`<span>${e(x)}</span>`).join('')}</div>` : ''}</td>
+        <td>${e(p.owner)}</td><td class="num">${fmtBaht(p.budget)}</td><td>${bar(hProg(p))}</td>
+        <td style="text-align:center"><span class="badge ${statusClass(hStat(p))}">${e(hStat(p)||'-')}</span></td></tr>`;
+    }).join('');
+
+    let rid = 0;
+    host.innerHTML = tree.strategies.map((s, si) => `
+      <details class="st-node"${si === 0 ? ' open' : ''}>
+        <summary>
+          <span class="st-lbl">${e(s.label || s.code)}</span>
+          <span class="st-nm">${e(s.name)}</span>
+          <span class="st-meta">${s.projects.length} โครงการ · ${fmtBahtShort(sum(s.projects, p=>p.budget))} บาท</span>
+          <span class="st-bar">${bar(avg(s.projects))}</span>
+        </summary>
+        ${s.orgs.map(o => `
+          <div class="st-org">
+            <div class="st-org-head">
+              <div class="st-org-t"><span class="eyebrow">ตัวชี้วัดองค์กร ${o.code !== '__none__' ? e(o.code) : ''}</span>
+                <div class="st-org-nm">${e(o.name)}</div></div>
+              <div class="st-org-side">${o.target ? `<span class="st-target">เป้าหมาย ${e(o.target)} ${e(o.unit)}</span>` : ''}
+                <span class="st-meta">${o.projects.length} โครงการ</span>${countChips(o.projects)}</div>
+            </div>
+            <div class="st-tbl-wrap"><table class="st-tbl">
+              <colgroup><col><col class="c-t"><col class="c-n"><col class="c-b"><col class="c-p"><col class="c-s"></colgroup>
+              <thead><tr><th>กลยุทธ์ / ตัวชี้วัดรายปี</th><th>ค่าเป้าหมาย</th><th class="r">โครงการ</th><th class="r">งบประมาณ (บาท)</th><th>${thBreak(HL.avg)}</th><th>สถานะโครงการ</th></tr></thead>
+              <tbody>${o.items.map(it => { rid++; return `
+                <tr class="st-row" data-r="${rid}" tabindex="0" aria-expanded="false">
+                  <td><div class="st-y-nm"><span class="st-caret">▸</span><span>${e(it.name)}${it.name !== it.code ? ` <span class="st-code">${e(it.code)}</span>` : ''}</span></div>
+                    ${it.si ? `<div class="st-si">กลยุทธ์ ${e(it.si.code)}${it.si.name ? ' · ' + e(it.si.name) : ''}</div>` : ''}</td>
+                  <td>${it.target ? `${e(it.target)} ${e(it.unit)}` : '-'}</td>
+                  <td class="num">${it.projects.length}</td>
+                  <td class="num">${fmtBaht(sum(it.projects, p=>p.budget))}</td>
+                  <td>${bar(avg(it.projects))}</td>
+                  <td>${countChips(it.projects)}</td>
+                </tr>
+                <tr class="st-detail" data-d="${rid}" hidden><td colspan="6">
+                  <table class="st-ptbl"><thead><tr><th class="nw">รหัสโครงการ</th><th>ชื่อโครงการ / ตัวชี้วัดโครงการ</th><th class="nw">หน่วยงาน</th><th class="nw" style="text-align:right">งบประมาณ (บาท)</th><th>${thBreak(HL.pct)}</th><th style="text-align:center">${e(HL.status)}</th></tr></thead>
+                  <tbody>${projRows(it)}</tbody></table>
+                </td></tr>`; }).join('')}
+              </tbody>
+            </table></div>
+          </div>`).join('')}
+      </details>`).join('');
+    const toggle = tr => {
+      const d = host.querySelector(`tr.st-detail[data-d="${tr.dataset.r}"]`);
+      d.hidden = !d.hidden; tr.classList.toggle('open', !d.hidden); tr.setAttribute('aria-expanded', String(!d.hidden));
+    };
+    host.querySelectorAll('tr.st-row').forEach(tr=>{
+      tr.addEventListener('click', ()=>toggle(tr));
+      tr.addEventListener('keydown', ev=>{ if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); toggle(tr); } });
+    });
+
+    const up = document.getElementById('stUnlinkedPanel');
+    if(tree.unlinked.length){
+      up.style.display = '';
+      document.getElementById('stUnlinkedSub').textContent = `${tree.unlinked.length} โครงการ — ควรระบุ KPI_Year_Code ในชีต "ตัวชี้วัดโครงการ"`;
+      document.getElementById('stUnlinked').innerHTML = tree.unlinked.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p=>`
+        <div class="mp-crosslink-item"><div class="xnm">${e(p.name)}</div><div class="xcode">${e(p.code)} &middot; ${e(p.owner)}</div></div>`).join('');
+    }else{
+      up.style.display = 'none';
+    }
+  })();
+
   // ---------- มุมมอง: ผลการดำเนินงานตามแผนแม่บท ----------
   (function renderMasterPlanView(){
     const groups = {};
-    (MASTER_PLANS||[]).forEach(mp=>{ groups[mp.code] = { code: mp.code, name: mp.name, projects: [] }; });
+    (MASTER_PLANS||[]).forEach(mp=>{ groups[mp.code] = { code: mp.code, name: mp.name, cbe: mp.cbe, projects: [] }; });
     groups['__none__'] = { code: '__none__', name: 'ไม่เกี่ยวข้องกับแผนแม่บท', projects: [] };
 
     PROJECTS.forEach(p=>{
@@ -2150,7 +2336,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       const avgProgress = n ? g.projects.reduce((a,p)=>a+(hProg(p)||0),0)/n : null;
       return `
         <tr class="mp-row" data-mp="${g.code}">
-          <td class="nm">${g.name}</td>
+          <td class="nm">${g.cbe ? `<span class="cbe-tag" title="หมวด SE-AM: ${g.cbe.abbr}${g.cbe.name ? ' · ' + g.cbe.name : ''}">${g.cbe.abbr}</span>` : ''}${g.name}</td>
           <td class="r">${n}</td>
           <td class="r">${fmtBaht(totalBudget)}</td>
           <td class="r">${fmtPct(disburseRate)}</td>
@@ -2413,10 +2599,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   };
   const TOPICS = {
     dashboard:  '1. ภาพรวมแดชบอร์ด',
-    annual:     '2. ความก้าวหน้าแผนปฏิบัติการประจำปี',
-    masterplan: '3. ความก้าวหน้าแผนแม่บท',
-    lineorg:    '4. แผนปฏิบัติการตามสายงาน',
-    dgarea:     '5. ความก้าวหน้า PA และ MOU',
+    strategy:   '2. ความเชื่อมโยงยุทธศาสตร์',
+    annual:     '3. ความก้าวหน้าแผนปฏิบัติการประจำปี',
+    masterplan: '4. ความก้าวหน้าแผนแม่บท',
+    lineorg:    '5. แผนปฏิบัติการตามสายงาน',
+    dgarea:     '6. ความก้าวหน้า PA และ MOU',
   };
   const REPORT_TITLE = 'รายงานผลการดำเนินงานตามแผนปฏิบัติการ การยางแห่งประเทศไทย';
   const STATUS_ORDER = ['ดีมาก','ดี','พอใช้','ต้องปรับปรุง'];
@@ -2544,6 +2731,12 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     });
   }
 
+  // ความเชื่อมโยงยุทธศาสตร์: สรุปแบบเดียวกับกลุ่มอื่น (aggGroup) ทุกระดับ — buildStrategyTree อยู่ในสคริปต์ส่วนโหลดข้อมูล
+  function aggTree(t){
+    if(!t) return null;
+    t.strategies.forEach(s=>{ aggGroup(s); s.orgs.forEach(o=>{ aggGroup(o); o.items.forEach(aggGroup); }); });
+    return t;
+  }
   function computeReport(P){
     const all = aggGroup({name:'รวมทั้งหมด', projects:P});
     const statusCounts = (YE ? [YE_PASS, YE_FAIL] : sch().levels).map(s=>({status:s, n:P.filter(p=>hS(p)===s).length}));
@@ -2598,6 +2791,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       P: P.slice().sort(byCode), all, statusCounts, byStrategy, byMasterPlan, crossLinked, byDg, paMou: pm, paMouGroups,
       done: P.filter(p=>p.completion==='สำเร็จ').sort(byCode),
       nImportant: P.filter(p=>p.important).length,
+      tree: aggTree(buildStrategyTree(P)),
     };
   }
 
@@ -2794,6 +2988,43 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         rows:R.done.map((p,i)=>`<tr><td class="c">${i+1}</td><td class="mono">${esc(p.code)}</td><td>${nameCell(p, true)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td></tr>`)});
     }
 
+    // ---------- 2. ความเชื่อมโยงยุทธศาสตร์: ยุทธศาสตร์ -> ตัวชี้วัดองค์กร -> กลยุทธ์/ตัวชี้วัดรายปี -> โครงการ (ตรงกับหน้าเว็บ) ----------
+    if(topics.includes('strategy') && R.tree && R.tree.strategies.length){
+      const t = R.tree, c = t.counts, tp = sch().key === 'tp' && !YE;
+      B.push({kind:'section', title:TOPICS.strategy, sub:'ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์ / ตัวชี้วัดรายปี → โครงการ (ที่มา: ชีต "ตัวชี้วัดโครงการ", "เชื่อมโยงตัวชี้วัด", "ตัวชี้วัดรายปี")'});
+      if(histNote) B.push({kind:'html', html:histNote});
+      B.push({kind:'html', html:`<div class="rp-kpis">
+        ${kpiCard('c1','ยุทธศาสตร์', c.st, 'ยุทธศาสตร์', `ตัวชี้วัดองค์กร ${c.org} ตัว`)}
+        ${kpiCard('c2','ตัวชี้วัดรายปี', c.year, 'ตัวชี้วัด', c.si ? `ภายใต้ ${c.si} กลยุทธ์` : 'ตัวชี้วัดที่มีโครงการตอบ')}
+        ${kpiCard('c3','โครงการที่เชื่อมโยงตัวชี้วัด', c.linked, `/ ${c.total} โครงการ`, `${c.total?Math.round(c.linked/c.total*100):0}% ของโครงการทั้งหมด`)}
+        ${kpiCard('c4','ยังไม่เชื่อมโยงตัวชี้วัด', c.total - c.linked, 'โครงการ', c.total - c.linked ? 'รายชื่อท้ายหัวข้อนี้' : 'ทุกโครงการเชื่อมโยงแล้ว')}
+      </div>`});
+      B.push({kind:'html', html:`<div class="rp-note">ความก้าวหน้าและจำนวนโครงการตามสถานะ สรุปจากโครงการที่ตอบตัวชี้วัด (${esc(headLabels(YE).avg)} ของโครงการ) ยังไม่ใช่ผลจริงของตัวชี้วัดองค์กร/รายปี · โครงการที่ตอบหลายตัวชี้วัดรายปีนับในทุกตัวชี้วัดนั้น</div>`});
+      const yName = it => `${esc(it.name)}${it.name !== it.code ? ` <span class="rp-small">${esc(it.code)}</span>` : ''}${it.si ? `<div class="rp-small">กลยุทธ์ ${esc(it.si.code)}${it.si.name ? ' · ' + esc(it.si.name) : ''}</div>` : ''}`;
+      const tgt = x => x.target ? `${esc(x.target)} ${esc(x.unit)}` : '-';
+      t.strategies.forEach(s=>{
+        const rows = [];
+        s.orgs.forEach(o=> o.items.forEach((it, i)=> rows.push(`<tr>
+          <td>${i === 0 ? `<b>${esc(o.name)}</b>${o.target ? `<div class="rp-small">เป้าหมาย ${tgt(o)}</div>` : ''}` : ''}</td>
+          <td>${yName(it)}</td><td class="c">${tgt(it)}</td><td class="r">${it.n}</td><td class="r">${fmtBaht(it.budget)}</td>
+          <td class="r">${it.nGood}</td>${tp ? `<td class="r">${it.nFair}</td>` : ''}<td class="r">${it.nPoor}</td><td>${bar(it.avgProgress)}</td></tr>`)));
+        B.push({kind:'table', title:`${s.label || s.code} ${s.name} (${s.n} โครงการ · งบประมาณ ${fmtShort(s.budget)} บาท)`,
+          cols:[['ตัวชี้วัดองค์กร',20],['กลยุทธ์ / ตัวชี้วัดรายปี',29],['ค่าเป้าหมาย',9,'c'],['โครงการ',6,'r'],['งบประมาณ (บาท)',11,'r'],
+            [T(sch().labels.good,'บรรลุ'),6,'r'], ...(tp ? [[sch().labels.watch,6,'r']] : []), [T(sch().labels.poor,'ไม่บรรลุ'),6,'r'], [headLabels(YE).avg,13]],
+          rows});
+      });
+      t.strategies.forEach(s=> s.orgs.forEach(o=> o.items.forEach(it=> B.push({kind:'table',
+        title:`${it.name}${it.name !== it.code ? ' (' + it.code + ')' : ''} — ${it.n} โครงการ`,
+        cols:[['รหัสโครงการ',9],['ชื่อโครงการ / ตัวชี้วัดโครงการ',47],['หน่วยงาน',11],['งบประมาณ (บาท)',11,'r'],[T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'),12,'c'],[T(sch().labels.status,'ผลสิ้นปี'),10,'c']],
+        rows:it.projects.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p=>{
+          const k = it.kpis[p.code] || [];
+          return `<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}${k.length ? `<div class="rp-small">${k.map(esc).join('<br>')}</div>` : ''}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`;
+        })}))));
+      if(t.unlinked.length) B.push({kind:'table', title:`โครงการที่ยังไม่เชื่อมโยงตัวชี้วัดรายปี (${t.unlinked.length} โครงการ)`,
+        cols:[['รหัสโครงการ',12],['ชื่อโครงการ',60],['หน่วยงาน',28]],
+        rows:t.unlinked.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td></tr>`)});
+    }
+
     if(topics.includes('annual')){
       B.push({kind:'section', title:TOPICS.annual, sub:`รายละเอียดความก้าวหน้ารายโครงการ ทั้งหมด ${R.P.length} โครงการ (★ = โครงการสำคัญ)`});
       if(histNote) B.push({kind:'html', html:histNote});
@@ -2819,7 +3050,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)}));
     }
 
-    // ---------- 4. แผนปฏิบัติการตามสายงาน: สายงาน -> ส่วนงาน -> โครงการ (ตรงกับหน้าเว็บ) ----------
+    // ---------- 5. แผนปฏิบัติการตามสายงาน: สายงาน -> ส่วนงาน -> โครงการ (ตรงกับหน้าเว็บ) ----------
     if(topics.includes('lineorg')){
       B.push({kind:'section', title:TOPICS.lineorg, sub:'ความก้าวหน้าแยกตามสายงานผู้บริหาร (ผู้ว่าการ กยท. และรองผู้ว่าการ) และส่วนงานภายใต้แต่ละสายงาน'});
       if(histNote) B.push({kind:'html', html:histNote});
@@ -2841,7 +3072,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       });
     }
 
-    // ---------- 5. ความก้าวหน้า PA และ MOU ----------
+    // ---------- 6. ความก้าวหน้า PA และ MOU ----------
     if(topics.includes('dgarea')){
       B.push({kind:'section', title:TOPICS.dgarea, sub:'โครงการภายใต้ PA / MOU (ที่มา: คอลัมน์ "โครงการภายใต้ PA" และ "โครงการภายใต้ MOU" ในชีต "โครงการ")'});
       if(histNote) B.push({kind:'html', html:histNote});
@@ -3189,6 +3420,46 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       ], R.done, {title:`โครงการที่บรรลุเป้าหมายทั้งปี (${R.done.length} โครงการ)`, freeze:true, filter:true});
     }
 
+    // ---------- 2. ความเชื่อมโยงยุทธศาสตร์ ----------
+    if(topics.includes('strategy') && R.tree && R.tree.strategies.length){
+      const {ws, row:r0} = newSheet('ยุทธศาสตร์-KPI', [30,36,16,40,46,16,12,16,12,12,12,15], TOPICS.strategy);
+      const items = [];
+      R.tree.strategies.forEach(s=> s.orgs.forEach(o=> o.items.forEach(it=> items.push({s, o, it}))));
+      const tgt = x => x.target ? `${x.target} ${x.unit}`.trim() : '';
+      let row = table(ws, r0, [
+        {h:'ยุทธศาสตร์', get:x=>`${x.s.label || x.s.code} ${x.s.name}`},
+        {h:'ตัวชี้วัดองค์กร', get:x=>x.o.name},
+        {h:'เป้าหมายตัวชี้วัดองค์กร', get:x=>tgt(x.o)},
+        {h:'กลยุทธ์', get:x=>x.it.si ? `${x.it.si.code}${x.it.si.name ? ' ' + x.it.si.name : ''}` : ''},
+        {h:'ตัวชี้วัดรายปี', get:x=>x.it.name !== x.it.code ? `${x.it.name} (${x.it.code})` : x.it.code},
+        {h:'ค่าเป้าหมาย', get:x=>tgt(x.it)},
+        {h:'จำนวนโครงการ', get:x=>x.it.n, fmt:'0'},
+        {h:'งบประมาณ (บาท)', get:x=>x.it.budget, fmt:F_BAHT},
+        {h:T(sch().labels.good,'บรรลุเป้าหมาย'), get:x=>x.it.nGood, fmt:'0'},
+        {h:T(sch().labels.watch,'—'), get:x=>x.it.nFair, fmt:'0'},
+        {h:T(sch().labels.poor,'ไม่บรรลุเป้าหมาย'), get:x=>x.it.nPoor, fmt:'0'},
+        {h:headLabels(YE).avg, get:x=>x.it.avgProgress, fmt:F_PCT},
+      ], items, {title:'สรุปรายตัวชี้วัดรายปี (ความก้าวหน้าสรุปจากโครงการที่ตอบตัวชี้วัด ไม่ใช่ผลจริงของตัวชี้วัด)'});
+      const detail = [];
+      items.forEach(x=> x.it.projects.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).forEach(p=> detail.push(Object.assign({p}, x))));
+      row = table(ws, row, [
+        {h:'ยุทธศาสตร์', get:x=>x.s.label || x.s.code},
+        {h:'ตัวชี้วัดรายปี', get:x=>x.it.name !== x.it.code ? `${x.it.name} (${x.it.code})` : x.it.code},
+        {h:'รหัสโครงการ', get:x=>x.p.code},
+        {h:'ชื่อโครงการ', get:x=>(x.p.important?'★ ':'')+x.p.name},
+        {h:'ตัวชี้วัดโครงการ', get:x=>(x.it.kpis[x.p.code]||[]).join('\n')},
+        {h:'หน่วยงาน', get:x=>x.p.owner},
+        {h:'งบประมาณ (บาท)', get:x=>x.p.budget, fmt:F_BAHT},
+        {h:headLabels(YE).pct, get:x=>num(hP(x.p)), fmt:F_PCT},
+        {h:T(sch().labels.status,'ผลสิ้นปี'), get:x=>hS(x.p), status:true},
+      ], detail, {title:'รายชื่อโครงการแยกตามตัวชี้วัดรายปี (โครงการที่ตอบหลายตัวชี้วัดแสดงทุกตัว)'});
+      if(R.tree.unlinked.length) table(ws, row, [
+        {h:'รหัสโครงการ', get:p=>p.code},
+        {h:'ชื่อโครงการ', get:p=>p.name},
+        {h:'หน่วยงาน', get:p=>p.owner},
+      ], R.tree.unlinked, {title:`โครงการที่ยังไม่เชื่อมโยงตัวชี้วัดรายปี (${R.tree.unlinked.length} โครงการ)`});
+    }
+
     if(topics.includes('annual')){
       const {ws, row} = newSheet('แผนปฏิบัติการประจำปี', [6,14,46,16,30,30,16,16,11,13,15,13,16,16,13,20,12,8,8], TOPICS.annual);
       table(ws, row, [
@@ -3243,7 +3514,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       ], detail, {title:'รายละเอียดโครงการแยกตามแผนแม่บท'});
     }
 
-    // ---------- 4. แผนปฏิบัติการตามสายงาน ----------
+    // ---------- 5. แผนปฏิบัติการตามสายงาน ----------
     if(topics.includes('lineorg')){
       const {ws, row:r0} = newSheet('สายงาน', [26,24,46,16,22,16,14,13,14,14,8,8], TOPICS.lineorg);
       let row = table(ws, r0, grpCols('สายงาน'), R.byDg, {title:'สรุปความก้าวหน้ารายสายงานผู้บริหาร', total:R.all});
@@ -3271,7 +3542,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       ], rows, {title:'รายละเอียดโครงการแยกตามสายงานและส่วนงาน', filter:true});
     }
 
-    // ---------- 5. ความก้าวหน้า PA และ MOU ----------
+    // ---------- 6. ความก้าวหน้า PA และ MOU ----------
     if(topics.includes('dgarea')){
       const {ws, row:r0} = newSheet('PA-MOU', [22,14,46,16,24,16,14,14,14,8,8], TOPICS.dgarea);
       let row = table(ws, r0, [
@@ -3553,6 +3824,11 @@ const SHEET_SPECS = {
   link:      { names:['เชื่อมโยงโครงการ'],                  required:['PRJ_Code','MP_Code'], optional:true },
   exec:      { names:['ส่วนงานภายใต้ผู้บริหาร','ส่วนงานภายใต้รองผวก.'], required:[], optional:true, check: f => f.length>=2 && f.slice(1).some(x=>/ผวก|ผู้ว่าการ/.test(x)) },
   yearEnd:   { names:['ผลสิ้นปีงบประมาณ'],                  required:['Fiscal_Year','PRJ_Code','ผลสิ้นปี'], optional:true },
+  // ความเชื่อมโยงยุทธศาสตร์ (เมนู "ความเชื่อมโยงยุทธศาสตร์") — ถ้ายังไม่ได้ส่งชีตเหล่านี้ขึ้นเว็บ จะแสดงเป็นรหัสแทนชื่อ
+  initiative:{ names:['กลุยุทธ์','กลยุทธ์'],                 required:['SI_Code'], optional:true },
+  yearKpi:   { names:['ตัวชี้วัดรายปี'],                    required:['KPI_Strategy_Code'], optional:true },
+  kpiLink:   { names:['เชื่อมโยงตัวชี้วัด'],                required:['KPI_Year_Code'], optional:true },
+  cbe:       { names:['Core_Business_Enabler'],             required:['CBE_Code'], optional:true },
 };
 
 // ---------- ผลสิ้นปีงบประมาณ ----------
@@ -3582,6 +3858,94 @@ function buildYearEnd(rows){
   return out;
 }
 function yearEndOf(fy){ return fy == null ? null : (window.ACP_YEAR_END[String(fy)] || null); }
+
+// ---------- ความเชื่อมโยงยุทธศาสตร์ (line of sight) ----------
+// ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์ / ตัวชี้วัดรายปี → โครงการ
+// โครงการ → ตัวชี้วัดรายปี จาก "ตัวชี้วัดโครงการ".KPI_Year_Code (สำรอง: "เชื่อมโยงโครงการ")
+// ตัวชี้วัดรายปี → กลยุทธ์/ตัวชี้วัดองค์กร/ยุทธศาสตร์ จาก "เชื่อมโยงตัวชี้วัด" (สำรอง: "ตัวชี้วัดรายปี", "เชื่อมโยงโครงการ")
+// ชื่อกลยุทธ์ / ตัวชี้วัดรายปี มาจากชีตที่ Apps Script ส่งเพิ่ม — ถ้ายังไม่มี แสดงเป็นรหัส
+window.ACP_LINKS = null;
+const isNonCode = c => !c || /^(NON|None|-)/i.test(c);
+function fmtTarget(v){
+  const n = parseNum(v);
+  return n == null ? String(v||'').trim() : n.toLocaleString('th-TH', {maximumFractionDigits:2});
+}
+function buildStrategyLinks(o){
+  const t = s => String(s||'').trim();
+  const stName = {};
+  (o.strategyRows||[]).forEach(r=>{ const c = t(r['Strategy_Code']); if(c) stName[c] = { label: t(r['ยุทธศาสตร์']), name: t(r['ชื่อยุทธศาสตร์']) }; });
+  const org = {};
+  (o.orgKpiRows||[]).forEach(r=>{ const c = t(r['KPI_Org_Code']); if(isNonCode(c)) return;
+    org[c] = { code:c, name:t(r['ชื่อตัวชี้วัด']), unit:t(r['หน่วยนับ']), target:fmtTarget(r['ค่าเป้าหมาย']), st:t(r['Strategy_Code']) }; });
+  const si = {};
+  (o.initiativeRows||[]).forEach(r=>{ const c = t(r['SI_Code']); if(c) si[c] = { code:c, name:t(r['กลยุทธ์']), st:t(r['Strategy_Code']) }; });
+  const year = {};
+  const Y = c => year[c] || (year[c] = { code:c, name:'', unit:'', target:'', org:'', si:'', st:'' });
+  const fill = (y, k, v) => { v = t(v); if(v && !isNonCode(v) && !y[k]) y[k] = v; };
+  // รหัสตัวชี้วัดรายปีไม่ซ้ำข้ามปี (KPI-ST69-xx / KPI-ST70-xx) จึงใช้ชีตนี้ค้นชื่อได้ทุกปี
+  (o.yearKpiRows||[]).forEach(r=>{ const c = t(r['KPI_Strategy_Code']); if(isNonCode(c)) return;
+    const y = Y(c); y.name = t(r['ชื่อตัวชี้วัด']); y.unit = t(r['หน่วย']); y.target = fmtTarget(r['ค่าเป้าหมาย']); fill(y, 'org', r['KPI_Org_Code']); });
+  (o.kpiLinkRows||[]).forEach(r=>{ const c = t(r['KPI_Year_Code']); if(isNonCode(c)) return;
+    const y = Y(c); fill(y, 'si', r['SI_Code']); fill(y, 'org', r['KPI_Org_Code']); fill(y, 'st', r['Strategy_Code']); });
+  (o.linkRows||[]).forEach(r=>{ const c = t(r['KPI_Year_Code']); if(isNonCode(c)) return;
+    const y = Y(c); fill(y, 'si', r['SI_Code']); fill(y, 'st', r['Strategy_Code']); });
+  // โครงการ → ตัวชี้วัดรายปี (พร้อมชื่อตัวชี้วัดโครงการที่ตอบตัวชี้วัดนั้น)
+  const prj = {};
+  const add = (p, y, kpiName) => { const m = prj[p] || (prj[p] = {}); (m[y] = m[y] || []); if(kpiName) m[y].push(kpiName); };
+  (o.kpiRows||[]).forEach(r=>{ const p = normCode(r['PRJ_Code']), c = t(r['KPI_Year_Code']); if(!p || isNonCode(c)) return;
+    add(p, c, t(r['ชื่อตัวชี้วัดโครงการ'])); fill(Y(c), 'st', r['Strategy_Code']); });
+  // "เชื่อมโยงโครงการ".KPI_Org_Code = โครงการตอบตัวชี้วัดองค์กรโดยตรงหรือไม่ (ส่วนใหญ่ NON-KPI-ORG) — ไม่ใช่ลำดับชั้น จึงไม่ใช้จัดกลุ่ม
+  const prjOrg = {};
+  (o.linkRows||[]).forEach(r=>{ const p = normCode(r['PRJ_Code']), c = t(r['KPI_Year_Code']), oc = t(r['KPI_Org_Code']);
+    if(p && !isNonCode(oc)) prjOrg[p] = oc;
+    if(!p || isNonCode(c) || prj[p]) return; add(p, c, ''); });
+  Object.values(year).forEach(y=>{
+    if(!y.st && y.si && si[y.si]) y.st = si[y.si].st;
+    if(!y.st && y.org && org[y.org]) y.st = org[y.org].st;
+  });
+  // ยังไม่มีชีตเชื่อมโยงตัวชี้วัด: ถ้ายุทธศาสตร์มีตัวชี้วัดองค์กรตัวเดียว ใช้ตัวนั้น
+  const orgBySt = {};
+  Object.values(org).forEach(x=>{ (orgBySt[x.st] = orgBySt[x.st] || []).push(x.code); });
+  Object.values(year).forEach(y=>{
+    if(!y.org && y.st && (orgBySt[y.st]||[]).length === 1) y.org = orgBySt[y.st][0];
+  });
+  return { stName, org, si, year, prj, prjOrg, hasNames: !!(o.yearKpiRows||[]).length };
+}
+// แบ่งโครงการ (ของรอบที่เลือก) ตามลำดับชั้น — คืนเฉพาะรายการโครงการ ผู้เรียกคำนวณสรุปเอง (ให้ตรงกับโหมดสิ้นปี/เกณฑ์สถานะของหน้านั้น)
+// โครงการที่ตอบหลายตัวชี้วัดรายปี นับในทุกตัวชี้วัดนั้น (เหมือนแผนแม่บท) แต่ระดับยุทธศาสตร์/ตัวชี้วัดองค์กรนับครั้งเดียว
+function buildStrategyTree(projects){
+  const L = window.ACP_LINKS;
+  if(!L) return null;
+  const sts = {}, unlinked = [];
+  const ST = c => sts[c] || (sts[c] = { code:c, label:(L.stName[c]||{}).label || c, name:(L.stName[c]||{}).name || (c==='__none__' ? 'ไม่ระบุยุทธศาสตร์' : c), orgs:{}, set:new Set() });
+  projects.forEach(p=>{
+    const m = L.prj[p.code];
+    const codes = m ? Object.keys(m) : [];
+    if(!codes.length){ unlinked.push(p); return; }
+    codes.forEach(c=>{
+      const y = L.year[c] || { code:c, name:'', unit:'', target:'', org:'', si:'', st:'' };
+      const s = ST(y.st || p.strategy_code || '__none__');
+      const oc = y.org || '__none__';
+      const og = s.orgs[oc] || (s.orgs[oc] = Object.assign({ code:oc, name: oc==='__none__' ? 'ไม่ระบุตัวชี้วัดองค์กร' : oc, unit:'', target:'' }, L.org[oc]||{}, { items:{}, set:new Set() }));
+      const it = og.items[c] || (og.items[c] = { code:c, name:y.name || c, unit:y.unit, target:y.target,
+        si: y.si ? { code:y.si, name:(L.si[y.si]||{}).name || '' } : null, projects:[], kpis:{} });
+      it.projects.push(p); it.kpis[p.code] = m[c].filter(Boolean);
+      og.set.add(p); s.set.add(p);
+    });
+  });
+  const byCode = (a,b) => String(a.code).localeCompare(String(b.code), 'th', {numeric:true});
+  const strategies = Object.values(sts).sort(byCode).map(s=>({
+    code:s.code, label:s.label, name:s.name, projects:[...s.set],
+    orgs: Object.values(s.orgs).sort(byCode).map(o=>({ code:o.code, name:o.name, unit:o.unit, target:o.target, projects:[...o.set],
+      items: Object.values(o.items).sort(byCode) })),
+  }));
+  const nYear = strategies.reduce((a,s)=>a+s.orgs.reduce((b,o)=>b+o.items.length,0),0);
+  const siSet = new Set(), orgSet = new Set();
+  strategies.forEach(s=>s.orgs.forEach(o=>{ if(o.code!=='__none__') orgSet.add(o.code); o.items.forEach(i=>{ if(i.si) siSet.add(i.si.code); }); }));
+  return { strategies, unlinked, hasNames: L.hasNames,
+    counts:{ st: strategies.filter(s=>s.code!=='__none__').length, org: orgSet.size, si: siSet.size, year: nYear,
+      linked: projects.length - unlinked.length, total: projects.length } };
+}
 // รอบที่แสดงผลสิ้นปี: รอบกันยายนของปีที่ปิดแล้ว หรือข้อมูลปัจจุบันของปีที่ปิดแล้ว
 function isYearEndPeriod(per){
   return !!(per && yearEndOf(per.fiscalYear) && (per.isLive || per.monthName === 'กันยายน'));
@@ -4093,6 +4457,8 @@ async function loadAndRender(){
       fetchSheetBySpec('link'),
     ]);
     const execRows = await fetchSheetBySpec('exec');
+    let [initiativeRows, yearKpiRows, kpiLinkRows, cbeRows] = await Promise.all(
+      ['initiative','yearKpi','kpiLink','cbe'].map(fetchSheetBySpec));
     // ผลสิ้นปีของทุกปีที่ปิดแล้ว (ไม่กรองตามปีปัจจุบัน)
     window.ACP_YEAR_END = buildYearEnd(await fetchSheetBySpec('yearEnd'));
 
@@ -4104,7 +4470,7 @@ async function loadAndRender(){
       window.LIVE_FISCAL_YEAR = liveFY;
       const keepFY = rows => rows.filter(r => { const y = fyOf(r); return isNaN(y) || y === liveFY; });
       projectRows = keepFY(projectRows); resultRows = keepFY(resultRows);
-      importantRows = keepFY(importantRows); kpiRows = keepFY(kpiRows); linkRows = keepFY(linkRows);
+      importantRows = keepFY(importantRows); kpiRows = keepFY(kpiRows); linkRows = keepFY(linkRows); kpiLinkRows = keepFY(kpiLinkRows);
     }
 
     // ---- diagnostic (เปิด Console เพื่อตรวจสอบจำนวนแถวที่โหลดได้จริงจากแต่ละชีต) ----
@@ -4125,11 +4491,18 @@ async function loadAndRender(){
     console.log('[Dashboard] จำนวนโครงการหลังประมวลผล:', records.length);
 
     // ---- เชื่อมโยงโครงการ <-> แผนแม่บท ผ่านชีต "เชื่อมโยงโครงการ" ----
-    const mpMap = {};
+    const mpMap = {}, mpCbe = {};
+    // หมวด SE-AM (Core Business Enablers) ของแผนแม่บท: CBE-SP → SP · การวางแผนเชิงยุทธศาสตร์ (ชื่อหมวดจากชีต Core_Business_Enabler ถ้ามี)
+    const cbeMap = {};
+    cbeRows.forEach(r=>{ const c = (r['CBE_Code']||'').trim(); if(c) cbeMap[c] = { abbr:(r['หมวด']||'').trim(), name:(r['รายละเอียด']||'').trim() }; });
     mpRows.forEach(r=>{
       const code = (r['MP_Code']||'').trim();
-      if(code) mpMap[code] = (r['ชื่อแผนแม่บท']||'').trim();
+      if(!code) return;
+      mpMap[code] = (r['ชื่อแผนแม่บท']||'').trim();
+      const cc = (r['CBE_Code']||'').trim();
+      if(cc && !isNonCode(cc)) mpCbe[code] = Object.assign({ code: cc, abbr: cc.replace(/^CBE-/,''), name: '' }, cbeMap[cc] || {});
     });
+    window.ACP_LINKS = buildStrategyLinks({ strategyRows, orgKpiRows, initiativeRows, yearKpiRows, kpiLinkRows, linkRows, kpiRows });
     const prjToMp = {};
     linkRows.forEach(r=>{
       const prj = normCode(r['PRJ_Code']);
@@ -4175,7 +4548,7 @@ async function loadAndRender(){
 
     const masterPlans = Object.keys(mpMap)
       .filter(c => c !== 'NON-MP')
-      .map(c => ({ code: c, name: mpMap[c] }));
+      .map(c => ({ code: c, name: mpMap[c], cbe: mpCbe[c] || null }));
 
     const strategyMapForOrg = {};
     strategyRows.forEach(r=>{
