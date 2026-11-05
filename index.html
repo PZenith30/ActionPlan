@@ -1526,10 +1526,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const t = window.ACP_SYNCED_AT;
     const asOf = liveAsOfDate(fy, t);
     document.getElementById('fyQuarterLabel').textContent = asOf ? `ข้อมูล ณ ${fmtThaiDate(asOf, true)}` : (fy ? `ปีงบประมาณ ${fy}` : 'ข้อมูลล่าสุด');
+    // บรรทัดเล็กแบบสั้น: ไตรมาส 4/2569 · อัปเดต 3 พ.ย. 69 (วันเวลาเต็มอยู่ใน title และหน้าต่างนิยามและวิธีคำนวณ)
     document.getElementById('fyDateLabel').textContent = [
-      asOf ? `ปีงบ ${fy} ไตรมาส ${fiscalQuarter(asOf)}` : '',
-      t ? `อัปเดตขึ้นเว็บ ${fmtThaiDateTime(t)}` : '',
+      asOf ? `ไตรมาส ${fiscalQuarter(asOf)}/${fy}` : '',
+      t ? `อัปเดต ${fmtThaiDateShort(t)}` : '',
     ].filter(Boolean).join(' · ') || 'ข้อมูลล่าสุด';
+    document.querySelector('.fy-badge').title = [
+      asOf ? `ผลการดำเนินงาน ณ ${fmtThaiDate(asOf)} (ปีงบประมาณ ${fy} ไตรมาส ${fiscalQuarter(asOf)})` : '',
+      t ? `ส่งข้อมูลขึ้นแดชบอร์ด ${fmtThaiDateTime(t)}` : '',
+    ].filter(Boolean).join('\n');
   })();
 
   const fmtBaht = n => n==null ? '-' : Math.round(n).toLocaleString('th-TH');
@@ -3863,7 +3868,9 @@ window.ACPDash = (function(){
     } else {
       const asOf = periodAsOf(per);
       $('fyQuarterLabel').textContent = asOf ? 'ข้อมูล ณ ' + fmtThaiDate(asOf, true) : label;
-      $('fyDateLabel').textContent = 'ข้อมูลย้อนหลัง' + (asOf ? ' · ปีงบ ' + per.fiscalYear + ' ไตรมาส ' + fiscalQuarter(asOf) : '') + ' · บันทึกเมื่อ ' + (per.timestamp || '-');
+      const saved = parseThaiStamp(per.timestamp);
+      $('fyDateLabel').textContent = ['ข้อมูลย้อนหลัง', asOf ? `ไตรมาส ${fiscalQuarter(asOf)}/${per.fiscalYear}` : '', saved ? `บันทึก ${fmtThaiDateShort(saved)}` : ''].filter(Boolean).join(' · ');
+      document.querySelector('.fy-badge').title = [asOf ? `ผลการดำเนินงาน ณ ${fmtThaiDate(asOf)} (ปีงบประมาณ ${per.fiscalYear} ไตรมาส ${fiscalQuarter(asOf)})` : label, `บันทึกข้อมูลย้อนหลังเมื่อ ${per.timestamp || '-'}`].join('\n');
       banner.innerHTML = `<span class="pb-tag">ข้อมูลย้อนหลัง</span>
         <span>กำลังแสดงความก้าวหน้ารอบ <b>${esc(label)}</b> (ปีงบประมาณ ${per.fiscalYear}) · ${projects.length} โครงการ · บันทึกเมื่อ ${esc(per.timestamp||'-')}
         — ข้อมูลที่ไม่มีในชีตย้อนหลังจะแสดงเป็น "-"</span>
@@ -4099,6 +4106,10 @@ function monthAsOfDate(fy, monthName){
 }
 function fmtThaiDate(d, short){ return d ? `${d.getDate()} ${(short ? TH_MONTHS_SHORT : TH_MONTHS)[d.getMonth()]} ${d.getFullYear() + 543}` : '-'; }
 function fmtThaiDateTime(d){ return d ? `${fmtThaiDate(d, true)} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} น.` : '-'; }
+// แบบสั้นสำหรับป้ายหัวเว็บ: 3 พ.ย. 69
+function fmtThaiDateShort(d){ return d ? `${d.getDate()} ${TH_MONTHS_SHORT[d.getMonth()]} ${String(d.getFullYear() + 543).slice(-2)}` : '-'; }
+// เวลาบันทึกในชีตย้อนหลัง "17/09/2569 10:05 น." → Date
+function parseThaiStamp(s){ const m = String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/); return m ? new Date(+m[3] - 543, +m[2] - 1, +m[1], +(m[4]||0), +(m[5]||0)) : null; }
 // วันตัดยอดของรอบที่ดู (per = รอบในตัวเลือกช่วงเวลา: {isLive, fiscalYear, monthName})
 function periodAsOf(per){ return per.isLive ? liveAsOfDate(per.fiscalYear, window.ACP_SYNCED_AT) : monthAsOfDate(per.fiscalYear, per.monthName); }
 
