@@ -2898,8 +2898,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       return {w, h, url: makeChart({
         type:'doughnut',
         data:{ labels: sc.map(x=>`${x.status} (${x.n})`), datasets:[{ data: sc.map(x=>x.n), backgroundColor: sc.map(x=>x.color), borderColor:'#fff', borderWidth:2 }]},
-        options:{ cutout:'50%', plugins:{ legend:legendOpts,
-          title:{display:true, text:R.yearEnd ? 'ความก้าวหน้าจากเป้าหมายทั้งปี (จำนวนโครงการ)' : (sch().key==='tp' ? sch().labels.chart : 'สถานะความก้าวหน้าโครงการ (ผลเทียบแผนสะสม)'), font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
+        options:{ cutout:'50%', layout:{padding:{left:8, right:8, top:4}}, plugins:{ legend:legendOpts,
+          // ชื่อยาวเกินความกว้างกราฟ: แยกส่วนในวงเล็บไปบรรทัดที่ 2
+          title:{display:true, text:(R.yearEnd ? 'ความก้าวหน้าจากเป้าหมายทั้งปี (จำนวนโครงการ)' : (sch().key==='tp' ? sch().labels.chart : 'สถานะความก้าวหน้าโครงการ (ผลเทียบแผนสะสม)')).split(/ (?=\()/), font:F(14,'600'), color:'#123423', align:'start', padding:{bottom:10}},
           rpValueLabels:{formatter:v=>String(v), size:12} } }
       }, w, h)};
     };
@@ -3273,6 +3274,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     return {per, topics, R, charts, meta, fileBase};
   }
 
+  // ดาวน์โหลดไฟล์ (PDF / Excel ใช้วิธีเดียวกัน) — คืน URL ช้า ๆ เพราะบางเบราว์เซอร์ (เช่น เบราว์เซอร์ในแอป LINE) ยังเขียนไฟล์ไม่เสร็จหลังกดดาวน์โหลด
+  function saveBlob(blob, name){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 120000);
+  }
+
   // ---------- PDF ----------
   async function exportPdf(){
     const job = await prepare();
@@ -3294,7 +3304,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         if(i>0) pdf.addPage('a4','landscape');
         pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
       }
-      pdf.save(job.fileBase + '.pdf');
+      saveBlob(pdf.output('blob'), job.fileBase + '.pdf');
       setStatus(`✓ สร้าง PDF สำเร็จ (${pages.length} หน้า)`, 'ok');
     } finally {
       stage.classList.remove('active');
@@ -3679,11 +3689,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
 
     const buf = await wb.xlsx.writeBuffer();
     const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = job.fileBase + '.xlsx';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+    saveBlob(blob, job.fileBase + '.xlsx');
     setStatus(`✓ สร้าง Excel สำเร็จ (${wb.worksheets.length} ชีต)`, 'ok');
   }
 
