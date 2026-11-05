@@ -1509,6 +1509,11 @@ function activateView(viewId){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   btn.classList.add('active');
   view.classList.add('active');
+  // ให้ลิงก์ในแถบที่อยู่ชี้มาหน้านี้ได้ (เช่น ปุ่ม rich menu ใน LINE) โดยไม่เพิ่มประวัติย้อนกลับ
+  const hash = viewId === 'view-dashboard' ? '' : '#' + viewId.replace(/^view-/, '');
+  if(location.hash !== hash){
+    try{ history.replaceState(null, '', location.pathname + location.search + hash); }catch(e){}
+  }
   // มือถือ: เลื่อนแท็บเมนูที่เลือกให้อยู่ในจอ
   if(window.innerWidth <= 900 && btn.scrollIntoView){
     try{ btn.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(e){}
@@ -1518,6 +1523,13 @@ document.addEventListener('click', e=>{
   const btn = e.target.closest && e.target.closest('.nav-item');
   if(btn) activateView(btn.dataset.view);
 });
+// ลิงก์ตรงไปหน้าย่อย: …/#strategy #annual #masterplan #lineorg #dgarea (#method เปิดหน้าต่างนิยามฯ ดู initMethodModal)
+function activateViewFromHash(){
+  const id = 'view-' + location.hash.slice(1).toLowerCase();
+  if(location.hash.length > 1 && document.querySelector(`.nav-item[data-view="${id}"]`)) activateView(id);
+}
+activateViewFromHash();
+window.addEventListener('hashchange', activateViewFromHash);
 </script>
 <script>
 function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER_PLANS){
@@ -4752,9 +4764,13 @@ async function loadAndRender(){
   document.getElementById('mdClose').addEventListener('click', close);
   modal.addEventListener('click', e => { if(e.target === modal) close(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !modal.hidden) close(); });
+  // ลิงก์ …/#method เปิดหน้าต่างนี้หลังโหลดข้อมูลเสร็จ (ต้องรู้วันที่ข้อมูลก่อน)
+  window.__openMethodOnLoad = location.hash.toLowerCase() === '#method'
+    ? () => open({ currentTarget: document.querySelector('.method-link') })
+    : null;
 })();
 
-loadAndRender();
+loadAndRender().then(() => { if(window.__openMethodOnLoad) window.__openMethodOnLoad(); });
 
 </script>
 </body>
