@@ -917,7 +917,7 @@ window.addEventListener('load', function(){
     .brand-mark{height:42px; padding:6px 9px; border-radius:10px;}
     .brand h1{font-size:16px; line-height:1.3; white-space:normal;}
     .brand p{font-size:11px;}
-    .top-actions{width:100%; display:grid !important; grid-template-columns:minmax(0,1fr) auto; gap:8px !important; align-items:stretch;}
+    .top-actions{width:100%; display:grid !important; grid-template-columns:auto minmax(0,1fr); gap:8px !important; align-items:stretch;}
     .period-picker{grid-column:1 / -1; width:100%; flex-wrap:nowrap; padding:6px;}
     .period-picker .pp-lbl{display:none;}
     .period-picker select{flex:1 1 0; min-width:0; max-width:none; font-size:13px; padding:8px 6px;}
@@ -927,7 +927,9 @@ window.addEventListener('load', function(){
     .report-open-btn .rb-short{display:inline;}
     .fy-badge{padding:6px 12px 6px 8px; gap:8px;}
     .fy-badge .num{font-size:14.5px;}
-    .fy-badge .lbl{font-size:10.5px;}
+    .fy-badge{white-space:normal; min-width:0;}
+    .fy-badge > div{min-width:0;}
+    .fy-badge .lbl{font-size:10.5px; line-height:1.35;}
 
     .sidebar{padding:6px 0;}
     .side-nav{padding:0 8px;}
@@ -1372,7 +1374,8 @@ window.addEventListener('load', function(){
         <dl>
           <dt>แหล่งข้อมูล</dt><dd>Google Sheet แผนปฏิบัติการและผลการดำเนินงานโครงการ ของการยางแห่งประเทศไทย บันทึกโดยหน่วยงานเจ้าของโครงการ และรวบรวมโดยกองประเมินผล ฝ่ายยุทธศาสตร์องค์กร</dd>
           <dt>รอบการอัปเดต</dt><dd>รายเดือน — เมื่อบันทึกผลการดำเนินงานประจำเดือน ระบบจะส่งข้อมูลขึ้นแดชบอร์ดและเก็บเป็นข้อมูลย้อนหลังของเดือนนั้น</dd>
-          <dt>ข้อมูลอัปเดตล่าสุด</dt><dd id="mdSynced">-</dd>
+          <dt>ข้อมูล ณ วันที่</dt><dd><b id="mdAsOf">-</b><br>วันตัดยอดผลการดำเนินงาน = วันสิ้นเดือนก่อนเดือนที่ส่งข้อมูลขึ้นแดชบอร์ด และไม่เกินวันสิ้นปีงบประมาณของข้อมูล · ข้อมูลย้อนหลังใช้วันสิ้นเดือนของรอบนั้น</dd>
+          <dt>ส่งข้อมูลขึ้นแดชบอร์ดล่าสุด</dt><dd id="mdSynced">-</dd>
           <dt>ข้อมูลย้อนหลัง</dt><dd>เลือกปีงบประมาณและเดือนที่หัวเว็บ เพื่อดูผล ณ สิ้นเดือนนั้น</dd>
         </dl>
       </section>
@@ -1516,16 +1519,17 @@ document.addEventListener('click', e=>{
 function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER_PLANS){
   document.getElementById('dashboardContent').style.display = '';
 
-  // ---------- ป้ายปีงบประมาณ / วันที่ข้อมูล: ใช้ปีของข้อมูล และเวลาที่ส่งข้อมูลขึ้นเว็บจริง (ไม่ใช่วันที่ของเครื่อง) ----------
-  // (รอบข้อมูลย้อนหลัง ACPDash.show() จะเขียนทับด้วยชื่อรอบและวันที่บันทึก)
+  // ---------- ป้ายวันที่ข้อมูล: หลัก = ข้อมูล ณ วันที่ (วันตัดยอด) · รอง = ปีงบ/ไตรมาส + เวลาที่ส่งข้อมูลขึ้นเว็บจริง (ไม่ใช่วันที่ของเครื่อง) ----------
+  // (รอบข้อมูลย้อนหลัง ACPDash.show() จะเขียนทับด้วยวันตัดยอดของรอบนั้นและวันที่บันทึก)
   (function setDataBadge(){
-    const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
     const fy = window.LIVE_FISCAL_YEAR || '';
     const t = window.ACP_SYNCED_AT;
-    document.getElementById('fyQuarterLabel').textContent = fy ? `ปีงบประมาณ ${fy}` : 'ข้อมูลล่าสุด';
-    document.getElementById('fyDateLabel').textContent = t
-      ? `ข้อมูลอัปเดต ${t.getDate()} ${months[t.getMonth()]} ${t.getFullYear()+543} · ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')} น.`
-      : 'ข้อมูลล่าสุด';
+    const asOf = liveAsOfDate(fy, t);
+    document.getElementById('fyQuarterLabel').textContent = asOf ? `ข้อมูล ณ ${fmtThaiDate(asOf, true)}` : (fy ? `ปีงบประมาณ ${fy}` : 'ข้อมูลล่าสุด');
+    document.getElementById('fyDateLabel').textContent = [
+      asOf ? `ปีงบ ${fy} ไตรมาส ${fiscalQuarter(asOf)}` : '',
+      t ? `อัปเดตขึ้นเว็บ ${fmtThaiDateTime(t)}` : '',
+    ].filter(Boolean).join(' · ') || 'ข้อมูลล่าสุด';
   })();
 
   const fmtBaht = n => n==null ? '-' : Math.round(n).toLocaleString('th-TH');
@@ -2683,8 +2687,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   }
   function periodLabel(per){
     if(per.isLive){
-      const d = new Date();
-      return 'ข้อมูลล่าสุด ณ ' + d.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+      // วันตัดยอดของข้อมูล (สิ้นเดือนก่อนเดือนที่ส่งขึ้นเว็บ) ไม่ใช่วันที่กดสร้างรายงาน — วันที่จัดทำอยู่ท้ายรายงาน
+      const d = periodAsOf(per);
+      return d ? 'ข้อมูลล่าสุด ณ ' + fmtThaiDate(d) : 'ข้อมูลล่าสุด';
     }
     return `${per.monthName} ${calYearOf(per.fiscalYear, per.monthName)}`;
   }
@@ -3856,8 +3861,9 @@ window.ACPDash = (function(){
     if(per.isLive){
       banner.hidden = true; banner.innerHTML = '';
     } else {
-      $('fyQuarterLabel').textContent = label;
-      $('fyDateLabel').textContent = 'ข้อมูลย้อนหลัง · บันทึกเมื่อ ' + (per.timestamp || '-');
+      const asOf = periodAsOf(per);
+      $('fyQuarterLabel').textContent = asOf ? 'ข้อมูล ณ ' + fmtThaiDate(asOf, true) : label;
+      $('fyDateLabel').textContent = 'ข้อมูลย้อนหลัง' + (asOf ? ' · ปีงบ ' + per.fiscalYear + ' ไตรมาส ' + fiscalQuarter(asOf) : '') + ' · บันทึกเมื่อ ' + (per.timestamp || '-');
       banner.innerHTML = `<span class="pb-tag">ข้อมูลย้อนหลัง</span>
         <span>กำลังแสดงความก้าวหน้ารอบ <b>${esc(label)}</b> (ปีงบประมาณ ${per.fiscalYear}) · ${projects.length} โครงการ · บันทึกเมื่อ ${esc(per.timestamp||'-')}
         — ข้อมูลที่ไม่มีในชีตย้อนหลังจะแสดงเป็น "-"</span>
@@ -4072,6 +4078,29 @@ const HEAD_LABELS = {
   true:  { pct:'% ความก้าวหน้าจากเป้าหมายทั้งปี', avg:'ความก้าวหน้าเฉลี่ย (เป้าหมายทั้งปี)', avgLong:'ความก้าวหน้าเฉลี่ย (จากเป้าหมายทั้งปี)', status:'ผลสิ้นปี' },
 };
 function headLabels(ye){ return HEAD_LABELS[!!ye]; }
+
+// ---------- "ข้อมูล ณ วันที่" (วันตัดยอดผลการดำเนินงาน) ----------
+// ข้อมูลปัจจุบัน: วันสิ้นเดือนก่อนเดือนที่ส่งข้อมูลขึ้นเว็บ (เหมือนเดือนรายงานของเมนูบันทึกย้อนหลัง)
+//   แต่ไม่เกินวันสิ้นปีงบประมาณของข้อมูล (ส่ง พ.ย. ขณะข้อมูลยังเป็นปีที่ปิดแล้ว = 30 ก.ย. ของปีนั้น)
+// ข้อมูลย้อนหลัง: วันสิ้นเดือนของรอบนั้น · ไตรมาสตามปีงบประมาณ (ต.ค.–ธ.ค. = ไตรมาส 1)
+const TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const TH_MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function fiscalQuarter(d){ const m = d.getMonth(); return m >= 9 ? 1 : m <= 2 ? 2 : m <= 5 ? 3 : 4; }
+function liveAsOfDate(fy, syncedAt){
+  if(!syncedAt) return null;
+  const d = new Date(syncedAt.getFullYear(), syncedAt.getMonth(), 0);
+  const fyEnd = fy ? new Date(Number(fy) - 543, 8, 30) : null;
+  return fyEnd && d > fyEnd ? fyEnd : d;
+}
+function monthAsOfDate(fy, monthName){
+  const m = TH_MONTHS.indexOf(String(monthName||'').trim());
+  if(m < 0 || !fy) return null;
+  return new Date(Number(fy) - 543 - (m >= 9 ? 1 : 0), m + 1, 0);
+}
+function fmtThaiDate(d, short){ return d ? `${d.getDate()} ${(short ? TH_MONTHS_SHORT : TH_MONTHS)[d.getMonth()]} ${d.getFullYear() + 543}` : '-'; }
+function fmtThaiDateTime(d){ return d ? `${fmtThaiDate(d, true)} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} น.` : '-'; }
+// วันตัดยอดของรอบที่ดู (per = รอบในตัวเลือกช่วงเวลา: {isLive, fiscalYear, monthName})
+function periodAsOf(per){ return per.isLive ? liveAsOfDate(per.fiscalYear, window.ACP_SYNCED_AT) : monthAsOfDate(per.fiscalYear, per.monthName); }
 
 // ---------- เกณฑ์สถานะตามปีงบประมาณ ----------
 // ปีงบ 2569: สถานะ 4 ระดับจากสูตรในชีต (ดีมาก/ดี/พอใช้/ต้องปรับปรุง)
@@ -4678,6 +4707,8 @@ async function loadAndRender(){
   const open = e => {
     opener = e.currentTarget;
     const t = window.ACP_SYNCED_AT;
+    const asOf = liveAsOfDate(window.LIVE_FISCAL_YEAR, t);
+    document.getElementById('mdAsOf').textContent = asOf ? `${fmtThaiDate(asOf)} (ปีงบประมาณ ${window.LIVE_FISCAL_YEAR} ไตรมาส ${fiscalQuarter(asOf)})` : '-';
     document.getElementById('mdSynced').textContent = t
       ? `${t.getDate()} ${months[t.getMonth()]} ${t.getFullYear()+543} เวลา ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')} น.`
       : '-';
