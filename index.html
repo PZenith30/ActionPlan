@@ -898,8 +898,11 @@ window.addEventListener('load', function(){
   .rp-ex-main{flex:1 1 auto; min-width:0;}
   .rp-ex-side{flex:0 0 290px;}
   .rp-ex-points{margin:0; padding-left:18px; font-size:11px; line-height:1.45; color:#1b2420;}
-  .rp-ex-top .rp-nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .rp-ex-points b{color:#123423;}
+  .rp-exec .rp-kpi{padding:7px 12px;}
+  .rp-exec .rp-kpis, .rp-exec .rp-ex-row{margin-bottom:9px;}
+  /* ชื่อโครงการแสดงเต็มได้ถึง 2 บรรทัด (ชื่อยาวที่สุดในแผนยังอยู่ใน 2 บรรทัด) เพื่อให้สรุปผู้บริหารอยู่ใน 1 หน้าเสมอ */
+  .rp-ex-top .rp-nm{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
 
   /* ================= มือถือ / แท็บเล็ต ================= */
   @media (max-width:900px){
@@ -1488,6 +1491,7 @@ window.addEventListener('load', function(){
       <div class="rm-status" id="rmStatus" aria-live="polite"></div>
       <button type="button" class="rm-btn ghost" id="rmPrint" title="เปิดหน้าต่างพิมพ์ของเบราว์เซอร์ (เลือกบันทึกเป็น PDF ได้)">🖨️ พิมพ์</button>
       <button type="button" class="rm-btn" id="rmExcel">📊 ดาวน์โหลด Excel</button>
+      <button type="button" class="rm-btn" id="rmBoth" title="สร้าง Excel แล้วต่อด้วย PDF จากหัวข้อและรอบข้อมูลเดียวกัน">📦 ทั้ง Excel + PDF</button>
       <button type="button" class="rm-btn primary" id="rmPdf">📄 ดาวน์โหลด PDF</button>
     </div>
   </div>
@@ -3039,7 +3043,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           <div class="rp-ex-side">${imgBlock(charts.execStatus, '')}</div>
         </div>
         <div class="rp-ttl">โครงการที่ต้องเร่งติดตาม${risky.length > 5 ? ` <span>(5 อันดับแรก จาก ${risky.length} โครงการ — รายชื่อทั้งหมดอยู่ในหัวข้อ "${esc(TOPICS.annual)}")</span>` : ''}</div>
-        ${top.length ? `<table class="rp-tbl rp-ex-top"><colgroup><col style="width:9%"><col style="width:45%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:10%"></colgroup>
+        ${top.length ? `<table class="rp-tbl rp-ex-top"><colgroup><col style="width:8%"><col style="width:52%"><col style="width:8%"><col style="width:11%"><col style="width:12%"><col style="width:9%"></colgroup>
           <thead><tr><th>รหัสโครงการ</th><th>ชื่อโครงการ</th><th>หน่วยงาน</th><th class="r">งบประมาณ (บาท)</th><th>${esc(T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'))}</th><th class="c">${esc(T(L.status,'ผลสิ้นปี'))}</th></tr></thead>
           <tbody>${top.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`).join('')}</tbody>
         </table>` : '<div class="rp-note">ไม่มีโครงการที่ต้องเร่งติดตามในรอบนี้</div>'}
@@ -3753,6 +3757,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   }
   function closeModal(){ document.getElementById('reportModal').hidden = true; }
 
+  // ดาวน์โหลดทั้ง 2 แบบ: Excel ก่อน (เร็ว) แล้ว PDF — เบราว์เซอร์อาจถามครั้งแรกว่าอนุญาตให้ดาวน์โหลดหลายไฟล์หรือไม่
+  async function exportBoth(){
+    await exportExcel();
+    const xl = document.getElementById('rmStatus').textContent.replace(/^✓\s*/, '');
+    await exportPdf();
+    const pd = document.getElementById('rmStatus').textContent.replace(/^✓\s*/, '');
+    setStatus(`✓ ${xl} และ ${pd} — ถ้าได้ไฟล์เดียว ให้กดอนุญาตการดาวน์โหลดหลายไฟล์ที่แถบที่อยู่ของเบราว์เซอร์`, 'ok');
+  }
+
   async function run(fn, btn){
     const btns = document.querySelectorAll('#reportModal .rm-btn');
     btns.forEach(b=>b.disabled = true);
@@ -3797,6 +3810,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     pdfBtn.addEventListener('click', ()=> run(exportPdf, pdfBtn));
     xlsBtn.addEventListener('click', ()=> run(exportExcel, xlsBtn));
     prBtn.addEventListener('click', ()=> run(printReport, prBtn));
+    const bothBtn = document.getElementById('rmBoth');
+    bothBtn.addEventListener('click', ()=> run(exportBoth, bothBtn));
     window.addEventListener('afterprint', ()=>{
       const area = document.getElementById('printArea');
       if(area.classList.contains('report')){ area.innerHTML = ''; area.className = ''; }
