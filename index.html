@@ -1409,7 +1409,7 @@ window.addEventListener('load', function(){
         </div>
         <dl>
           <dt>ผลงานเทียบแผน (%)</dt><dd>ผลงานสะสมจริง ÷ แผนงานสะสมตามแผน ณ วันติดตาม</dd>
-          <dt>ผลสำเร็จเทียบเป้าหมาย (%)</dt><dd>ผลงานสะสมจริง ÷ เป้าหมายสะสม ณ วันติดตามที่กำหนด — โครงการที่มีหลายตัวชี้วัดใช้<b>ค่าเฉลี่ยของตัวชี้วัด Output</b> (ไม่รวม Outcome)</dd>
+          <dt>ผลสำเร็จเทียบเป้าหมาย (%)</dt><dd>ผลงานสะสมจริง ÷ เป้าหมายสะสม ณ วันติดตามที่กำหนด — โครงการที่มีหลายตัวชี้วัดใช้<b>ค่าเฉลี่ยของตัวชี้วัด Output</b> (ไม่รวม Outcome) เฉพาะตัวชี้วัดที่<b>ถึงกำหนดแล้ว</b> (เป้าหมายสะสมไม่เป็น 0) · ถ้ายังไม่มีตัวชี้วัดถึงกำหนด สถานะดูจากผลงานเทียบแผนอย่างเดียว</dd>
           <dt>สถานะแจ้งเตือนรวม</dt><dd><b>ใช้ด้านที่มีระดับความเสี่ยงสูงกว่า</b> ไม่ใช่ค่าเฉลี่ยของสองด้าน เพื่อไม่ให้ผลที่มีความเสี่ยงสูงถูกกลบด้วยผลอีกด้านที่ดี</dd>
           <dt>ปีงบประมาณ 2569</dt><dd>สถานะ ดีมาก / ดี / พอใช้ / ต้องปรับปรุง ตามเกณฑ์ในชีตผลการดำเนินงานของปีนั้น (คงไว้ตามที่บันทึกและปิดปีแล้ว)</dd>
         </dl>
@@ -4331,9 +4331,18 @@ function isOutcomeType(v){ return /outcome|ผลลัพธ์/i.test(String(v
 function kpiIsOutcome(fy, kpiCode){
   return window.ACP_OUTCOME_KPI.has(String(fy||'').replace(/[^0-9]/g,'') + '|' + String(kpiCode||'').trim());
 }
-function splitKpiMean(outVals, ocVals){
+// hasOut = โครงการมีตัวชี้วัด Output (แม้ยังไม่ถึงกำหนด) → ไม่ใช้ Outcome แทน
+function splitKpiMean(outVals, ocVals, hasOut){
   const mean = a => a.length ? a.reduce((s,v)=>s+v,0)/a.length : null;
-  return { main: mean(outVals.length ? outVals : ocVals), oc: mean(ocVals) };
+  return { main: outVals.length ? mean(outVals) : (hasOut ? null : mean(ocVals)), oc: mean(ocVals) };
+}
+// % จากเป้าหมายสะสมของตัวชี้วัดนับเมื่อถึงกำหนดแล้ว (เป้าหมายสะสม ≠ 0) — ปีงบ 2570 เป็นต้นไป (ผู้ใช้กำหนด พ.ย. 2569)
+// ตรงกับสูตรรวมในแบบฟอร์มหน่วยงาน · ยังไม่มีตัวชี้วัดถึงกำหนด → ค่าว่าง และสถานะ Trigger Point ดูจากผลงานเทียบแผนอย่างเดียว
+// (ไม่นับเป็น 0% เพราะจะทำให้ทุกโครงการเป็น "วิกฤต" ตั้งแต่ต้นปี) · ปีงบ 2569 คงแบบเดิม
+function kpiCumDue(fy, cumTarget){
+  const y = parseInt(String(fy||'').replace(/[^0-9]/g,''), 10);
+  if(!(y >= TP_FROM_FY)) return true;
+  return cumTarget != null && cumTarget !== 0;
 }
 
 // จัดกลุ่มข้อมูลย้อนหลังตามรอบ (ปีงบประมาณ + เดือนรายงาน) และรวมกับข้อมูลโครงการปัจจุบัน (ชื่อ/หน่วยงาน/ยุทธศาสตร์)
@@ -4367,8 +4376,9 @@ function buildHistoryDataset(historyRows, projectRecords){
     const agg = period.projectsAgg[prjCode];
 
     const oc = kpiIsOutcome(fiscalYear, row[4]);   // E = KPI_PRJ_Code
+    if(!oc) agg.hasOut = true;
     const pctCum = parseNum(row[10]); // K = % ความก้าวหน้าจากเป้าหมายสะสม (ระดับตัวชี้วัด)
-    if(pctCum!=null) (oc ? agg.pctCumOc : agg.pctCumVals).push(pctCum);
+    if(pctCum!=null && kpiCumDue(fiscalYear, parseNum(row[8]))) (oc ? agg.pctCumOc : agg.pctCumVals).push(pctCum);   // I = เป้าหมายสะสม
     const pctYear = parseNum(row[12]); // M = % ความก้าวหน้าจากเป้าหมายทั้งปี (ระดับตัวชี้วัด)
     if(pctYear!=null) (oc ? agg.yearOc : agg.yearVals).push(pctYear);
 
@@ -4392,7 +4402,7 @@ function buildHistoryDataset(historyRows, projectRecords){
     const projects = Object.keys(period.projectsAgg).map(code=>{
       const agg = period.projectsAgg[code];
       const master = projByCode[code] || {};
-      const pc = splitKpiMean(agg.pctCumVals, agg.pctCumOc), py = splitKpiMean(agg.yearVals, agg.yearOc);
+      const pc = splitKpiMean(agg.pctCumVals, agg.pctCumOc, agg.hasOut), py = splitKpiMean(agg.yearVals, agg.yearOc, agg.hasOut);
       const allYear = agg.yearVals.concat(agg.yearOc);
       return {
         code,
@@ -4554,8 +4564,9 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
     const oc = kpiIsOutcome(r['Fiscal_Year'] || window.LIVE_FISCAL_YEAR, r['KPI_PRJ_Code']);
     const py = parseNum(r['ร้อยละความก้าวหน้า จากเป้าหมายทั้งปี']);
     if(py!=null) (oc ? a.progressYearOc : a.progressYearVals).push(py);
+    if(!oc) a.hasOut = true;
     const pc = parseNum(r['ร้อยละความก้าวหน้า จากเป้าหมายสะสม']);
-    if(pc!=null) (oc ? a.pctCumOc : a.pctCumVals).push(pc);
+    if(pc!=null && kpiCumDue(r['Fiscal_Year'] || window.LIVE_FISCAL_YEAR, parseNum(r['เป้าหมายสะสม']))) (oc ? a.pctCumOc : a.pctCumVals).push(pc);
 
     const st = (r['สถานะโครงการ (ผลเทียบแผนสะสม)']||'').trim();
     if(st) a.statuses.push(st);
@@ -4595,7 +4606,7 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
     const completion = (completions.length>0 && completions.every(c=>c==='สำเร็จ')) ? 'สำเร็จ' : 'อยู่ระหว่างดำเนินการ';
     const stratCode = (r['Strategy_Code']||'').trim();
     const wk = a.worstKpi || {};
-    const pyS = splitKpiMean(a.progressYearVals||[], a.progressYearOc||[]), pcS = splitKpiMean(a.pctCumVals||[], a.pctCumOc||[]);
+    const pyS = splitKpiMean(a.progressYearVals||[], a.progressYearOc||[], a.hasOut), pcS = splitKpiMean(a.pctCumVals||[], a.pctCumOc||[], a.hasOut);
     const dgAreaRaw = (getField(r, ['ส่วนงานภายใต้ผู้บริหาร', 'ส่วนงานภายใต้รองผวก.ด้าน', 'ส่วนงานภายใต้รองผวก.']) || '').trim();
     const paRaw = (getField(r, ['โครงการภายใต้ PA', 'PA']) || '').trim();
     const mouRaw = (getField(r, ['โครงการภายใต้ MOU', 'MOU']) || '').trim();
