@@ -386,6 +386,11 @@ window.addEventListener('load', function(){
     font-family:'Kanit',sans-serif; font-size:16px; font-weight:600; margin:0 0 2px; color:var(--ink-900);
   }
   .panel .panel-sub{font-size:12.5px; color:var(--ink-400); margin-bottom:14px;}
+  /* หมายเหตุคำสั่งมอบอำนาจ ใต้การ์ดสายงาน (จากชีต ส่วนงานภายใต้ผู้บริหาร) */
+  .dg-order-note{margin:-12px 0 24px; padding:10px 14px; border-left:3px solid var(--amber-500); background:var(--latex-50); border-radius:0 8px 8px 0; font-size:12.5px; line-height:1.65; color:var(--ink-600);}
+  .dg-order-note b{color:var(--ink-900); font-weight:600;}
+  .dg-order-note p{margin:0;}
+  .dg-order-note p + p{margin-top:4px;}
   .chart-wrap{position:relative; min-width:0;}
   /* กล่องใน grid ต้องหดตามคอลัมน์ได้ทุกขนาดจอ — ไม่งั้นกราฟ Chart.js ที่เคยถูกวาดกว้าง (เช่น ย่อ/ขยายหน้าต่าง
      หรือเปลี่ยนซูม) จะดันกล่องให้ล้นเกินคอลัมน์และไม่หดกลับ ทำให้การ์ดแต่ละแถวกว้างไม่เท่ากัน */
@@ -1304,6 +1309,7 @@ window.addEventListener('load', function(){
     <section id="view-lineorg" class="view">
 
       <div class="kpi-grid" id="dgAreaCards" style="margin-bottom:24px;"></div>
+      <div class="dg-order-note" id="dgOrderNote" hidden></div>
 
       <div class="table-panel" id="dgDrilldownPanel">
         <div style="padding:18px 22px 0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
@@ -2442,6 +2448,19 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         </div>
       `;
     }).join('');
+
+    // หมายเหตุใต้การ์ด: คำสั่งที่ใช้จัดส่วนงานภายใต้ผู้บริหาร (ชีต ส่วนงานภายใต้ผู้บริหาร)
+    const dgNoteEl = document.getElementById('dgOrderNote');
+    if(dgNoteEl){
+      const e = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const orders = window.ACP_EXEC_ORDERS || [];
+      dgNoteEl.innerHTML = orders.map((o, i) =>
+        `<p>${i ? '' : '<b>หมายเหตุ</b> '}การจัดส่วนงานภายใต้ผู้บริหารเป็นไปตามคำสั่งการยางแห่งประเทศไทย`
+        + (o.no ? ` ที่ ${e(o.no)}` : '')
+        + (o.subject ? ` เรื่อง ${e(o.subject)}` : '')
+        + (o.date ? ` ลงวันที่ ${e(o.date)}` : '') + '</p>').join('');
+      dgNoteEl.hidden = !orders.length;
+    }
 
     // ---- โครงการภายใต้ PA / MOU (แบ่งเป็น 3 กลุ่ม: ทั้งคู่ / เฉพาะ MOU / เฉพาะ PA) ----
     const paMouProjects = PROJECTS.filter(p=>p.is_mou);
@@ -4687,13 +4706,29 @@ async function loadAndRender(){
     if(execRows.length){
       const fields = execRows.__fields || Object.keys(execRows[0]);
       const ownerCol = fields[0];
+      // คอลัมน์ผู้บริหาร = หัวคอลัมน์ที่มีคำว่า ผวก./ผู้ว่าการ เท่านั้น (คอลัมน์คำสั่ง/เรื่อง/ลงวันที่ ไม่ใช่สายงาน)
+      const execCols = fields.slice(1).filter(f => /ผวก|ผู้ว่าการ/.test(f));
       const ownerToExec = {};
+      // หมายเหตุใต้การ์ดสายงาน: คำสั่งที่ใช้จัดสายงาน (ทุกแถวที่กรอกเลขที่/เรื่อง/วันที่ไว้)
+      const fOrder = fields.find(f => /คำสั่ง/.test(f));
+      const fSubj  = fields.find(f => /^\s*เรื่อง/.test(f));
+      const fDate  = fields.find(f => /ลงวันที่/.test(f));
+      const clean = v => String(v ?? '').replace(/\s+/g, ' ').trim();
+      // ช่องติ๊ก "ใช้อยู่" = คำสั่งที่ยึดปัจจุบัน (หัวคอลัมน์ ใช้อยู่/ปัจจุบัน/ยึด/มีผล หรือคอลัมน์ไม่มีหัว)
+      let fActive = fields.find(f => /ใช้อยู่|ปัจจุบัน|ยึด|มีผล/.test(f));
+      if(fActive == null && fields.includes('')) fActive = '';
+      const orders = execRows.map(r => ({
+        no: fOrder ? clean(r[fOrder]) : '', subject: fSubj ? clean(r[fSubj]) : '', date: fDate ? clean(r[fDate]) : '',
+        active: fActive != null && isYes(r[fActive])
+      })).filter(o => o.no || o.subject || o.date);
+      // ติ๊กไว้อย่างน้อย 1 คำสั่ง → แสดงเฉพาะที่ติ๊ก · ไม่ได้ติ๊กเลย → แสดงทุกคำสั่งที่กรอกไว้
+      window.ACP_EXEC_ORDERS = orders.some(o => o.active) ? orders.filter(o => o.active) : orders;
       // รายชื่อส่วนงานภายใต้แต่ละสายงาน (ตามลำดับในชีต) — ใช้แสดงปุ่มเลือกส่วนงานในหน้า "แผนปฏิบัติการตามสายงาน"
       const execUnits = {};
       execRows.forEach(r=>{
         const o = normOwner(r[ownerCol]);
         if(!o) return;
-        const hit = fields.slice(1).find(f => isYes(r[f]));
+        const hit = execCols.find(f => isYes(r[f]));
         if(hit){
           const lab = normExecLabel(hit);
           ownerToExec[o] = lab;
@@ -4701,7 +4736,7 @@ async function loadAndRender(){
         }
       });
       window.ACP_EXEC_UNITS = execUnits;
-      fields.slice(1).map(normExecLabel).forEach(l=>{ if(l && !DG_ORDER_GLOBAL.includes(l)) DG_ORDER_GLOBAL.push(l); });
+      execCols.map(normExecLabel).forEach(l=>{ if(l && !DG_ORDER_GLOBAL.includes(l)) DG_ORDER_GLOBAL.push(l); });
       let mapped = 0;
       records.forEach(rec=>{
         const lab = ownerToExec[normOwner(rec.owner)];
