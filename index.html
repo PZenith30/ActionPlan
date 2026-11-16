@@ -1205,22 +1205,14 @@ window.addEventListener('load', function(){
                 <th data-key="owner" class="nw" style="width:110px;">หน่วยงาน<span class="arrow">▾</span></th>
                 <th data-key="master_plans_label" style="width:150px;">แผนแม่บท<br>ที่เกี่ยวข้อง<span class="arrow">▾</span></th>
                 <th data-key="budget" class="nw" style="text-align:right">งบประมาณ (บาท)<span class="arrow">▾</span></th>
-                <th data-key="progress_cum" style="text-align:center">
-                  % ความก้าวหน้า<br>เทียบแผนสะสม<span class="arrow">▾</span>
-                </th>
-                <th data-key="status" style="text-align:center" title="ที่มา: คอลัมน์ &quot;สถานะโครงการ (ผลเทียบแผนสะสม)&quot;">
-                  สถานะ<br>(ผลเทียบแผนสะสม)<span class="arrow">▾</span>
-                  <div class="th-source">ที่มา: สถานะโครงการ (ผลเทียบแผนสะสม)</div>
-                </th>
-                <th data-key="progress_pct_cum" style="text-align:center">
+                <th data-key="progress_pct_cum" style="text-align:center" title="ป้ายด้านบน: สถานะโครงการ (ร้อยละความก้าวหน้า จากเป้าหมายสะสม)">
                   % ความก้าวหน้า<br>จากเป้าหมายสะสม<span class="arrow">▾</span>
                 </th>
-                <th data-key="status_pct_cum" style="text-align:center" title="ที่มา: คอลัมน์ &quot;สถานะโครงการ (ร้อยละความก้าวหน้า จากเป้าหมายสะสม)&quot;">
-                  สถานะ<br>(จากเป้าหมายสะสม)<span class="arrow">▾</span>
-                  <div class="th-source">ที่มา: สถานะโครงการ (ร้อยละความก้าวหน้า จากเป้าหมายสะสม)</div>
-                </th>
-                <th data-key="progress_year" style="text-align:center">
+                <th data-key="progress_year" style="text-align:center" title="ป้ายด้านบน: สถานะโครงการ (ผลเทียบเป้าทั้งปี)">
                   % ความก้าวหน้า<br>จากเป้าหมายทั้งปี<span class="arrow">▾</span>
+                </th>
+                <th data-key="progress_cum" style="text-align:center" title="ป้ายด้านบน: สถานะโครงการ (ผลเทียบแผนสะสม)">
+                  % ความก้าวหน้า<br>เทียบแผนสะสม<span class="arrow">▾</span>
                 </th>
               </tr>
             </thead>
@@ -2040,11 +2032,6 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     });
   }
   setStatusChips(SCH);
-  // ปีงบ 2570+: คอลัมน์สถานะแรกแสดง "สถานะแจ้งเตือนรวม" (ด้านที่เสี่ยงกว่า) — ด้านเทียบแผนดูจากสีแถบซึ่งใช้เกณฑ์เดียวกัน
-  if(SCH.key === 'tp'){
-    const th = document.querySelector('#view-annual th[data-key="status"]');
-    if(th){ th.innerHTML = 'สถานะแจ้งเตือน<br>(รวม)<span class="arrow">▾</span>'; th.title = 'Trigger Point: ใช้ด้านที่เสี่ยงกว่าระหว่างผลงานเทียบแผน และผลสำเร็จเทียบเป้าหมาย'; }
-  }
 
   [fStrategy, fOwner, fMasterPlan, fSearch, fImportant].forEach(el=>{
     el.addEventListener('input', render);
@@ -2107,8 +2094,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
 
     const tbody = document.getElementById('tblBody');
     tbody.innerHTML = rows.map(p=>{
-      const sc = statusClass(p.status);
-      const sc2 = statusClass(p.status_pct_cum);
+      // ป้ายสถานะวางเหนือแถบของ % ที่เป็นที่มา · ทั้งปี: สำเร็จ = ทุกตัวชี้วัดสำเร็จ (สิ้นปีที่ปิดแล้ว = บรรลุ/ไม่บรรลุเป้าหมาย)
+      const yrStat = p.year_end_result || p.completion || '';
+      const yrCls = (yrStat === 'สำเร็จ' || yrStat === 'บรรลุเป้าหมาย') ? 'great' : statusClass(yrStat);
+      const stTop = (s, cls) => s ? `<div style="text-align:center; margin-bottom:5px;"><span class="badge ${cls}">${s}</span></div>` : '';
       return `
         <tr>
           <td class="code">${p.code}</td>
@@ -2119,11 +2108,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           <td class="owner">${p.owner}</td>
           <td class="mp-cell">${p.master_plans_label || ''}</td>
           <td class="num">${fmtBaht(p.budget)}</td>
-          <td>${tapBarHtml(p.progress_cum, pctColorClass(p.progress_cum))}</td>
-          <td style="text-align:center"><span class="badge ${sc}">${p.status}</span></td>
-          <td>${tapBarHtml(p.progress_pct_cum, pctColorClass(p.progress_pct_cum))}</td>
-          <td style="text-align:center"><span class="badge ${sc2}">${p.status_pct_cum}</span></td>
-          <td>${tapBarHtml(p.progress_year, pctColorClass(p.progress_year))}</td>
+          <td>${stTop(p.status_pct_cum, statusClass(p.status_pct_cum))}${tapBarHtml(p.progress_pct_cum, pctColorClass(p.progress_pct_cum))}</td>
+          <td>${stTop(yrStat, yrCls)}${tapBarHtml(p.progress_year, pctColorClass(p.progress_year))}</td>
+          <td>${stTop(p.status_plan || p.status, statusClass(p.status_plan || p.status))}${tapBarHtml(p.progress_cum, pctColorClass(p.progress_cum))}</td>
         </tr>
       `;
     }).join('');
