@@ -2014,13 +2014,16 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const fSearch = document.getElementById('fSearch');
   const fImportant = document.getElementById('fImportant');
   let activeStatus = '';
+  // รอบปิดปีงบ (โครงการมีผลสิ้นปี): สถานะเหลือแค่ บรรลุ/ไม่บรรลุเป้าหมาย ทั้งป้ายในตารางและปุ่มกรอง
+  const yeData = () => ACTIVE_DATA.some(p=>p.year_end_result);
+  const yeStat = p => p.year_end_result || (p.completion === 'สำเร็จ' ? YE_PASS : YE_FAIL);
   let sortKey = 'code', sortDir = -1;
 
   // ปุ่มกรองสถานะสร้างตามเกณฑ์ของปีที่แสดง (2569 = 4 ระดับ · 2570+ = ปกติ/เฝ้าระวัง/วิกฤต)
   function setStatusChips(scheme){
     const box = document.getElementById('statusChips');
     box.innerHTML = `<span class="chip active" data-status="">ทั้งหมด</span>` +
-      scheme.levels.map(s=>`<span class="chip" data-status="${s}">${s}</span>`).join('');
+      (yeData() ? [YE_PASS, YE_FAIL] : scheme.levels).map(s=>`<span class="chip" data-status="${s}">${s}</span>`).join('');
     activeStatus = '';
     box.querySelectorAll('.chip').forEach(chip=>{
       chip.addEventListener('click', ()=>{
@@ -2052,11 +2055,12 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const mp = fMasterPlan.value;
     const q = fSearch.value.trim().toLowerCase();
     const onlyImportant = fImportant.checked;
+    const ye = yeData();
     return ACTIVE_DATA.filter(p=>{
       if(strat && p.strategy_code !== strat) return false;
       if(owner && p.owner !== owner) return false;
       if(mp && !(p.master_plans||[]).some(m=>m.code===mp)) return false;
-      if(activeStatus && p.status !== activeStatus) return false;
+      if(activeStatus && (ye ? yeStat(p) : p.status) !== activeStatus) return false;
       if(onlyImportant && !p.important) return false;
       if(q && !(p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q))) return false;
       return true;
@@ -2093,9 +2097,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     document.getElementById('resultCount').textContent = `พบ ${rows.length} จาก ${ACTIVE_DATA.length} โครงการ`;
 
     const tbody = document.getElementById('tblBody');
+    const ye = yeData();
     tbody.innerHTML = rows.map(p=>{
       // ป้ายสถานะวางเหนือแถบของ % ที่เป็นที่มา · ทั้งปี: สำเร็จ = ทุกตัวชี้วัดสำเร็จ (สิ้นปีที่ปิดแล้ว = บรรลุ/ไม่บรรลุเป้าหมาย)
-      const yrStat = p.year_end_result || p.completion || '';
+      const yrStat = ye ? yeStat(p) : (p.completion || '');
       const yrCls = (yrStat === 'สำเร็จ' || yrStat === 'บรรลุเป้าหมาย') ? 'great' : statusClass(yrStat);
       const stTop = (s, cls) => s ? `<div style="text-align:center; margin-bottom:5px;"><span class="badge ${cls}">${s}</span></div>` : '';
       return `
@@ -2108,9 +2113,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           <td class="owner">${p.owner}</td>
           <td class="mp-cell">${p.master_plans_label || ''}</td>
           <td class="num">${fmtBaht(p.budget)}</td>
-          <td>${stTop(p.status_pct_cum, statusClass(p.status_pct_cum))}${tapBarHtml(p.progress_pct_cum, pctColorClass(p.progress_pct_cum))}</td>
+          <td>${ye ? '' : stTop(p.status_pct_cum, statusClass(p.status_pct_cum))}${tapBarHtml(p.progress_pct_cum, pctColorClass(p.progress_pct_cum))}</td>
           <td>${stTop(yrStat, yrCls)}${tapBarHtml(p.progress_year, pctColorClass(p.progress_year))}</td>
-          <td>${stTop(p.status_plan || p.status, statusClass(p.status_plan || p.status))}${tapBarHtml(p.progress_cum, pctColorClass(p.progress_cum))}</td>
+          <td>${ye ? '' : stTop(p.status_plan || p.status, statusClass(p.status_plan || p.status))}${tapBarHtml(p.progress_cum, pctColorClass(p.progress_cum))}</td>
         </tr>
       `;
     }).join('');
