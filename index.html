@@ -416,7 +416,10 @@ window.addEventListener('load', function(){
   .kr-c-great{color:#2f7a4f;} .kr-c-poor{color:#b5533c;} .kr-c-good{color:#3d7ea6;} .kr-c-fair{color:#c8933c;} .kr-c-none{color:var(--ink-400);}
   .kr-tbl thead th{position:static;}
   .kr-trend .kr-ysep{border-left:1px solid var(--line);}
-  .kr-chev{display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; margin-left:6px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--ink-600); font-size:12px; line-height:1; transition:transform .2s;}
+  #krBody .st-node > summary{grid-template-columns:auto minmax(0,1fr) auto minmax(150px,280px) 26px;}
+  #krBody .st-counts{justify-content:flex-end;}
+  #krBody .st-tree > *, #krBody .st-node{min-width:0;}   /* ตารางกว้างเลื่อนในกรอบของตัวเอง ไม่ดันทั้งหน้าให้ล้นจอ */
+  .kr-chev{grid-column:-2; justify-self:end; display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--ink-600); font-size:12px; line-height:1; transition:transform .2s;}
   #krBody .st-node > summary:hover .kr-chev{border-color:var(--forest-600); color:var(--forest-600);}
   #krBody .st-node[open] > summary .kr-chev{transform:rotate(180deg);}
   #krBody .st-counts{align-items:center;}
@@ -590,6 +593,10 @@ window.addEventListener('load', function(){
     .st-node > summary{grid-template-columns:auto minmax(0,1fr); padding:12px 14px;}
     .st-node > summary .st-meta{grid-column:1 / -1;}
     .st-node > summary .st-bar{grid-column:1 / -1;}
+    #krBody .st-node > summary{grid-template-columns:auto minmax(0,1fr) 26px;}
+    #krBody .st-node > summary .kr-chev{grid-column:3; grid-row:1;}
+    #krBody .st-node > summary .st-counts{grid-column:1 / -1; justify-content:flex-start;}
+    .kr-tbl:not(.kr-plan):not(.kr-trend){min-width:1120px;}   /* จอเล็ก: ให้คอลัมน์ชื่อตัวชี้วัดมีที่พอ แล้วเลื่อนตารางซ้าย-ขวา */
     .st-org{padding:12px 14px 4px;}
     .st-detail > td{padding-left:8px;}
     .panel table.st-tbl{min-width:1000px;}
@@ -4790,7 +4797,7 @@ function renderKpiView(strategies){
       return `
       <details class="st-node">
         <summary title="กดเพื่อเปิด/ปิดรายการตัวชี้วัด"><span class="st-lbl">${krEsc(krStLabel(g.st))}</span><span class="st-nm">${krEsc(stName[g.st] || '')}</span>
-          <span class="st-meta">${cc.n} ตัวชี้วัด</span><span class="st-counts">${chips}<span class="kr-chev" aria-hidden="true">▾</span></span></summary>
+          <span class="st-meta">${cc.n} ตัวชี้วัด</span><span class="st-counts">${chips}</span><span class="kr-chev" aria-hidden="true">▾</span></summary>
       <div class="kr-st-body"><div class="kr-tbl-wrap"><table class="kr-tbl"><colgroup><col><col style="width:110px"><col style="width:90px"><col style="width:140px"><col style="width:190px"><col style="width:150px"><col style="width:230px"></colgroup>
         <thead><tr><th>ตัวชี้วัด</th><th class="num">ค่าเป้าหมาย${partial ? 'ทั้งปี' : ''}</th><th>หน่วยนับ</th><th class="num">ผลการดำเนินงาน${partial ? 'สะสม' : ''}</th><th>% เทียบเป้าหมาย${partial ? ' (คาดการณ์)' : ''}</th><th style="text-align:center">สถานะ</th><th>หมายเหตุ</th></tr></thead>
         <tbody>${g.orgs.map(o => (o.head ? row(o.head, 'kr-org') : '') +   // ปีที่ไม่มีตัวชี้วัดองค์กรของกลุ่มนี้ (เช่น ปี 67–68) แสดงเฉพาะตัวชี้วัดระดับยุทธศาสตร์
@@ -4819,7 +4826,7 @@ function renderKpiView(strategies){
       const byC = cols.map(c => L.find(k => k.fy === c.fy && k.period === c.period && k.level === 'org' && k.org === org));
       const last = byC.filter(Boolean).pop();
       return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div><div class="kr-yt">${krEsc(last.unit)}</div></td>${byC.map((k, i) => `<td class="${ysep(i)}" style="text-align:center; white-space:nowrap">${
-        k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600">${k.isForecast ? `<span style="font-family:Sarabun,sans-serif; font-weight:400; color:var(--ink-400)">คาดการณ์</span> ${krEsc(k.forecastText)}` : krEsc(k.resultText || '-')}</div><div style="margin-top:3px">${krBadge(k.status)}</div>` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
+        k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600">${k.isForecast ? `<span style="font-family:Sarabun,sans-serif; font-weight:400; color:var(--ink-400)">คาดการณ์</span> ${krEsc(k.forecastText)}` : krEsc(k.resultText || '-')}</div><div style="margin-top:3px">${krBadge(k.status)}</div><div class="kr-yt" style="margin-top:2px">เป้า ${krEsc(k.targetText || '-')}</div>` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
     }).join('')}</tbody></table><div class="panel-sub" style="margin-top:8px">แสดงผลการดำเนินงาน (ผลสะสมถึงรอบนั้น) · รอบไตรมาสที่ผลยังไม่ถึงเป้าแสดงค่าคาดการณ์สิ้นปีของรอบนั้นแทน · ผลสิ้นปีที่ยังรอผลประเมินแสดงค่าคาดการณ์</div>`;
 }
 
