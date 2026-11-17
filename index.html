@@ -416,6 +416,10 @@ window.addEventListener('load', function(){
   .kr-c-great{color:#2f7a4f;} .kr-c-poor{color:#b5533c;} .kr-c-good{color:#3d7ea6;} .kr-c-fair{color:#c8933c;} .kr-c-none{color:var(--ink-400);}
   .kr-tbl thead th{position:static;}
   .kr-trend .kr-ysep{border-left:1px solid var(--line);}
+  .kr-chev{display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; margin-left:6px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--ink-600); font-size:12px; line-height:1; transition:transform .2s;}
+  #krBody .st-node > summary:hover .kr-chev{border-color:var(--forest-600); color:var(--forest-600);}
+  #krBody .st-node[open] > summary .kr-chev{transform:rotate(180deg);}
+  #krBody .st-counts{align-items:center;}
   .kr-st-body{padding:12px 18px 8px;}
   #krBody .st-tree{display:flex; flex-direction:column; gap:12px;}
   .kr-st-title{font-family:'Kanit',sans-serif; font-weight:600; font-size:14px; color:var(--ink-900); margin:18px 0 8px;}
@@ -1302,7 +1306,7 @@ window.addEventListener('load', function(){
 
       <div class="panel" id="krTrendPanel" style="display:none;">
         <h2>แนวโน้มผลตัวชี้วัดองค์กรรายปี</h2>
-        <div class="panel-sub">ผลการดำเนินงานหรือค่าคาดการณ์ของแต่ละปีและแต่ละรอบรายงานที่บันทึกไว้ เทียบค่าเป้าหมายของปีนั้น (ตัวชี้วัดองค์กรรหัสเดียวกัน)</div>
+        <div class="panel-sub">ผลการดำเนินงานหรือค่าคาดการณ์ของแต่ละปีและแต่ละรอบรายงานที่บันทึกไว้ พร้อมสถานะเทียบค่าเป้าหมายของปีนั้น (ตัวชี้วัดองค์กรรหัสเดียวกัน)</div>
         <div class="kr-tbl-wrap" id="krTrend"></div>
       </div>
 
@@ -3293,13 +3297,13 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           : `<div style="font-weight:600; color:${C5[KR_CLS(k.status)]}">${esc(k.result != null ? k.resultText : k.forecastText ? 'คาดการณ์ ' + k.forecastText : '-')}</div><div class="rp-sub">เป้า ${esc(k.targetText || '-')}${k.period < KR_FULL ? ' · ' + krPeriodLabel(k.period) : ''}</div>`;
         const pc5 = r => r.pct == null ? '<span class="rp-dash">-</span>'
           : `<div class="rp-barw"><div class="rp-bar ${plan5Band(r.pct)}"><i style="width:${Math.max(0, Math.min(100, r.pct * 100))}%"></i></div><span class="rp-bv">${krPctTxt(r.pct)}${r.fc ? '*' : ''}</span></div>`;
-        B.push({kind:'html', html:'<div class="rp-foot-note">แผนวิสาหกิจ 5 ปี: สีของผลรายปี เขียว = บรรลุเป้าหมาย · แดง = ไม่บรรลุ · ฟ้า = คาดว่าบรรลุ · ส้ม = เสี่ยงไม่บรรลุ · เทา = รอผล · ผลสะสม "สะสม" = รวมผลทุกปี, "ค่าล่าสุด" = ผลของปีล่าสุด · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>'});
+        B.push({kind:'html', html:'<div class="rp-foot-note">แผนวิสาหกิจ 5 ปี: สีของผลรายปี เขียว = บรรลุเป้าหมาย · แดง = ไม่บรรลุ · ฟ้า = คาดว่าบรรลุ · ส้ม = เสี่ยงไม่บรรลุ · เทา = รอผล · ผลปัจจุบัน: แบบ "สะสม" = รวมผลทุกปี, แบบอื่น = ผลของปีล่าสุด · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>'});
         D5.groups.forEach(g => B.push({kind:'table',
           title:`แผนวิสาหกิจ 5 ปี (พ.ศ. ${D5.P.startYear} – ${D5.P.endYear}) · ${krStLabel(g.st)}${stN5[g.st] ? ' · ' + stN5[g.st] : ''}`,
-          cols:[['ตัวชี้วัด',25]].concat(D5.years.map(y => [String(y),8.4,'c'])).concat([['เป้าหมาย 5 ปี',9,'r'],['ผลสะสม',9,'r'],['% เทียบเป้า 5 ปี',13,'c']]),
-          rows: g.rows.map(r => `<tr${r.it.level === 'org' ? ' style="background:#f1f6f2"' : ''}><td><div class="rp-nm"${r.it.level === 'org' ? ' style="font-weight:600"' : ' style="padding-left:12px"'}>${esc(r.it.name)}</div><div class="rp-sub"${r.it.level === 'org' ? '' : ' style="padding-left:12px"'}>${esc(r.it.unit)} · ผลสะสมแบบ${esc(r.it.methodText)}</div></td>` +
+          cols:[['ตัวชี้วัด',25]].concat(D5.years.map(y => [String(y),8.4,'c'])).concat([['เป้าหมาย 5 ปี',9,'r'],['ผลปัจจุบัน',9,'r'],['% เทียบเป้า 5 ปี',13,'c']]),
+          rows: g.rows.map(r => `<tr${r.it.level === 'org' ? ' style="background:#f1f6f2"' : ''}><td><div class="rp-nm"${r.it.level === 'org' ? ' style="font-weight:600"' : ' style="padding-left:12px"'}>${esc(r.it.name)}</div><div class="rp-sub"${r.it.level === 'org' ? '' : ' style="padding-left:12px"'}>${esc(r.it.unit)}</div></td>` +
             r.recs.map(k => `<td class="c">${yc(k)}</td>`).join('') +
-            `<td class="r">${esc(r.it.targetText || '-')}</td><td class="r">${plan5Fmt(r.cum)}${r.fc ? '*' : ''}</td><td>${pc5(r)}</td></tr>`)}));
+            `<td class="r">${esc(r.it.targetText || '-')}</td><td class="r">${plan5Fmt(r.cum)}${r.fc ? '*' : ''}${r.it.method === 'sum' && r.cum != null ? '<div class="rp-sub">(สะสม)</div>' : ''}</td><td>${pc5(r)}</td></tr>`)}));
       }
     }
     return B;
@@ -3866,11 +3870,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           {h:'หน่วยนับ', get:r => r.it.unit},
         ].concat(yc).concat([
           {h:`เป้าหมาย 5 ปี (สิ้นปี ${D5.P.endYear})`, get:r => r.it.target, fmt:'#,##0.00##'},
-          {h:'ผลสะสม', get:r => r.cum, fmt:'#,##0.00##'},
+          {h:'ผลปัจจุบัน', get:r => r.cum, fmt:'#,##0.00##'},
           {h:'% เทียบเป้าหมาย 5 ปี', get:r => r.pct, fmt:F_PCT},
-          {h:'วิธีนับผลสะสม', get:r => r.it.methodText},
+          {h:'วิธีนับผลปัจจุบัน', get:r => r.it.methodText},
           {h:'หมายเหตุ', get:r => r.fcYears.length ? `ผลปี ${r.fcYears.join(', ')} เป็นค่าคาดการณ์ (ยังไม่มีผลจริง)` : ''},
-        ]), rows5, {title:`แผนวิสาหกิจ 5 ปี (พ.ศ. ${D5.P.startYear} – ${D5.P.endYear}): เป้า/ผลรายปี ผลสะสม และ % เทียบเป้าหมาย ณ สิ้นปี ${D5.P.endYear}`, filter:true});
+        ]), rows5, {title:`แผนวิสาหกิจ 5 ปี (พ.ศ. ${D5.P.startYear} – ${D5.P.endYear}): เป้า/ผลรายปี ผลปัจจุบัน และ % เทียบเป้าหมาย ณ สิ้นปี ${D5.P.endYear}`, filter:true});
       }
     }
 
@@ -4785,8 +4789,8 @@ function renderKpiView(strategies){
       const chips = [['great', 'บรรลุ', cc.pass], ['good', 'คาดว่าบรรลุ', cc.likely], ['fair', 'เสี่ยง', cc.risk], ['poor', 'ไม่บรรลุ', cc.fail], ['none', 'รอผล', cc.open]].filter(x => x[2]).map(x => `<span class="badge ${x[0]}">${x[1]} ${x[2]}</span>`).join('');
       return `
       <details class="st-node">
-        <summary><span class="st-lbl">${krEsc(krStLabel(g.st))}</span><span class="st-nm">${krEsc(stName[g.st] || '')}</span>
-          <span class="st-meta">${cc.n} ตัวชี้วัด</span><span class="st-counts">${chips}</span></summary>
+        <summary title="กดเพื่อเปิด/ปิดรายการตัวชี้วัด"><span class="st-lbl">${krEsc(krStLabel(g.st))}</span><span class="st-nm">${krEsc(stName[g.st] || '')}</span>
+          <span class="st-meta">${cc.n} ตัวชี้วัด</span><span class="st-counts">${chips}<span class="kr-chev" aria-hidden="true">▾</span></span></summary>
       <div class="kr-st-body"><div class="kr-tbl-wrap"><table class="kr-tbl"><colgroup><col><col style="width:110px"><col style="width:90px"><col style="width:140px"><col style="width:190px"><col style="width:150px"><col style="width:230px"></colgroup>
         <thead><tr><th>ตัวชี้วัด</th><th class="num">ค่าเป้าหมาย${partial ? 'ทั้งปี' : ''}</th><th>หน่วยนับ</th><th class="num">ผลการดำเนินงาน${partial ? 'สะสม' : ''}</th><th>% เทียบเป้าหมาย${partial ? ' (คาดการณ์)' : ''}</th><th style="text-align:center">สถานะ</th><th>หมายเหตุ</th></tr></thead>
         <tbody>${g.orgs.map(o => (o.head ? row(o.head, 'kr-org') : '') +   // ปีที่ไม่มีตัวชี้วัดองค์กรของกลุ่มนี้ (เช่น ปี 67–68) แสดงเฉพาะตัวชี้วัดระดับยุทธศาสตร์
@@ -4815,7 +4819,7 @@ function renderKpiView(strategies){
       const byC = cols.map(c => L.find(k => k.fy === c.fy && k.period === c.period && k.level === 'org' && k.org === org));
       const last = byC.filter(Boolean).pop();
       return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div><div class="kr-yt">${krEsc(last.unit)}</div></td>${byC.map((k, i) => `<td class="${ysep(i)}" style="text-align:center; white-space:nowrap">${
-        k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600">${k.isForecast ? `<span style="font-family:Sarabun,sans-serif; font-weight:400; color:var(--ink-400)">คาดการณ์</span> ${krEsc(k.forecastText)}` : krEsc(k.resultText || '-')}</div><div class="kr-yt" style="margin-bottom:3px">เป้า ${krEsc(k.targetText || '-')}</div>${krBadge(k.status)}` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
+        k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600">${k.isForecast ? `<span style="font-family:Sarabun,sans-serif; font-weight:400; color:var(--ink-400)">คาดการณ์</span> ${krEsc(k.forecastText)}` : krEsc(k.resultText || '-')}</div><div style="margin-top:3px">${krBadge(k.status)}</div>` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
     }).join('')}</tbody></table><div class="panel-sub" style="margin-top:8px">แสดงผลการดำเนินงาน (ผลสะสมถึงรอบนั้น) · รอบไตรมาสที่ผลยังไม่ถึงเป้าแสดงค่าคาดการณ์สิ้นปีของรอบนั้นแทน · ผลสิ้นปีที่ยังรอผลประเมินแสดงค่าคาดการณ์</div>`;
 }
 
@@ -4891,14 +4895,14 @@ function renderPlan5(stName){
     : `<div class="tap-inline"><div class="tap-bar ${plan5Band(p)}"><div class="fill" style="width:${Math.max(0, Math.min(100, p * 100))}%"></div></div><span class="v">${krPctTxt(p)}</span></div>`;
   const ncol = years.length + 5;
   document.getElementById('krPlanTitle').textContent = `ความก้าวหน้าตามแผนวิสาหกิจ 5 ปี (พ.ศ. ${P.startYear} – ${P.endYear})`;
-  document.getElementById('krPlanSub').textContent = `ผลรายปีเทียบเป้าหมายรายปี และผลสะสมเทียบเป้าหมาย ณ สิ้นปี ${P.endYear} (ที่มา: ชีต "เป้าหมาย 5 ปี" และ "ผลตัวชี้วัดที่สำคัญ")`;
-  document.getElementById('krPlan').innerHTML = `<table class="kr-tbl kr-plan"><colgroup><col style="width:280px">${years.map(() => '<col style="width:112px">').join('')}<col style="width:110px"><col style="width:100px"><col style="width:180px"><col style="width:90px"></colgroup><thead><tr><th>ตัวชี้วัด</th>${years.map(y => `<th style="text-align:center">${y}</th>`).join('')}<th class="num">เป้าหมาย 5 ปี</th><th class="num">ผลสะสม</th><th>% เทียบเป้าหมาย 5 ปี</th><th>วิธีนับผลสะสม</th></tr></thead><tbody>${
+  document.getElementById('krPlanSub').textContent = `ผลรายปีเทียบเป้าหมายรายปี และผลปัจจุบันเทียบเป้าหมาย ณ สิ้นปี ${P.endYear} (ที่มา: ชีต "เป้าหมาย 5 ปี" และ "ผลตัวชี้วัดที่สำคัญ")`;
+  document.getElementById('krPlan').innerHTML = `<table class="kr-tbl kr-plan"><colgroup><col style="width:280px">${years.map(() => '<col style="width:112px">').join('')}<col style="width:110px"><col style="width:100px"><col style="width:180px"><col style="width:90px"></colgroup><thead><tr><th>ตัวชี้วัด</th>${years.map(y => `<th style="text-align:center">${y}</th>`).join('')}<th class="num">เป้าหมาย 5 ปี</th><th class="num">ผลปัจจุบัน</th><th>% เทียบเป้าหมาย 5 ปี</th><th>วิธีนับผล</th></tr></thead><tbody>${
     D.groups.map(g => `<tr class="kr-grp"><td colspan="${ncol}">${krEsc(krStLabel(g.st))}${stName[g.st] ? ' · ' + krEsc(stName[g.st]) : ''}</td></tr>` +
       g.rows.map(r => `<tr class="${r.it.level === 'org' ? 'kr-org' : 'kr-st'}"><td><div class="kr-nm">${krEsc(r.it.name)}</div><div class="kr-yt">${krEsc(r.it.unit)}</div></td>` +
           r.recs.map(k => `<td style="text-align:center">${cell(k)}</td>`).join('') +
-          `<td class="num">${krEsc(r.it.targetText || '-')}</td><td class="num">${plan5Fmt(r.cum)}${r.fc ? '*' : ''}</td><td style="min-width:160px">${bar(r.pct)}${r.fc ? '<div class="kr-yt">* รวมค่าคาดการณ์</div>' : ''}</td><td><span class="kr-yt">${krEsc(r.it.methodText)}</span></td></tr>`).join('')).join('')}</tbody></table>
+          `<td class="num">${krEsc(r.it.targetText || '-')}</td><td class="num">${plan5Fmt(r.cum)}${r.fc ? '*' : ''}${r.it.method === 'sum' && r.cum != null ? '<div class="kr-yt">(สะสม)</div>' : ''}</td><td style="min-width:160px">${bar(r.pct)}${r.fc ? '<div class="kr-yt">* รวมค่าคาดการณ์</div>' : ''}</td><td><span class="kr-yt">${krEsc(r.it.methodText)}</span></td></tr>`).join('')).join('')}</tbody></table>
     <div class="panel-sub" style="margin-top:8px">สีของผลรายปี: เขียว = บรรลุเป้าหมาย · แดง = ไม่บรรลุ · ฟ้า = คาดว่าบรรลุ · ส้ม = เสี่ยงไม่บรรลุ · เทา = รอผล ·
-      ผลสะสม: "สะสม" = รวมผลทุกปี, "ค่าล่าสุด" = ผลของปีล่าสุดที่มีผล · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>`;
+      ผลปัจจุบัน: ตัวชี้วัดแบบ "สะสม" = รวมผลทุกปี, แบบ "ค่าล่าสุด" = ผลของปีล่าสุดที่มีผล · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>`;
 }
 
 function parseNum(v){
