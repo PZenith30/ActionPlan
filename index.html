@@ -1083,11 +1083,11 @@ window.addEventListener('load', function(){
     <aside class="sidebar">
       <nav class="side-nav">
         <button class="nav-item active" data-view="view-dashboard"><span class="ico">📊</span> แดชบอร์ด</button>
-        <button class="nav-item" data-view="view-strategy"><span class="ico">🧭</span> ความเชื่อมโยงยุทธศาสตร์</button>
+        <button class="nav-item" data-view="view-strategy"><span class="ico">🧭</span> ผลการดำเนินงานตามยุทธศาสตร์</button>
         <button class="nav-item" data-view="view-kpi"><span class="ico">🏆</span> ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</button>
         <button class="nav-item" data-view="view-annual"><span class="ico">📋</span> ความก้าวหน้าแผนปฏิบัติการประจำปี</button>
         <button class="nav-item" data-view="view-masterplan"><span class="ico">🗂️</span> ความก้าวหน้าแผนแม่บท</button>
-        <button class="nav-item" data-view="view-lineorg"><span class="ico">🏢</span> แผนปฏิบัติการตามสายงาน</button>
+        <button class="nav-item" data-view="view-lineorg"><span class="ico">🏢</span> ความก้าวหน้าแผนปฏิบัติการตามสายงาน</button>
         <button class="nav-item" data-view="view-dgarea"><span class="ico">🎯</span> ความก้าวหน้า PA และ MOU</button>
       </nav>
       <!-- ผู้จัดทำและช่องทางติดต่อ (จอคอมฯ; บนมือถือแสดงท้ายหน้าแทน) -->
@@ -1302,7 +1302,7 @@ window.addEventListener('load', function(){
 
       <div class="panel" id="krTrendPanel" style="display:none;">
         <h2>แนวโน้มผลตัวชี้วัดองค์กรรายปี</h2>
-        <div class="panel-sub">ร้อยละผลการดำเนินงานเทียบค่าเป้าหมายของแต่ละปีและแต่ละรอบรายงานที่บันทึกไว้ (ตัวชี้วัดองค์กรรหัสเดียวกัน)</div>
+        <div class="panel-sub">ผลการดำเนินงานหรือค่าคาดการณ์ของแต่ละปีและแต่ละรอบรายงานที่บันทึกไว้ เทียบค่าเป้าหมายของปีนั้น (ตัวชี้วัดองค์กรรหัสเดียวกัน)</div>
         <div class="kr-tbl-wrap" id="krTrend"></div>
       </div>
 
@@ -1494,7 +1494,7 @@ window.addEventListener('load', function(){
           <dt>ร้อยละการเบิกจ่าย</dt><dd>เบิกจ่ายสะสม ÷ กรอบงบประมาณ</dd>
           <dt>แผนแม่บท</dt><dd>จากชีตเชื่อมโยงโครงการ</dd>
           <dt>สายงานและส่วนงาน</dt><dd>จากชีตส่วนงานภายใต้ผู้บริหาร จับคู่กับหน่วยงานเจ้าของโครงการ</dd>
-          <dt>ความเชื่อมโยงยุทธศาสตร์</dt><dd>ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี จากชีตเชื่อมโยงตัวชี้วัด · โครงการเชื่อมกับตัวชี้วัดรายปีผ่านตัวชี้วัดโครงการ (KPI_Year_Code) — ความก้าวหน้าของแต่ละตัวชี้วัดคือค่าเฉลี่ยของโครงการที่ตอบตัวชี้วัดนั้น ไม่ใช่ผลจริงของตัวชี้วัด และโครงการที่ตอบหลายตัวชี้วัดถูกนับในทุกตัว</dd>
+          <dt>ผลการดำเนินงานตามยุทธศาสตร์</dt><dd>ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี จากชีตเชื่อมโยงตัวชี้วัด · โครงการเชื่อมกับตัวชี้วัดรายปีผ่านตัวชี้วัดโครงการ (KPI_Year_Code) — ความก้าวหน้าของแต่ละตัวชี้วัดคือค่าเฉลี่ยของโครงการที่ตอบตัวชี้วัดนั้น ไม่ใช่ผลจริงของตัวชี้วัด และโครงการที่ตอบหลายตัวชี้วัดถูกนับในทุกตัว</dd>
           <dt>หมวด SE-AM ของแผนแม่บท</dt><dd>ป้ายหน้าชื่อแผนแม่บทระบุด้านตามเกณฑ์การประเมินผลการดำเนินงานรัฐวิสาหกิจ (Core Business Enablers)
             <ul class="md-cbe">
               <li><b>CG</b> การกำกับดูแลที่ดีและการนำองค์กร</li>
@@ -1546,12 +1546,12 @@ window.addEventListener('load', function(){
         <div class="rm-topics">
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="exec" checked><span><b>สรุปผู้บริหาร (1 หน้า)</b><small>การ์ดสรุป · สรุปรายยุทธศาสตร์ · ประเด็นสำคัญ · กราฟสถานะ · โครงการที่ต้องเร่งติดตาม 5 อันดับ</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dashboard" checked><span><b>1. ภาพรวมแดชบอร์ด</b><small>KPI · กราฟงบประมาณ/การเบิกจ่าย · สถานะโครงการ · สรุปรายยุทธศาสตร์ · โครงการที่บรรลุเป้าหมาย</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="strategy" checked><span><b>2. ความเชื่อมโยงยุทธศาสตร์</b><small>ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี → โครงการ · สรุปรายตัวชี้วัด · รายชื่อโครงการที่ตอบแต่ละตัวชี้วัด</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="strategy" checked><span><b>2. ผลการดำเนินงานตามยุทธศาสตร์</b><small>ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี → โครงการ · สรุปรายตัวชี้วัด · รายชื่อโครงการที่ตอบแต่ละตัวชี้วัด</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="annual" checked><span><b>3. ความก้าวหน้าแผนปฏิบัติการประจำปี</b><small>ตารางรายโครงการครบทุกคอลัมน์ ความก้าวหน้า และสถานะ</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="masterplan" checked><span><b>4. ความก้าวหน้าแผนแม่บท</b><small>สรุปรายแผนแม่บท · กราฟ · โครงการที่เชื่อมโยงหลายแผน · รายละเอียดรายแผน</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>5. แผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>5. ความก้าวหน้าแผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>6. ความก้าวหน้า PA และ MOU</b><small>สรุปโครงการภายใต้ PA / MOU · รายชื่อโครงการแยกกลุ่ม</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="kpi" checked><span><b>7. ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</b><small>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ของปีงบประมาณที่เลือก · ค่าเป้าหมาย ผล % เทียบเป้า และสถานะ</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="kpi" checked><span><b>7. ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</b><small>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ของปีงบประมาณที่เลือก · ค่าเป้าหมาย ผล % เทียบเป้า และสถานะ · ความก้าวหน้าตามแผนวิสาหกิจ 5 ปี</small></span></label>
         </div>
       </div>
       <div class="rm-orient"><span class="pg"></span> รูปแบบหน้า: กระดาษ A4 แนวนอน (Landscape) ทั้ง PDF และ Excel</div>
@@ -2720,10 +2720,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const TOPICS = {
     exec:       'สรุปผู้บริหาร',
     dashboard:  '1. ภาพรวมแดชบอร์ด',
-    strategy:   '2. ความเชื่อมโยงยุทธศาสตร์',
+    strategy:   '2. ผลการดำเนินงานตามยุทธศาสตร์',
     annual:     '3. ความก้าวหน้าแผนปฏิบัติการประจำปี',
     masterplan: '4. ความก้าวหน้าแผนแม่บท',
-    lineorg:    '5. แผนปฏิบัติการตามสายงาน',
+    lineorg:    '5. ความก้าวหน้าแผนปฏิบัติการตามสายงาน',
     dgarea:     '6. ความก้าวหน้า PA และ MOU',
     kpi:        '7. ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ',
   };
@@ -3284,6 +3284,23 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           rows: g.orgs.flatMap(o => [...(o.head ? [tr(o.head, true)] : []), ...o.items.map(k => tr(k, false))])}));
         B.push({kind:'html', html:'<div class="rp-foot-note">% เทียบเป้าหมาย = ผลการดำเนินงาน ÷ ค่าเป้าหมาย (ตัวชี้วัดแบบ "ไม่เกิน" = ค่าเป้าหมาย ÷ ผล) · * = คำนวณจากค่าคาดการณ์ (ยังไม่มีผลจริง) · สรุปเป็นจำนวนตัวชี้วัด ไม่เฉลี่ยร้อยละข้ามตัวชี้วัดเพราะหน่วยต่างกัน</div>'});
       }
+      // แผนวิสาหกิจ 5 ปี (ชีต "เป้าหมาย 5 ปี") — ตารางเดียวกับการ์ดบนหน้าเว็บ
+      const D5 = plan5Data();
+      if(D5){
+        const C5 = {great:'#2f7a4f', poor:'#b5533c', good:'#3d7ea6', fair:'#c8933c', none:'#9a9488'};
+        const stN5 = window.ACP_KPI_ST_NAMES || {};
+        const yc = k => !k ? '<span class="rp-dash">-</span>'
+          : `<div style="font-weight:600; color:${C5[KR_CLS(k.status)]}">${esc(k.result != null ? k.resultText : k.forecastText ? 'คาดการณ์ ' + k.forecastText : '-')}</div><div class="rp-sub">เป้า ${esc(k.targetText || '-')}${k.period < KR_FULL ? ' · ' + krPeriodLabel(k.period) : ''}</div>`;
+        const pc5 = r => r.pct == null ? '<span class="rp-dash">-</span>'
+          : `<div class="rp-barw"><div class="rp-bar ${plan5Band(r.pct)}"><i style="width:${Math.max(0, Math.min(100, r.pct * 100))}%"></i></div><span class="rp-bv">${krPctTxt(r.pct)}${r.fc ? '*' : ''}</span></div>`;
+        B.push({kind:'html', html:'<div class="rp-foot-note">แผนวิสาหกิจ 5 ปี: สีของผลรายปี เขียว = บรรลุเป้าหมาย · แดง = ไม่บรรลุ · ฟ้า = คาดว่าบรรลุ · ส้ม = เสี่ยงไม่บรรลุ · เทา = รอผล · ผลสะสม "สะสม" = รวมผลทุกปี, "ค่าล่าสุด" = ผลของปีล่าสุด · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>'});
+        D5.groups.forEach(g => B.push({kind:'table',
+          title:`แผนวิสาหกิจ 5 ปี (พ.ศ. ${D5.P.startYear} – ${D5.P.endYear}) · ${krStLabel(g.st)}${stN5[g.st] ? ' · ' + stN5[g.st] : ''}`,
+          cols:[['ตัวชี้วัด',25]].concat(D5.years.map(y => [String(y),8.4,'c'])).concat([['เป้าหมาย 5 ปี',9,'r'],['ผลสะสม',9,'r'],['% เทียบเป้า 5 ปี',13,'c']]),
+          rows: g.rows.map(r => `<tr${r.it.level === 'org' ? ' style="background:#f1f6f2"' : ''}><td><div class="rp-nm"${r.it.level === 'org' ? ' style="font-weight:600"' : ' style="padding-left:12px"'}>${esc(r.it.name)}</div><div class="rp-sub"${r.it.level === 'org' ? '' : ' style="padding-left:12px"'}>${esc(r.it.unit)} · ผลสะสมแบบ${esc(r.it.methodText)}</div></td>` +
+            r.recs.map(k => `<td class="c">${yc(k)}</td>`).join('') +
+            `<td class="r">${esc(r.it.targetText || '-')}</td><td class="r">${plan5Fmt(r.cum)}${r.fc ? '*' : ''}</td><td>${pc5(r)}</td></tr>`)}));
+      }
     }
     return B;
   }
@@ -3831,6 +3848,30 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:'หมายเหตุ', get:k=>k.note},
       ], rows, {title: list.length ? `ผลตัวชี้วัด ปีงบประมาณ ${fy} ทุกรอบรายงาน (รอบล่าสุดอยู่บน) · % = ผลสะสมเทียบค่าเป้าหมายทั้งปี (ใช้ค่าคาดการณ์เมื่อยังไม่มีผล)`
         : `ยังไม่มีผลตัวชี้วัดของปีงบประมาณ ${fy} ในชีต "ผลตัวชี้วัดที่สำคัญ"`, filter:true});
+      const D5 = plan5Data();
+      if(D5){
+        const {ws: ws5, row: p0} = newSheet('แผน 5 ปี', [14,10,10,48,10].concat(D5.years.flatMap(() => [12,12])).concat([14,14,12,12,26]), TOPICS.kpi);
+        const rows5 = [];
+        D5.groups.forEach(g => g.rows.forEach(r => rows5.push(r)));
+        const yc = [];
+        D5.years.forEach((y, i) => {
+          yc.push({h:`เป้า ${y}`, get:r => r.recs[i] ? r.recs[i].target : null, fmt:'#,##0.00##'});
+          yc.push({h:`ผล ${y}`, get:r => r.recs[i] ? (r.recs[i].result != null ? r.recs[i].result : r.recs[i].forecast) : null, fmt:'#,##0.00##'});
+        });
+        table(ws5, p0, [
+          {h:'ยุทธศาสตร์', get:r => r.it.st},
+          {h:'ลำดับในแผน', get:r => r.it.plan, align:'center'},
+          {h:'ระดับ', get:r => r.it.level === 'org' ? 'องค์กร' : 'ยุทธศาสตร์'},
+          {h:'ชื่อตัวชี้วัด', get:r => r.it.name},
+          {h:'หน่วยนับ', get:r => r.it.unit},
+        ].concat(yc).concat([
+          {h:`เป้าหมาย 5 ปี (สิ้นปี ${D5.P.endYear})`, get:r => r.it.target, fmt:'#,##0.00##'},
+          {h:'ผลสะสม', get:r => r.cum, fmt:'#,##0.00##'},
+          {h:'% เทียบเป้าหมาย 5 ปี', get:r => r.pct, fmt:F_PCT},
+          {h:'วิธีนับผลสะสม', get:r => r.it.methodText},
+          {h:'หมายเหตุ', get:r => r.fcYears.length ? `ผลปี ${r.fcYears.join(', ')} เป็นค่าคาดการณ์ (ยังไม่มีผลจริง)` : ''},
+        ]), rows5, {title:`แผนวิสาหกิจ 5 ปี (พ.ศ. ${D5.P.startYear} – ${D5.P.endYear}): เป้า/ผลรายปี ผลสะสม และ % เทียบเป้าหมาย ณ สิ้นปี ${D5.P.endYear}`, filter:true});
+      }
     }
 
     const buf = await wb.xlsx.writeBuffer();
@@ -4773,9 +4814,9 @@ function renderKpiView(strategies){
     orgs.map(org => {
       const byC = cols.map(c => L.find(k => k.fy === c.fy && k.period === c.period && k.level === 'org' && k.org === org));
       const last = byC.filter(Boolean).pop();
-      return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div></td>${byC.map((k, i) => `<td class="${ysep(i)}" style="text-align:center; white-space:nowrap">${
-        k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; margin-bottom:3px">${krPctTxt(k.pct)}${k.isForecast ? '*' : ''}</div>${krBadge(k.status)}` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
-    }).join('')}</tbody></table><div class="panel-sub" style="margin-top:8px">รอบไตรมาส: ร้อยละจากค่าคาดการณ์สิ้นปีของรอบนั้น (ถ้าผลสะสมยังไม่ถึงเป้า) · * = ร้อยละจากค่าคาดการณ์</div>`;
+      return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div><div class="kr-yt">${krEsc(last.unit)}</div></td>${byC.map((k, i) => `<td class="${ysep(i)}" style="text-align:center; white-space:nowrap">${
+        k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600">${k.isForecast ? `<span style="font-family:Sarabun,sans-serif; font-weight:400; color:var(--ink-400)">คาดการณ์</span> ${krEsc(k.forecastText)}` : krEsc(k.resultText || '-')}</div><div class="kr-yt" style="margin-bottom:3px">เป้า ${krEsc(k.targetText || '-')}</div>${krBadge(k.status)}` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
+    }).join('')}</tbody></table><div class="panel-sub" style="margin-top:8px">แสดงผลการดำเนินงาน (ผลสะสมถึงรอบนั้น) · รอบไตรมาสที่ผลยังไม่ถึงเป้าแสดงค่าคาดการณ์สิ้นปีของรอบนั้นแทน · ผลสิ้นปีที่ยังรอผลประเมินแสดงค่าคาดการณ์</div>`;
 }
 
 // ---------- เป้าหมาย 5 ปี (แผนวิสาหกิจ · ชีต "เป้าหมาย 5 ปี") ----------
@@ -4806,48 +4847,56 @@ function buildPlan5(rows){
   }).filter(Boolean);
   return items.length ? { endYear, startYear: endYear - 4, items } : null;
 }
+// คำนวณตารางแผน 5 ปี (ใช้ร่วมกันระหว่างหน้าเว็บและรายงาน PDF / Excel)
+// ผลของปี = รอบทั้งปีถ้ามี ไม่งั้นรอบล่าสุดของปีนั้น · ผลสะสม: ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน (ผู้ใช้เลือก พ.ย. 2569) → fc = true แสดง *
+function plan5Data(){
+  const P = window.ACP_PLAN5;
+  if(!P) return null;
+  const L = window.ACP_KPI_RESULTS || [];
+  const years = []; for(let y = P.startYear; y <= P.endYear; y++) years.push(y);
+  const recOf = (plan, fy) => L.filter(k => k.fy === fy && k.plan === plan).sort((a, b) => b.period - a.period)[0] || null;
+  const cmp = (a, b) => String(a).localeCompare(String(b), 'th', {numeric:true});
+  const row = it => {
+    const recs = years.map(y => recOf(it.plan, y));
+    const ks = recs.filter(k => k && (k.result != null || k.forecast != null));
+    let v = null, fc = false;
+    if(ks.length){
+      const vals = ks.map(k => k.result != null ? k.result : k.forecast);
+      v = it.method === 'sum' ? vals.reduce((a, b) => a + b, 0) : it.method === 'avg' ? vals.reduce((a, b) => a + b, 0) / vals.length : vals[vals.length - 1];
+      fc = it.method === 'last' ? ks[ks.length - 1].result == null : ks.some(k => k.result == null);
+    }
+    const pct = (it.target == null || v == null) ? null : it.down ? (v <= 0 ? 1 : it.target / v) : (it.target > 0 ? v / it.target : null);
+    return { it, recs, cum: v, fc, pct, fcYears: years.filter((y, i) => recs[i] && recs[i].result == null && recs[i].forecast != null) };
+  };
+  const sts = [...new Set(P.items.map(it => it.st || '-'))].sort(cmp);
+  return { P, years, groups: sts.map(st => ({ st, rows: P.items.filter(it => (it.st || '-') === st)
+    .sort((a, b) => (a.level === b.level ? 0 : a.level === 'org' ? -1 : 1)).map(row) })) };
+}
+const plan5Fmt = v => v == null ? '-' : Number(v).toLocaleString('en-US', {maximumFractionDigits: 4});
+const plan5Band = p => p == null ? 'none' : p >= 1 ? 'great' : p >= 0.8 ? 'fair' : 'poor';
 function renderPlan5(stName){
   const panel = document.getElementById('krPlanPanel');
   if(!panel) return;
-  const P = window.ACP_PLAN5;
-  if(!P){ panel.style.display = 'none'; return; }
+  const D = plan5Data();
+  if(!D){ panel.style.display = 'none'; return; }
   panel.style.display = '';
-  const L = window.ACP_KPI_RESULTS || [];
-  const years = []; for(let y = P.startYear; y <= P.endYear; y++) years.push(y);
-  const fmt = v => v == null ? '-' : Number(v).toLocaleString('en-US', {maximumFractionDigits: 4});
-  // ผลของตัวชี้วัดในปีหนึ่ง = รอบทั้งปีถ้ามี ไม่งั้นรอบล่าสุดของปีนั้น
-  const recOf = (plan, fy) => L.filter(k => k.fy === fy && k.plan === plan).sort((a, b) => b.period - a.period)[0] || null;
+  const { P, years } = D;
   const cell = k => {
     if(!k) return '<span style="color:var(--ink-400)">-</span>';
     const v = k.result != null ? k.resultText : k.forecastText ? 'คาดการณ์ ' + k.forecastText : '-';
     return `<div class="kr-y kr-c-${KR_CLS(k.status)}" title="${krEsc(k.status)}">${krEsc(v)}</div>` +
       `<div class="kr-yt">เป้า ${krEsc(k.targetText || '-')}${k.period < KR_FULL ? ' · ' + krPeriodLabel(k.period) : ''}</div>`;
   };
-  // ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน (ให้ตรงกับไฟล์แผนวิสาหกิจ — ผู้ใช้เลือก พ.ย. 2569) และแสดงเครื่องหมาย *
-  const cum = it => {
-    const ks = years.map(y => recOf(it.plan, y)).filter(k => k && (k.result != null || k.forecast != null));
-    if(!ks.length) return { v: null, fc: false };
-    const vals = ks.map(k => k.result != null ? k.result : k.forecast);
-    const v = it.method === 'sum' ? vals.reduce((a, b) => a + b, 0) : it.method === 'avg' ? vals.reduce((a, b) => a + b, 0) / vals.length : vals[vals.length - 1];
-    const fc = it.method === 'last' ? ks[ks.length - 1].result == null : ks.some(k => k.result == null);
-    return { v, fc };
-  };
-  const pctOf = (it, v) => (it.target == null || v == null) ? null : it.down ? (v <= 0 ? 1 : it.target / v) : (it.target > 0 ? v / it.target : null);
   const bar = p => p == null ? '<span style="color:var(--ink-400)">-</span>'
-    : `<div class="tap-inline"><div class="tap-bar ${p >= 1 ? 'great' : p >= 0.8 ? 'fair' : 'poor'}"><div class="fill" style="width:${Math.max(0, Math.min(100, p * 100))}%"></div></div><span class="v">${krPctTxt(p)}</span></div>`;
-  const cmp = (a, b) => String(a).localeCompare(String(b), 'th', {numeric:true});
-  const sts = [...new Set(P.items.map(it => it.st || '-'))].sort(cmp);
+    : `<div class="tap-inline"><div class="tap-bar ${plan5Band(p)}"><div class="fill" style="width:${Math.max(0, Math.min(100, p * 100))}%"></div></div><span class="v">${krPctTxt(p)}</span></div>`;
   const ncol = years.length + 5;
   document.getElementById('krPlanTitle').textContent = `ความก้าวหน้าตามแผนวิสาหกิจ 5 ปี (พ.ศ. ${P.startYear} – ${P.endYear})`;
   document.getElementById('krPlanSub').textContent = `ผลรายปีเทียบเป้าหมายรายปี และผลสะสมเทียบเป้าหมาย ณ สิ้นปี ${P.endYear} (ที่มา: ชีต "เป้าหมาย 5 ปี" และ "ผลตัวชี้วัดที่สำคัญ")`;
   document.getElementById('krPlan').innerHTML = `<table class="kr-tbl kr-plan"><colgroup><col style="width:280px">${years.map(() => '<col style="width:112px">').join('')}<col style="width:110px"><col style="width:100px"><col style="width:180px"><col style="width:90px"></colgroup><thead><tr><th>ตัวชี้วัด</th>${years.map(y => `<th style="text-align:center">${y}</th>`).join('')}<th class="num">เป้าหมาย 5 ปี</th><th class="num">ผลสะสม</th><th>% เทียบเป้าหมาย 5 ปี</th><th>วิธีนับผลสะสม</th></tr></thead><tbody>${
-    sts.map(st => `<tr class="kr-grp"><td colspan="${ncol}">${krEsc(krStLabel(st))}${stName[st] ? ' · ' + krEsc(stName[st]) : ''}</td></tr>` +
-      P.items.filter(it => (it.st || '-') === st).sort((a, b) => (a.level === b.level ? 0 : a.level === 'org' ? -1 : 1)).map(it => {
-        const c = cum(it);
-        return `<tr class="${it.level === 'org' ? 'kr-org' : 'kr-st'}"><td><div class="kr-nm">${krEsc(it.name)}</div><div class="kr-yt">${krEsc(it.unit)}</div></td>` +
-          years.map(y => `<td style="text-align:center">${cell(recOf(it.plan, y))}</td>`).join('') +
-          `<td class="num">${krEsc(it.targetText || '-')}</td><td class="num">${fmt(c.v)}${c.fc ? '*' : ''}</td><td style="min-width:160px">${bar(pctOf(it, c.v))}${c.fc ? '<div class="kr-yt">* รวมค่าคาดการณ์</div>' : ''}</td><td><span class="kr-yt">${krEsc(it.methodText)}</span></td></tr>`;
-      }).join('')).join('')}</tbody></table>
+    D.groups.map(g => `<tr class="kr-grp"><td colspan="${ncol}">${krEsc(krStLabel(g.st))}${stName[g.st] ? ' · ' + krEsc(stName[g.st]) : ''}</td></tr>` +
+      g.rows.map(r => `<tr class="${r.it.level === 'org' ? 'kr-org' : 'kr-st'}"><td><div class="kr-nm">${krEsc(r.it.name)}</div><div class="kr-yt">${krEsc(r.it.unit)}</div></td>` +
+          r.recs.map(k => `<td style="text-align:center">${cell(k)}</td>`).join('') +
+          `<td class="num">${krEsc(r.it.targetText || '-')}</td><td class="num">${plan5Fmt(r.cum)}${r.fc ? '*' : ''}</td><td style="min-width:160px">${bar(r.pct)}${r.fc ? '<div class="kr-yt">* รวมค่าคาดการณ์</div>' : ''}</td><td><span class="kr-yt">${krEsc(r.it.methodText)}</span></td></tr>`).join('')).join('')}</tbody></table>
     <div class="panel-sub" style="margin-top:8px">สีของผลรายปี: เขียว = บรรลุเป้าหมาย · แดง = ไม่บรรลุ · ฟ้า = คาดว่าบรรลุ · ส้ม = เสี่ยงไม่บรรลุ · เทา = รอผล ·
       ผลสะสม: "สะสม" = รวมผลทุกปี, "ค่าล่าสุด" = ผลของปีล่าสุดที่มีผล · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>`;
 }
