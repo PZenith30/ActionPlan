@@ -1077,7 +1077,7 @@ window.addEventListener('load', function(){
       <nav class="side-nav">
         <button class="nav-item active" data-view="view-dashboard"><span class="ico">📊</span> แดชบอร์ด</button>
         <button class="nav-item" data-view="view-strategy"><span class="ico">🧭</span> ความเชื่อมโยงยุทธศาสตร์</button>
-        <button class="nav-item" data-view="view-kpi"><span class="ico">🏆</span> ผลตัวชี้วัดสำคัญ</button>
+        <button class="nav-item" data-view="view-kpi"><span class="ico">🏆</span> ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</button>
         <button class="nav-item" data-view="view-annual"><span class="ico">📋</span> ความก้าวหน้าแผนปฏิบัติการประจำปี</button>
         <button class="nav-item" data-view="view-masterplan"><span class="ico">🗂️</span> ความก้าวหน้าแผนแม่บท</button>
         <button class="nav-item" data-view="view-lineorg"><span class="ico">🏢</span> แผนปฏิบัติการตามสายงาน</button>
@@ -1277,7 +1277,7 @@ window.addEventListener('load', function(){
 
       <div class="panel" style="margin-bottom:24px;">
         <div class="kr-head">
-          <div><h2>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์</h2>
+          <div><h2 id="krTitle">ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ ประจำปีงบประมาณ</h2>
             <div class="panel-sub" id="krSub" style="margin:0;">ผลการดำเนินงานเทียบค่าเป้าหมายประจำปีงบประมาณ</div></div>
           <label style="font-size:12.5px; color:var(--ink-600);">ปีงบประมาณ <select id="krYear"></select></label>
         </div>
@@ -1438,7 +1438,7 @@ window.addEventListener('load', function(){
         </dl>
       </section>
       <section>
-        <h3>ผลตัวชี้วัดสำคัญ (เมนู "ผลตัวชี้วัดสำคัญ")</h3>
+        <h3>ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</h3>
         <dl>
           <dt>ที่มา</dt><dd>ชีต "ผลตัวชี้วัดที่สำคัญ" (ค่าเป้าหมาย ผลการดำเนินงาน และค่าคาดการณ์ของตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ แยกตามปีงบประมาณ)</dd>
           <dt>% เทียบเป้าหมาย</dt><dd>ผลการดำเนินงาน ÷ ค่าเป้าหมาย · ตัวชี้วัดที่ยิ่งน้อยยิ่งดี (คอลัมน์ "ทิศทาง" = น้อยกว่าดี หรือชื่อมีคำว่า "ไม่เกิน") = ค่าเป้าหมาย ÷ ผล · ถ้ายังไม่มีผล คำนวณจากค่าคาดการณ์และแสดงแถบสีจาง</dd>
@@ -1536,7 +1536,7 @@ window.addEventListener('load', function(){
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="masterplan" checked><span><b>4. ความก้าวหน้าแผนแม่บท</b><small>สรุปรายแผนแม่บท · กราฟ · โครงการที่เชื่อมโยงหลายแผน · รายละเอียดรายแผน</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>5. แผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>6. ความก้าวหน้า PA และ MOU</b><small>สรุปโครงการภายใต้ PA / MOU · รายชื่อโครงการแยกกลุ่ม</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="kpi" checked><span><b>7. ผลตัวชี้วัดสำคัญ</b><small>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ของปีงบประมาณที่เลือก · ค่าเป้าหมาย ผล % เทียบเป้า และสถานะ</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="kpi" checked><span><b>7. ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</b><small>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ของปีงบประมาณที่เลือก · ค่าเป้าหมาย ผล % เทียบเป้า และสถานะ</small></span></label>
         </div>
       </div>
       <div class="rm-orient"><span class="pg"></span> รูปแบบหน้า: กระดาษ A4 แนวนอน (Landscape) ทั้ง PDF และ Excel</div>
@@ -2300,7 +2300,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     document.getElementById('stNote').innerHTML =
       `ความก้าวหน้าและสถานะในหน้านี้ <b>สรุปจากโครงการที่ตอบตัวชี้วัด</b> (${e(HL.avg)} ของโครงการ) ยังไม่ใช่ผลจริงของตัวชี้วัดองค์กร/รายปี · ` +
       `โครงการที่ตอบหลายตัวชี้วัดรายปีนับในทุกตัวชี้วัดนั้น · กดแถวตัวชี้วัดเพื่อดูรายชื่อโครงการ` +
-      ((window.ACP_KPI_RESULTS||[]).some(k => k.fy === KR_FY) ? '<br><b>ผลจริงของตัวชี้วัด</b> (ผล · % เทียบเป้า · สถานะ ใต้ค่าเป้าหมาย) มาจากชีต "ผลตัวชี้วัดที่สำคัญ" — ดูทั้งหมดที่เมนู "ผลตัวชี้วัดสำคัญ"' : '') +
+      ((window.ACP_KPI_RESULTS||[]).some(k => k.fy === KR_FY) ? '<br><b>ผลจริงของตัวชี้วัด</b> (ผล · % เทียบเป้า · สถานะ ใต้ค่าเป้าหมาย) มาจากชีต "ผลตัวชี้วัดที่สำคัญ" — ดูทั้งหมดที่เมนู "ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ"' : '') +
       (tree.hasNames ? '' : '<br><span class="st-warn">ชื่อกลยุทธ์และตัวชี้วัดรายปีจะแสดงหลังส่งชีต "กลุยุทธ์", "ตัวชี้วัดรายปี" และ "เชื่อมโยงตัวชี้วัด" ขึ้นเว็บ (ตอนนี้แสดงเป็นรหัส)</span>');
 
     const projRows = it => it.projects.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p=>{
@@ -2710,7 +2710,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     masterplan: '4. ความก้าวหน้าแผนแม่บท',
     lineorg:    '5. แผนปฏิบัติการตามสายงาน',
     dgarea:     '6. ความก้าวหน้า PA และ MOU',
-    kpi:        '7. ผลตัวชี้วัดสำคัญ',
+    kpi:        '7. ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ',
   };
   const REPORT_TITLE = 'รายงานผลการดำเนินงานตามแผนปฏิบัติการ การยางแห่งประเทศไทย';
   const STATUS_ORDER = ['ดีมาก','ดี','พอใช้','ต้องปรับปรุง'];
@@ -4660,6 +4660,7 @@ function renderKpiView(strategies){
         <div class="value">${c.fail}<span class="unit">ตัวชี้วัด</span></div><div class="sub">${pc(c.fail)}% ของตัวชี้วัดทั้งหมด</div></div>
       <div class="kpi-card c2"><div class="accent-bar"></div><span class="eyebrow">รอผล</span>
         <div class="value">${c.wait}<span class="unit">ตัวชี้วัด</span></div><div class="sub">ยังไม่มีผลการดำเนินงาน</div></div>`;
+    document.getElementById('krTitle').textContent = `ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ ประจำปีงบประมาณ ${fy}`;
     document.getElementById('krSub').textContent = `ผลการดำเนินงานเทียบค่าเป้าหมาย ปีงบประมาณ ${fy} (ที่มา: ชีต "ผลตัวชี้วัดที่สำคัญ")`;
     body.innerHTML = '<div class="st-tree">' + kpiResultGroups(list).map((g, gi) => {
       const all = g.orgs.flatMap(o => (o.head ? [o.head] : []).concat(o.items)), cc = kpiResultCounts(all);
