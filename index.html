@@ -391,6 +391,28 @@ window.addEventListener('load', function(){
   .dg-order-note b{color:var(--ink-900); font-weight:600;}
   .dg-order-note p{margin:0;}
   .dg-order-note p + p{margin-top:4px;}
+  /* ผลตัวชี้วัดสำคัญ (#kpi · ชีต ผลตัวชี้วัดที่สำคัญ) */
+  .kr-head{display:flex; justify-content:space-between; align-items:center; gap:10px 16px; flex-wrap:wrap; margin-bottom:16px;}
+  .kr-head h2{margin:0;}
+  .kr-head select{font:inherit; font-size:13px; padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink-900);}
+  .kr-tbl-wrap{overflow-x:auto;}
+  .kr-tbl{min-width:900px; table-layout:fixed;}
+  .kr-tbl td:nth-child(3){white-space:nowrap;}
+  .kr-tbl thead th{white-space:nowrap;}
+  .kr-tbl td.num, .kr-tbl th.num{text-align:right; font-family:'JetBrains Mono',monospace; font-size:12px; white-space:nowrap;}
+  .kr-tbl tr.kr-org td{background:rgba(47,122,79,0.05);}
+  .kr-tbl tr.kr-org .kr-nm{font-weight:600; color:var(--ink-900);}
+  .kr-tbl tr.kr-st td:first-child{padding-left:30px;}
+  .kr-nm{line-height:1.5; color:var(--ink-900);}
+  .kr-code{display:block; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-400); font-weight:400;}
+  .kr-alias{display:inline-block; font-size:10.5px; font-weight:500; color:var(--ink-600); background:var(--latex-50); border:1px solid var(--line); border-radius:10px; padding:0 7px; margin-left:4px;}
+  .kr-note{font-size:12px; color:var(--ink-600); line-height:1.5; min-width:180px;}
+  .kr-fc .tap-bar, .kr-fc .v{opacity:.55;}
+  .kr-fc-lbl{display:block; font-size:10.5px; color:var(--ink-400); text-align:right;}
+  .kr-st-title{font-family:'Kanit',sans-serif; font-weight:600; font-size:14px; color:var(--ink-900); margin:18px 0 8px;}
+  .kr-st-title:first-child{margin-top:0;}
+  .kr-res{display:block; margin-top:3px; font-size:11.5px; color:var(--ink-600);}
+  .kr-res .badge{font-size:10.5px; padding:1px 8px;}
   .chart-wrap{position:relative; min-width:0;}
   /* กล่องใน grid ต้องหดตามคอลัมน์ได้ทุกขนาดจอ — ไม่งั้นกราฟ Chart.js ที่เคยถูกวาดกว้าง (เช่น ย่อ/ขยายหน้าต่าง
      หรือเปลี่ยนซูม) จะดันกล่องให้ล้นเกินคอลัมน์และไม่หดกลับ ทำให้การ์ดแต่ละแถวกว้างไม่เท่ากัน */
@@ -1053,6 +1075,7 @@ window.addEventListener('load', function(){
       <nav class="side-nav">
         <button class="nav-item active" data-view="view-dashboard"><span class="ico">📊</span> แดชบอร์ด</button>
         <button class="nav-item" data-view="view-strategy"><span class="ico">🧭</span> ความเชื่อมโยงยุทธศาสตร์</button>
+        <button class="nav-item" data-view="view-kpi"><span class="ico">🏆</span> ผลตัวชี้วัดสำคัญ</button>
         <button class="nav-item" data-view="view-annual"><span class="ico">📋</span> ความก้าวหน้าแผนปฏิบัติการประจำปี</button>
         <button class="nav-item" data-view="view-masterplan"><span class="ico">🗂️</span> ความก้าวหน้าแผนแม่บท</button>
         <button class="nav-item" data-view="view-lineorg"><span class="ico">🏢</span> แผนปฏิบัติการตามสายงาน</button>
@@ -1246,6 +1269,28 @@ window.addEventListener('load', function(){
 
     </section>
 
+    <section id="view-kpi" class="view">
+
+      <div class="kpi-grid" id="krCards" style="margin-bottom:24px;"></div>
+
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="kr-head">
+          <div><h2>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์</h2>
+            <div class="panel-sub" id="krSub" style="margin:0;">ผลการดำเนินงานเทียบค่าเป้าหมายประจำปีงบประมาณ</div></div>
+          <label style="font-size:12.5px; color:var(--ink-600);">ปีงบประมาณ <select id="krYear"></select></label>
+        </div>
+        <div class="st-note" id="krNote"></div>
+        <div id="krBody"></div>
+      </div>
+
+      <div class="panel" id="krTrendPanel" style="display:none;">
+        <h2>แนวโน้มผลตัวชี้วัดองค์กรรายปี</h2>
+        <div class="panel-sub">ร้อยละผลการดำเนินงานเทียบค่าเป้าหมายของแต่ละปี (ตัวชี้วัดองค์กรรหัสเดียวกัน)</div>
+        <div class="kr-tbl-wrap" id="krTrend"></div>
+      </div>
+
+    </section>
+
     <section id="view-masterplan" class="view">
 
       <div class="panel" style="margin-bottom:24px;">
@@ -1391,6 +1436,14 @@ window.addEventListener('load', function(){
         </dl>
       </section>
       <section>
+        <h3>ผลตัวชี้วัดสำคัญ (เมนู "ผลตัวชี้วัดสำคัญ")</h3>
+        <dl>
+          <dt>ที่มา</dt><dd>ชีต "ผลตัวชี้วัดที่สำคัญ" (ค่าเป้าหมาย ผลการดำเนินงาน และค่าคาดการณ์ของตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ แยกตามปีงบประมาณ)</dd>
+          <dt>% เทียบเป้าหมาย</dt><dd>ผลการดำเนินงาน ÷ ค่าเป้าหมาย · ตัวชี้วัดที่ยิ่งน้อยยิ่งดี (คอลัมน์ "ทิศทาง" = น้อยกว่าดี หรือชื่อมีคำว่า "ไม่เกิน") = ค่าเป้าหมาย ÷ ผล · ถ้ายังไม่มีผล คำนวณจากค่าคาดการณ์และแสดงแถบสีจาง</dd>
+          <dt>สถานะ</dt><dd>ใช้ตามคอลัมน์ "สถานะ" ในชีตถ้ากรอกไว้ ถ้าว่าง: ผลถึงค่าเป้าหมาย = บรรลุเป้าหมาย · ไม่ถึง = ไม่บรรลุเป้าหมาย · ยังไม่มีผล = รอผล · การ์ดสรุปนับจำนวนตัวชี้วัดตามสถานะ ไม่เฉลี่ยร้อยละข้ามตัวชี้วัด เพราะหน่วยนับต่างกัน</dd>
+        </dl>
+      </section>
+      <section>
         <h3>สถานะแจ้งเตือน (Trigger Point) — ปีงบประมาณ 2570 เป็นต้นไป</h3>
         <div class="md-tbl-wrap">
           <table class="md-tbl">
@@ -1481,6 +1534,7 @@ window.addEventListener('load', function(){
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="masterplan" checked><span><b>4. ความก้าวหน้าแผนแม่บท</b><small>สรุปรายแผนแม่บท · กราฟ · โครงการที่เชื่อมโยงหลายแผน · รายละเอียดรายแผน</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>5. แผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>6. ความก้าวหน้า PA และ MOU</b><small>สรุปโครงการภายใต้ PA / MOU · รายชื่อโครงการแยกกลุ่ม</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="kpi" checked><span><b>7. ผลตัวชี้วัดสำคัญ</b><small>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ของปีงบประมาณที่เลือก · ค่าเป้าหมาย ผล % เทียบเป้า และสถานะ</small></span></label>
         </div>
       </div>
       <div class="rm-orient"><span class="pg"></span> รูปแบบหน้า: กระดาษ A4 แนวนอน (Landscape) ทั้ง PDF และ Excel</div>
@@ -2219,6 +2273,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       return;
     }
     const e = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const KR_FY = window.__viewFY || window.LIVE_FISCAL_YEAR;   // ผลจริงของตัวชี้วัด (ชีต ผลตัวชี้วัดที่สำคัญ) ของปีที่ดูอยู่
     const avg = ps => ps.length ? ps.reduce((a,p)=>a+(hProg(p)||0),0)/ps.length : null;
     const sum = (ps, f) => ps.reduce((a,p)=>a+(f(p)||0),0);
     const bar = v => `<div class="tap-inline"><div class="tap-bar ${pctColorClass(v)}"><div class="fill" style="width:${v==null?0:Math.max(0,Math.min(100,v*100))}%"></div></div><span class="v">${v==null?'-':(v*100).toFixed(1)+'%'}</span></div>`;
@@ -2243,6 +2298,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     document.getElementById('stNote').innerHTML =
       `ความก้าวหน้าและสถานะในหน้านี้ <b>สรุปจากโครงการที่ตอบตัวชี้วัด</b> (${e(HL.avg)} ของโครงการ) ยังไม่ใช่ผลจริงของตัวชี้วัดองค์กร/รายปี · ` +
       `โครงการที่ตอบหลายตัวชี้วัดรายปีนับในทุกตัวชี้วัดนั้น · กดแถวตัวชี้วัดเพื่อดูรายชื่อโครงการ` +
+      ((window.ACP_KPI_RESULTS||[]).some(k => k.fy === KR_FY) ? '<br><b>ผลจริงของตัวชี้วัด</b> (ผล · % เทียบเป้า · สถานะ ใต้ค่าเป้าหมาย) มาจากชีต "ผลตัวชี้วัดที่สำคัญ" — ดูทั้งหมดที่เมนู "ผลตัวชี้วัดสำคัญ"' : '') +
       (tree.hasNames ? '' : '<br><span class="st-warn">ชื่อกลยุทธ์และตัวชี้วัดรายปีจะแสดงหลังส่งชีต "กลุยุทธ์", "ตัวชี้วัดรายปี" และ "เชื่อมโยงตัวชี้วัด" ขึ้นเว็บ (ตอนนี้แสดงเป็นรหัส)</span>');
 
     const projRows = it => it.projects.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p=>{
@@ -2268,7 +2324,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
             <div class="st-org-head">
               <div class="st-org-t"><span class="eyebrow">ตัวชี้วัดองค์กร ${o.code !== '__none__' ? e(o.code) : ''}</span>
                 <div class="st-org-nm">${e(o.name)}</div></div>
-              <div class="st-org-side">${o.target ? `<span class="st-target">เป้าหมาย ${e(o.target)} ${e(o.unit)}</span>` : ''}
+              <div class="st-org-side">${o.target ? `<span class="st-target">เป้าหมาย ${e(o.target)} ${e(o.unit)}</span>` : ''}${o.code !== '__none__' ? kpiResultChip(o.code, KR_FY) : ''}
                 <span class="st-meta">${o.projects.length} โครงการ</span>${countChips(o.projects)}</div>
             </div>
             <div class="st-tbl-wrap"><table class="st-tbl">
@@ -2278,7 +2334,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
                 <tr class="st-row" data-r="${rid}" tabindex="0" aria-expanded="false">
                   <td><div class="st-y-nm"><span class="st-caret">▸</span><span>${e(it.name)}${it.name !== it.code ? ` <span class="st-code">${e(it.code)}</span>` : ''}</span></div>
                     ${it.si ? `<div class="st-si">กลยุทธ์ ${e(it.si.code)}${it.si.name ? ' · ' + e(it.si.name) : ''}</div>` : ''}</td>
-                  <td>${it.target ? `${e(it.target)} ${e(it.unit)}` : '-'}</td>
+                  <td>${it.target ? `${e(it.target)} ${e(it.unit)}` : '-'}${kpiResultChip(it.code, KR_FY)}</td>
                   <td class="num">${it.projects.length}</td>
                   <td class="num">${fmtBaht(sum(it.projects, p=>p.budget))}</td>
                   <td>${bar(avg(it.projects))}</td>
@@ -2652,6 +2708,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     masterplan: '4. ความก้าวหน้าแผนแม่บท',
     lineorg:    '5. แผนปฏิบัติการตามสายงาน',
     dgarea:     '6. ความก้าวหน้า PA และ MOU',
+    kpi:        '7. ผลตัวชี้วัดสำคัญ',
   };
   const REPORT_TITLE = 'รายงานผลการดำเนินงานตามแผนปฏิบัติการ การยางแห่งประเทศไทย';
   const STATUS_ORDER = ['ดีมาก','ดี','พอใช้','ต้องปรับปรุง'];
@@ -3189,6 +3246,28 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td>${esc(p.dg_area_label)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)}));
       if(!R.paMou.length) B.push({kind:'html', html:'<div class="rp-note">ยังไม่มีโครงการที่ระบุว่าอยู่ภายใต้ PA หรือ MOU ในชีตข้อมูล</div>'});
     }
+    if(topics.includes('kpi')){
+      const fy = per.fiscalYear;
+      const list = (window.ACP_KPI_RESULTS || []).filter(k => k.fy === fy);
+      B.push({kind:'section', title:TOPICS.kpi, sub:`ผลการดำเนินงานเทียบค่าเป้าหมาย ปีงบประมาณ ${fy} (ที่มา: ชีต "ผลตัวชี้วัดที่สำคัญ")`});
+      if(!list.length){
+        B.push({kind:'html', html:`<div class="rp-note">ยังไม่มีผลตัวชี้วัดของปีงบประมาณ ${fy} ในชีต "ผลตัวชี้วัดที่สำคัญ"</div>`});
+      }else{
+        const c = kpiResultCounts(list);
+        const pc = x => c.n ? Math.round(x / c.n * 100) + '% ของตัวชี้วัดทั้งหมด' : '';
+        B.push({kind:'html', html:`<div class="rp-kpis">${kpiCard('c1','ตัวชี้วัดทั้งหมด', c.n, 'ตัวชี้วัด', `องค์กร ${c.org} · ระดับยุทธศาสตร์ ${c.st}`)}${kpiCard('c3','บรรลุเป้าหมาย', c.pass, 'ตัวชี้วัด', pc(c.pass))}${kpiCard('c4','ไม่บรรลุเป้าหมาย', c.fail, 'ตัวชี้วัด', pc(c.fail))}${kpiCard('c2','รอผล', c.wait, 'ตัวชี้วัด', 'ยังไม่มีผลการดำเนินงาน')}</div>`});
+        const stN = window.ACP_KPI_ST_NAMES || {};
+        const pctCell = k => k.pct == null ? '<span class="rp-dash">-</span>'
+          : `<div class="rp-barw"><div class="rp-bar ${k.isForecast ? 'none' : KR_CLS(k.status)}"><i style="width:${Math.max(0, Math.min(100, k.pct * 100))}%"></i></div><span class="rp-bv">${krPctTxt(k.pct)}${k.isForecast ? '*' : ''}</span></div>`;
+        const tr = (k, org) => `<tr${org ? ' style="background:#f1f6f2"' : ''}><td><div class="rp-nm"${org ? ' style="font-weight:600"' : ' style="padding-left:12px"'}>${esc(k.name)}</div><div class="rp-sub"${org ? '' : ' style="padding-left:12px"'}>${esc(k.code)}${k.aliases.length ? ' (ใช้เป็น ' + esc(k.aliases.join(', ')) + ')' : ''}</div></td>` +
+          `<td class="r">${esc(k.targetText || '-')}</td><td>${esc(k.unit)}</td><td class="r">${k.resultText ? esc(k.resultText) : k.forecastText ? 'คาดการณ์ ' + esc(k.forecastText) : '-'}</td>` +
+          `<td>${pctCell(k)}</td><td class="c">${pill(k.status)}</td><td>${esc(k.note)}</td></tr>`;
+        kpiResultGroups(list).forEach(g => B.push({kind:'table', title:`${g.st}${stN[g.st] ? ' · ' + stN[g.st] : ''}`,
+          cols:[['ตัวชี้วัด',33],['ค่าเป้าหมาย',10,'r'],['หน่วยนับ',8],['ผลการดำเนินงาน',11,'r'],['% เทียบเป้าหมาย',12,'c'],['สถานะ',10,'c'],['หมายเหตุ',16]],
+          rows: g.orgs.flatMap(o => [...(o.head ? [tr(o.head, true)] : []), ...o.items.map(k => tr(k, false))])}));
+        B.push({kind:'html', html:'<div class="rp-foot-note">% เทียบเป้าหมาย = ผลการดำเนินงาน ÷ ค่าเป้าหมาย (ตัวชี้วัดแบบ "ไม่เกิน" = ค่าเป้าหมาย ÷ ผล) · * = คำนวณจากค่าคาดการณ์ (ยังไม่มีผลจริง) · สรุปเป็นจำนวนตัวชี้วัด ไม่เฉลี่ยร้อยละข้ามตัวชี้วัดเพราะหน่วยต่างกัน</div>'});
+      }
+    }
     return B;
   }
 
@@ -3713,6 +3792,28 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:'MOU', get:x=>x.p.is_mou?'✓':'', align:'center'},
       ], rows, {title:'รายชื่อโครงการภายใต้ PA / MOU', filter:true});
     }
+    if(topics.includes('kpi')){
+      const fy = per.fiscalYear;
+      const list = (window.ACP_KPI_RESULTS || []).filter(k => k.fy === fy);
+      const {ws, row:r0} = newSheet('ตัวชี้วัด', [12,14,14,52,14,12,16,16,14,16,36], TOPICS.kpi);
+      const rows = [];
+      kpiResultGroups(list).forEach(g => g.orgs.forEach(o => { if(o.head) rows.push(o.head); rows.push(...o.items); }));
+      const c = kpiResultCounts(list);
+      table(ws, r0, [
+        {h:'ยุทธศาสตร์', get:k=>k.st},
+        {h:'ตัวชี้วัดองค์กร', get:k=>k.org},
+        {h:'ตัวชี้วัดระดับยุทธศาสตร์', get:k=>k.ks || (k.aliases.length ? '= ' + k.aliases.join(', ') : '')},
+        {h:'ชื่อตัวชี้วัด', get:k=>k.name, bold:false},
+        {h:'ค่าเป้าหมาย', get:k=>k.target, fmt:'#,##0.00##'},
+        {h:'หน่วยนับ', get:k=>k.unit},
+        {h:'ผลการดำเนินงาน', get:k=>k.result, fmt:'#,##0.00##'},
+        {h:'ค่าคาดการณ์', get:k=>k.forecast, fmt:'#,##0.00##'},
+        {h:'% เทียบเป้าหมาย', get:k=>k.pct, fmt:F_PCT},
+        {h:'สถานะ', get:k=>k.status, status:true},
+        {h:'หมายเหตุ', get:k=>k.note},
+      ], rows, {title: list.length ? `ผลตัวชี้วัด ปีงบประมาณ ${fy}: ทั้งหมด ${c.n} · บรรลุ ${c.pass} · ไม่บรรลุ ${c.fail} · รอผล ${c.wait} (% จากค่าคาดการณ์เมื่อยังไม่มีผล)`
+        : `ยังไม่มีผลตัวชี้วัดของปีงบประมาณ ${fy} ในชีต "ผลตัวชี้วัดที่สำคัญ"`, filter:true});
+    }
 
     const buf = await wb.xlsx.writeBuffer();
     const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
@@ -3984,6 +4085,7 @@ const SHEET_SPECS = {
   yearKpi:   { names:['ตัวชี้วัดรายปี'],                    required:['KPI_Strategy_Code'], optional:true },
   kpiLink:   { names:['เชื่อมโยงตัวชี้วัด'],                required:['KPI_Year_Code'], optional:true },
   cbe:       { names:['Core_Business_Enabler'],             required:['CBE_Code'], optional:true },
+  kpiResult: { names:['ผลตัวชี้วัดที่สำคัญ','ผลตัวชี้วัดองค์กรและรายปี'], required:['KPI_Org_Code'], optional:true },
 };
 
 // ---------- ผลสิ้นปีงบประมาณ ----------
@@ -4408,6 +4510,181 @@ function buildHistoryDataset(historyRows, projectRecords){
   return periods;
 }
 
+// ---------- ผลตัวชี้วัดองค์กรและรายปี (ชีต "ผลตัวชี้วัดที่สำคัญ" · หน้า #kpi · หัวข้อรายงาน kpi) ----------
+// % เทียบเป้า: มากกว่าดี = ผล ÷ เป้า · น้อยกว่าดี (คอลัมน์ "ทิศทาง" หรือชื่อมีคำว่า "ไม่เกิน") = เป้า ÷ ผล
+// ยังไม่มีผล → คำนวณจากค่าคาดการณ์ (แสดงจาง) · สถานะ: ใช้คอลัมน์ "สถานะ" ถ้ากรอก ไม่งั้น ถึงเป้า = บรรลุ / ไม่ถึง = ไม่บรรลุ / ไม่มีผล = รอผล
+// ไม่เฉลี่ยร้อยละข้ามตัวชี้วัด (หน่วยต่างกัน) — สรุปเป็นจำนวนตัวชี้วัดตามสถานะ
+const KR_PASS = 'บรรลุเป้าหมาย', KR_FAIL = 'ไม่บรรลุเป้าหมาย', KR_WAIT = 'รอผล';
+const KR_CLS = s => s === KR_PASS ? 'great' : s === KR_FAIL ? 'poor' : 'none';
+window.ACP_KPI_RESULTS = [];
+function buildKpiResults(rows){
+  if(!rows || !rows.length) return [];
+  const fields = rows.__fields || Object.keys(rows[0]);
+  const col = re => fields.find(f => re.test(String(f).replace(/\s+/g,' ').trim()));
+  const F = {
+    st: col(/^Strategy_Code$/i), org: col(/^KPI_Org_Code$/i), ks: col(/^KPI_Strategy_Code$/i),
+    name: col(/^ชื่อตัวชี้วัด/), target: col(/^ค่าเป้าหมาย/), unit: col(/^หน่วย/), fy: col(/^ปีงบ|^Fiscal_Year/i),
+    result: col(/^ผลการดำเนินงาน/), fcst: col(/คาดการณ์/), status: col(/^สถานะ/), note: col(/^หมายเหตุ/),
+    dir: col(/^ทิศทาง/), alias: col(/ใช้ผลเดียวกัน/),
+    pct: col(/คิดเป็นร้อยละ|ร้อยละเทียบเป้า/),
+  };
+  const txt = v => String(v ?? '').replace(/\s+/g,' ').trim();
+  const val = v => { const s = txt(v); return (s === '' || s === '-') ? '' : s; };
+  const get = (r, f) => f ? r[f] : '';
+  const recs = rows.map(r => {
+    const org = txt(get(r, F.org)), ks = txt(get(r, F.ks));
+    const fy = parseInt(txt(get(r, F.fy)).replace(/[^0-9]/g,''), 10);
+    if((!org && !ks) || isNaN(fy)) return null;
+    let tTxt = val(get(r, F.target)), uTxt = val(get(r, F.unit));
+    // กันหัวคอลัมน์ "ค่าเป้าหมาย" / "หน่วยนับ" สลับกัน: ตัวเลขอยู่ฝั่งหน่วย → สลับกลับ
+    if(parseNum(tTxt) == null && parseNum(uTxt) != null){ const x = tTxt; tTxt = uTxt; uTxt = x; }
+    const name = txt(get(r, F.name));
+    const resultText = val(get(r, F.result)), forecastText = val(get(r, F.fcst));
+    const target = parseNum(tTxt), result = parseNum(resultText), forecast = parseNum(forecastText);
+    const dTxt = txt(get(r, F.dir));
+    const down = dTxt ? /น้อย|ไม่เกิน|ลด/.test(dTxt) : /ไม่เกิน|ไม่สูงกว่า|ไม่มากกว่า/.test(name);
+    const isForecast = result == null && forecast != null;
+    const v = result != null ? result : forecast;
+    let pct = null;
+    if(target != null && v != null) pct = down ? (v <= 0 ? 1 : target / v) : (target > 0 ? v / target : null);
+    // คอลัมน์ "คิดเป็นร้อยละ" ในชีต (ถ้ากรอก) ใช้แทนค่าที่คำนวณ · ไม่มีเครื่องหมาย % และมากกว่า 5 = เลขร้อยละ (117.01 = 117.01%)
+    const pTxt = val(get(r, F.pct));
+    if(pTxt){ let p = parseNum(pTxt); if(p != null){ if(!/%/.test(pTxt) && Math.abs(p) > 5) p = p / 100; pct = p; } }
+    const met = (result == null || target == null) ? null : (down ? result <= target : result >= target);
+    const sTxt = txt(get(r, F.status));
+    const status = /ไม่บรรลุ|ไม่ผ่าน/.test(sTxt) ? KR_FAIL
+      : /บรรลุ|ผ่าน|สำเร็จ/.test(sTxt) ? KR_PASS
+      : /รอ/.test(sTxt) ? KR_WAIT
+      : sTxt || (met == null ? KR_WAIT : met ? KR_PASS : KR_FAIL);
+    const aliases = txt(get(r, F.alias)).split(/[\s,;]+/).filter(s => s && s !== '-');
+    return { fy, st: txt(get(r, F.st)), org, ks, code: ks || org, level: ks ? 'st' : 'org', name,
+      targetText: tTxt, unit: uTxt, resultText, forecastText, target, result, forecast, isForecast, pct, down,
+      status, note: val(get(r, F.note)), aliases };
+  }).filter(Boolean);
+  // แถวตัวชี้วัดองค์กร = แถวที่ KPI_Strategy_Code ว่าง · ถ้ารหัสองค์กรนั้นไม่มีแถวว่างในปีนั้น ใช้แถวแรกของรหัสองค์กร
+  // (ชีตใส่รหัสรายปีในแถวองค์กรเมื่อใช้ผลเดียวกัน เช่น KPI-ORG-02 ↔ KPI-ST69-03) และถือรหัสรายปีนั้นเป็นรหัสที่ใช้ผลเดียวกัน
+  const firstOf = {};
+  recs.forEach(k => { const key = k.fy + '|' + k.org; if(k.org && !(key in firstOf)) firstOf[key] = k; });
+  Object.values(firstOf).forEach(k => {
+    if(recs.some(x => x.fy === k.fy && x.org === k.org && x.level === 'org')) return;
+    if(!k.aliases.includes(k.ks)) k.aliases.unshift(k.ks);
+    k.ks = ''; k.code = k.org; k.level = 'org';
+  });
+  return recs;
+}
+// ผลของตัวชี้วัด (รหัสองค์กร / รหัสรายปี หรือรหัสรายปีที่ระบุว่าใช้ผลเดียวกัน) ในปีงบที่กำหนด
+function kpiResultFor(code, fy){
+  code = String(code || '').trim();
+  if(!code) return null;
+  const L = (window.ACP_KPI_RESULTS || []).filter(k => k.fy === fy);
+  return L.find(k => k.code === code) || L.find(k => k.aliases.includes(code)) || null;
+}
+const krEsc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const krPctTxt = p => p == null ? '-' : (p * 100).toFixed(1) + '%';
+function krBarHtml(k){
+  if(k.pct == null) return '<span style="color:var(--ink-400)">-</span>';
+  const cls = k.isForecast ? 'none' : KR_CLS(k.status);
+  return `<div class="tap-inline${k.isForecast ? ' kr-fc' : ''}"><div class="tap-bar ${cls}"><div class="fill" style="width:${Math.max(0, Math.min(100, k.pct * 100))}%"></div></div><span class="v">${krPctTxt(k.pct)}</span></div>` +
+    (k.isForecast ? '<span class="kr-fc-lbl">จากค่าคาดการณ์</span>' : '');
+}
+const krBadge = s => `<span class="badge ${KR_CLS(s)}">${krEsc(s || '-')}</span>`;
+// ป้ายผลจริงเล็ก ๆ สำหรับหน้า "ความเชื่อมโยงยุทธศาสตร์"
+function kpiResultChip(code, fy){
+  const k = kpiResultFor(code, fy);
+  if(!k) return '';
+  const v = k.result != null ? `ผล ${k.resultText}` : k.forecastText ? `คาดการณ์ ${k.forecastText}` : '';
+  return `<span class="kr-res">${krEsc(v)}${k.pct != null ? ` (${krPctTxt(k.pct)})` : ''} ${krBadge(k.status)}</span>`;
+}
+// จัดกลุ่ม: ยุทธศาสตร์ → ตัวชี้วัดองค์กร (แถว org) → ตัวชี้วัดระดับยุทธศาสตร์ภายใต้ตัวชี้วัดองค์กรนั้น
+function kpiResultGroups(list){
+  const cmp = (a, b) => String(a).localeCompare(String(b), 'th', {numeric:true});
+  const sts = [...new Set(list.map(k => k.st || '-'))].sort(cmp);
+  return sts.map(st => {
+    const inSt = list.filter(k => (k.st || '-') === st);
+    const orgs = [...new Set(inSt.map(k => k.org || '-'))].sort(cmp);
+    return { st, orgs: orgs.map(org => ({
+      org,
+      head: inSt.find(k => k.level === 'org' && (k.org || '-') === org) || null,
+      items: inSt.filter(k => k.level === 'st' && (k.org || '-') === org).sort((a, b) => cmp(a.ks, b.ks)),
+    })) };
+  });
+}
+function kpiResultCounts(list){
+  const pass = list.filter(k => k.status === KR_PASS).length, fail = list.filter(k => k.status === KR_FAIL).length;
+  return { n: list.length, org: list.filter(k => k.level === 'org').length, st: list.filter(k => k.level === 'st').length,
+    pass, fail, wait: list.length - pass - fail };
+}
+function renderKpiView(strategies){
+  const sel = document.getElementById('krYear');
+  if(!sel) return;
+  const L = window.ACP_KPI_RESULTS || [];
+  const stName = {};
+  (strategies || []).forEach(s => { stName[s.code] = s.name; });
+  window.ACP_KPI_ST_NAMES = stName;
+  const years = [...new Set(L.map(k => k.fy))].sort((a, b) => b - a);
+  const body = document.getElementById('krBody'), note = document.getElementById('krNote');
+  if(!years.length){
+    sel.innerHTML = '<option>-</option>';
+    document.getElementById('krCards').innerHTML = '';
+    note.style.display = 'none';
+    body.innerHTML = '<div class="st-empty">ยังไม่มีข้อมูลผลตัวชี้วัด — ส่งชีต "ผลตัวชี้วัดที่สำคัญ" ขึ้นเว็บจากเมนูในไฟล์ Data ACP69</div>';
+    return;
+  }
+  sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+  sel.value = String(years.includes(window.LIVE_FISCAL_YEAR) ? window.LIVE_FISCAL_YEAR : years[0]);
+  note.style.display = '';
+  note.innerHTML = '<b>% เทียบเป้าหมาย</b> = ผลการดำเนินงาน ÷ ค่าเป้าหมาย (ตัวชี้วัดแบบ "ไม่เกิน" = ค่าเป้าหมาย ÷ ผล) · แถบยาวสุดที่ 100% แต่ตัวเลขแสดงค่าจริง · ' +
+    'ตัวชี้วัดที่ยังไม่มีผลแสดงร้อยละจากค่าคาดการณ์ (แถบสีจาง) · สถานะใช้ตามที่ระบุในชีต ถ้าไม่ระบุ: ผลถึงเป้า = บรรลุ, ไม่ถึงเป้า = ไม่บรรลุ, ยังไม่มีผล = รอผล';
+  const row = (k, cls) => `<tr class="${cls}">
+      <td><div class="kr-nm">${krEsc(k.name)}${k.aliases.map(a => `<span class="kr-alias" title="ใช้ผลเดียวกับตัวชี้วัดรายปีนี้">= ${krEsc(a)}</span>`).join('')}</div><span class="kr-code">${krEsc(k.code)}</span></td>
+      <td class="num">${krEsc(k.targetText || '-')}</td>
+      <td>${krEsc(k.unit || '')}</td>
+      <td class="num">${k.resultText ? krEsc(k.resultText) : k.forecastText ? `<span style="color:var(--ink-400)">คาดการณ์ ${krEsc(k.forecastText)}</span>` : '-'}</td>
+      <td style="min-width:170px">${krBarHtml(k)}</td>
+      <td style="text-align:center">${krBadge(k.status)}</td>
+      <td><div class="kr-note">${krEsc(k.note)}</div></td></tr>`;
+  const draw = () => {
+    const fy = Number(sel.value);
+    const list = L.filter(k => k.fy === fy);
+    const c = kpiResultCounts(list);
+    const pc = n => c.n ? Math.round(n / c.n * 100) : 0;
+    document.getElementById('krCards').innerHTML = `
+      <div class="kpi-card c1"><div class="accent-bar"></div><span class="eyebrow">ตัวชี้วัดทั้งหมด ปีงบประมาณ ${fy}</span>
+        <div class="value">${c.n}<span class="unit">ตัวชี้วัด</span></div><div class="sub">องค์กร ${c.org} · ระดับยุทธศาสตร์ ${c.st}</div></div>
+      <div class="kpi-card c3"><div class="accent-bar"></div><span class="eyebrow">บรรลุเป้าหมาย</span>
+        <div class="value">${c.pass}<span class="unit">/ ${c.n} ตัวชี้วัด</span></div><div class="sub">${pc(c.pass)}% ของตัวชี้วัดทั้งหมด</div></div>
+      <div class="kpi-card c4"><div class="accent-bar"></div><span class="eyebrow">ไม่บรรลุเป้าหมาย</span>
+        <div class="value">${c.fail}<span class="unit">ตัวชี้วัด</span></div><div class="sub">${pc(c.fail)}% ของตัวชี้วัดทั้งหมด</div></div>
+      <div class="kpi-card c2"><div class="accent-bar"></div><span class="eyebrow">รอผล</span>
+        <div class="value">${c.wait}<span class="unit">ตัวชี้วัด</span></div><div class="sub">ยังไม่มีผลการดำเนินงาน</div></div>`;
+    document.getElementById('krSub').textContent = `ผลการดำเนินงานเทียบค่าเป้าหมาย ปีงบประมาณ ${fy} (ที่มา: ชีต "ผลตัวชี้วัดที่สำคัญ")`;
+    body.innerHTML = kpiResultGroups(list).map(g => `
+      <div class="kr-st-title">${krEsc(g.st)}${stName[g.st] ? ' · ' + krEsc(stName[g.st]) : ''}</div>
+      <div class="kr-tbl-wrap"><table class="kr-tbl"><colgroup><col><col style="width:110px"><col style="width:90px"><col style="width:140px"><col style="width:190px"><col style="width:140px"><col style="width:230px"></colgroup>
+        <thead><tr><th>ตัวชี้วัด</th><th class="num">ค่าเป้าหมาย</th><th>หน่วยนับ</th><th class="num">ผลการดำเนินงาน</th><th>% เทียบเป้าหมาย</th><th style="text-align:center">สถานะ</th><th>หมายเหตุ</th></tr></thead>
+        <tbody>${g.orgs.map(o => (o.head ? row(o.head, 'kr-org')
+            : `<tr class="kr-org"><td colspan="7"><div class="kr-nm">ตัวชี้วัดองค์กร ${krEsc(o.org)}</div></td></tr>`) +
+          o.items.map(k => row(k, 'kr-st')).join('')).join('')}</tbody>
+      </table></div>`).join('');
+  };
+  sel.onchange = draw;
+  draw();
+
+  // แนวโน้มรายปี (เมื่อมีข้อมูลมากกว่า 1 ปี): ตัวชี้วัดองค์กรรหัสเดียวกัน
+  const tp = document.getElementById('krTrendPanel');
+  if(years.length < 2){ tp.style.display = 'none'; return; }
+  tp.style.display = '';
+  const asc = years.slice().reverse();
+  const orgs = [...new Set(L.filter(k => k.level === 'org').map(k => k.org))].sort((a, b) => a.localeCompare(b, 'th', {numeric:true}));
+  document.getElementById('krTrend').innerHTML = `<table class="kr-tbl"><thead><tr><th>ตัวชี้วัดองค์กร</th>${asc.map(y => `<th style="text-align:center">${y}</th>`).join('')}</tr></thead><tbody>${
+    orgs.map(org => {
+      const byY = asc.map(y => L.find(k => k.fy === y && k.level === 'org' && k.org === org));
+      const last = byY.filter(Boolean).pop();
+      return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div><span class="kr-code">${krEsc(org)}</span></td>${byY.map(k => `<td style="text-align:center; white-space:nowrap">${
+        k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; margin-bottom:3px">${krPctTxt(k.pct)}${k.isForecast ? '*' : ''}</div>${krBadge(k.status)}` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
+    }).join('')}</tbody></table><div class="panel-sub" style="margin-top:8px">* ร้อยละจากค่าคาดการณ์ (ยังไม่มีผลจริง)</div>`;
+}
+
 function parseNum(v){
   if(v==null) return null;
   let s = String(v).trim();
@@ -4636,6 +4913,8 @@ async function loadAndRender(){
       ['initiative','yearKpi','kpiLink','cbe'].map(fetchSheetBySpec));
     // ผลสิ้นปีของทุกปีที่ปิดแล้ว (ไม่กรองตามปีปัจจุบัน)
     window.ACP_YEAR_END = buildYearEnd(await fetchSheetBySpec('yearEnd'));
+    // ผลตัวชี้วัดองค์กรและรายปี (ทุกปีงบ ไม่กรองตามปีปัจจุบัน) — ไม่ critical
+    try{ window.ACP_KPI_RESULTS = buildKpiResults(await fetchSheetBySpec('kpiResult')); }catch(krErr){ console.warn('[Dashboard] อ่านผลตัวชี้วัดไม่สำเร็จ:', krErr); }
 
     // ---- ถ้าชีตมีหลายปีงบประมาณ (คอลัมน์ Fiscal_Year) ใช้เฉพาะปีล่าสุด ----
     const fyOf = r => parseInt(String(r['Fiscal_Year']||'').replace(/[^0-9]/g,''), 10);
@@ -4761,6 +5040,7 @@ async function loadAndRender(){
     loadingEl.style.display = 'none';
     // ปีงบ ≥ 2570 ใช้สถานะ Trigger Point ที่แดชบอร์ดคำนวณเอง (ปี 2569 คงสถานะจากชีต)
     window.ACPDash.start({records: applyTriggerPoint(records, window.LIVE_FISCAL_YEAR), strategies, orgKpis, historyPeriods, masterPlans});
+    try{ renderKpiView(strategies); }catch(krErr){ console.warn('[Dashboard] แสดงผลตัวชี้วัดไม่สำเร็จ:', krErr); }
   }catch(err){
     console.error(err);
     loadingEl.style.display = 'none';
