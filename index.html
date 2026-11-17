@@ -2352,7 +2352,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
             <div class="st-org-head">
               <div class="st-org-t"><span class="eyebrow">ตัวชี้วัดองค์กร ${o.code !== '__none__' ? e(o.code) : ''}</span>
                 <div class="st-org-nm">${e(o.name)}</div></div>
-              <div class="st-org-side">${o.target ? `<span class="st-target">เป้าหมาย ${e(o.target)} ${e(o.unit)}</span>` : ''}${o.code !== '__none__' ? kpiResultChip(o.code, KR_FY) : ''}
+              <div class="st-org-side">${(t => t.target ? `<span class="st-target">เป้าหมาย ${e(t.target)} ${e(t.unit)}</span>` : '')(orgTargetText(o, KR_FY))}${o.code !== '__none__' ? kpiResultChip(o.code, KR_FY) : ''}
                 <span class="st-meta">${o.projects.length} โครงการ</span>${countChips(o.projects)}</div>
             </div>
             <div class="st-tbl-wrap"><table class="st-tbl">
@@ -3196,7 +3196,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       t.strategies.forEach(s=>{
         const rows = [];
         s.orgs.forEach(o=> o.items.forEach((it, i)=> rows.push(`<tr>
-          <td>${i === 0 ? `<b>${esc(o.name)}</b>${o.target ? `<div class="rp-small">เป้าหมาย ${tgt(o)}</div>` : ''}` : ''}</td>
+          <td>${i === 0 ? `<b>${esc(o.name)}</b>${(t => t.target ? `<div class="rp-small">เป้าหมาย ${tgt(t)}</div>` : '')(orgTargetText(o, per.fiscalYear))}` : ''}</td>
           <td>${yName(it)}</td><td class="c">${tgt(it)}</td><td class="r">${it.n}</td><td class="r">${fmtBaht(it.budget)}</td>
           <td class="r">${it.nGood}</td>${tp ? `<td class="r">${it.nFair}</td>` : ''}<td class="r">${it.nPoor}</td><td>${bar(it.avgProgress)}</td></tr>`)));
         B.push({kind:'table', title:`${s.label || s.code} ${s.name} (${s.n} โครงการ · งบประมาณ ${fmtShort(s.budget)} บาท)`,
@@ -3699,7 +3699,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       let row = table(ws, r0, [
         {h:'ยุทธศาสตร์', get:x=>`${x.s.label || x.s.code} ${x.s.name}`},
         {h:'ตัวชี้วัดองค์กร', get:x=>x.o.name},
-        {h:'เป้าหมายตัวชี้วัดองค์กร', get:x=>tgt(x.o)},
+        {h:'เป้าหมายตัวชี้วัดองค์กร', get:x=>tgt(orgTargetText(x.o, per.fiscalYear))},
         {h:'กลยุทธ์', get:x=>x.it.si ? `${x.it.si.code}${x.it.si.name ? ' ' + x.it.si.name : ''}` : ''},
         {h:'ตัวชี้วัดรายปี', get:x=>x.it.name !== x.it.code ? `${x.it.name} (${x.it.code})` : x.it.code},
         {h:'ค่าเป้าหมาย', get:x=>tgt(x.it)},
@@ -4698,6 +4698,11 @@ function kpiResultFor(code, fy, period){
   if(!code) return null;
   const L = kpiResultList(fy, period);
   return L.find(k => k.code === code) || L.find(k => k.aliases.includes(code)) || null;
+}
+// เป้าหมายตัวชี้วัดองค์กรของปีที่ดู: จากชีต "ผลตัวชี้วัดที่สำคัญ" (เป้ารายปี) · ไม่มี → ค่าในชีต "ตัวชี้วัดองค์กร" (เป้า ณ สิ้นแผน) — ผู้ใช้กำหนด พ.ย. 2569
+function orgTargetText(o, fy){
+  const k = o && o.code ? kpiResultFor(o.code, fy) : null;
+  return k && k.targetText ? { target: k.targetText, unit: k.unit || o.unit || '' } : { target: o ? o.target : '', unit: o ? o.unit : '' };
 }
 const krEsc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const krPctTxt = p => p == null ? '-' : (p * 100).toFixed(1) + '%';
