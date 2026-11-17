@@ -409,6 +409,13 @@ window.addEventListener('load', function(){
   .kr-note{font-size:12px; color:var(--ink-600); line-height:1.5; min-width:180px;}
   .kr-fc .tap-bar, .kr-fc .v{opacity:.55;}
   .kr-fc-lbl{display:block; font-size:10.5px; color:var(--ink-400); text-align:right;}
+  .kr-plan{min-width:1320px;} .kr-plan td{vertical-align:top;}
+  .kr-plan tr.kr-grp td{background:var(--latex-50); font-family:'Kanit',sans-serif; font-weight:600; font-size:13px; color:var(--forest-600);}
+  .kr-y{font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600;}
+  .kr-yt{font-size:10.5px; color:var(--ink-400); line-height:1.4;}
+  .kr-c-great{color:#2f7a4f;} .kr-c-poor{color:#b5533c;} .kr-c-good{color:#3d7ea6;} .kr-c-fair{color:#c8933c;} .kr-c-none{color:var(--ink-400);}
+  .kr-tbl thead th{position:static;}
+  .kr-trend .kr-ysep{border-left:1px solid var(--line);}
   .kr-st-body{padding:12px 18px 8px;}
   #krBody .st-tree{display:flex; flex-direction:column; gap:12px;}
   .kr-st-title{font-family:'Kanit',sans-serif; font-weight:600; font-size:14px; color:var(--ink-900); margin:18px 0 8px;}
@@ -1285,6 +1292,12 @@ window.addEventListener('load', function(){
         </div>
         <div class="st-note" id="krNote"></div>
         <div id="krBody"></div>
+      </div>
+
+      <div class="panel" id="krPlanPanel" style="display:none; margin-bottom:24px;">
+        <h2 id="krPlanTitle">ความก้าวหน้าตามแผนวิสาหกิจ 5 ปี</h2>
+        <div class="panel-sub" id="krPlanSub"></div>
+        <div class="kr-tbl-wrap" id="krPlan"></div>
       </div>
 
       <div class="panel" id="krTrendPanel" style="display:none;">
@@ -4091,6 +4104,7 @@ const SHEET_SPECS = {
   kpiLink:   { names:['เชื่อมโยงตัวชี้วัด'],                required:['KPI_Year_Code'], optional:true },
   cbe:       { names:['Core_Business_Enabler'],             required:['CBE_Code'], optional:true },
   kpiResult: { names:['ผลตัวชี้วัดที่สำคัญ','ผลตัวชี้วัดองค์กรและรายปี'], required:['KPI_Org_Code'], optional:true },
+  plan5:     { names:['เป้าหมาย 5 ปี','เป้าหมาย5ปี'],                  required:['ลำดับในแผน'], optional:true },
 };
 
 // ---------- ผลสิ้นปีงบประมาณ ----------
@@ -4540,7 +4554,7 @@ function buildKpiResults(rows){
   const C = {
     st: idx(/^Strategy_Code$/i), org: idx(/^KPI_Org_Code$/i), ks: idx(/^KPI_Strategy_Code$/i),
     name: idx(/^ชื่อตัวชี้วัด/), target: idx(/^ค่าเป้าหมาย/), unit: idx(/^หน่วย/), fy: idx(/^ปีงบ|^Fiscal_Year/i),
-    dir: idx(/^ทิศทาง/), alias: idx(/ใช้ผลเดียวกัน/), period: idx(/^รอบ/),
+    dir: idx(/^ทิศทาง/), alias: idx(/ใช้ผลเดียวกัน/), period: idx(/^รอบ/), plan: idx(/^ลำดับในแผน/),
   };
   // คอลัมน์ของแต่ละรอบ: g[รอบ] = {result, fcst, note, status, pct}
   const G = {};
@@ -4602,7 +4616,7 @@ function buildKpiResults(rows){
       else if(full) status = met === false ? KR_FAIL : KR_WAIT;
       else if(forecast != null && target != null) status = meets(forecast) ? KR_LIKELY : KR_RISK;
       else status = result != null ? KR_PROG : KR_WAIT;
-      recs.push({ fy, period: g.p, st: txt(at(C.st)), org, ks, code: ks || org, level: ks ? 'st' : 'org', name,
+      recs.push({ fy, period: g.p, plan: txt(at(C.plan)), st: txt(at(C.st)), org, ks, code: ks || org, level: ks ? 'st' : 'org', name,
         targetText: tTxt, unit: uTxt, resultText: g.resultText, forecastText: g.forecastText, target, result, forecast,
         isForecast, pct, down, status, note: g.note, aliases: aliases.slice() });
     });
@@ -4734,8 +4748,7 @@ function renderKpiView(strategies){
           <span class="st-meta">${cc.n} ตัวชี้วัด</span><span class="st-counts">${chips}</span></summary>
       <div class="kr-st-body"><div class="kr-tbl-wrap"><table class="kr-tbl"><colgroup><col><col style="width:110px"><col style="width:90px"><col style="width:140px"><col style="width:190px"><col style="width:150px"><col style="width:230px"></colgroup>
         <thead><tr><th>ตัวชี้วัด</th><th class="num">ค่าเป้าหมาย${partial ? 'ทั้งปี' : ''}</th><th>หน่วยนับ</th><th class="num">ผลการดำเนินงาน${partial ? 'สะสม' : ''}</th><th>% เทียบเป้าหมาย${partial ? ' (คาดการณ์)' : ''}</th><th style="text-align:center">สถานะ</th><th>หมายเหตุ</th></tr></thead>
-        <tbody>${g.orgs.map(o => (o.head ? row(o.head, 'kr-org')
-            : `<tr class="kr-org"><td colspan="7"><div class="kr-nm">ตัวชี้วัดองค์กร ${krEsc(o.org)}</div></td></tr>`) +
+        <tbody>${g.orgs.map(o => (o.head ? row(o.head, 'kr-org') : '') +   // ปีที่ไม่มีตัวชี้วัดองค์กรของกลุ่มนี้ (เช่น ปี 67–68) แสดงเฉพาะตัวชี้วัดระดับยุทธศาสตร์
           o.items.map(k => row(k, 'kr-st')).join('')).join('')}</tbody>
       </table></div></div>
       </details>`;
@@ -4745,6 +4758,7 @@ function renderKpiView(strategies){
   psel.onchange = draw;
   fillPeriods();
   draw();
+  renderPlan5(stName);
 
   // แนวโน้ม (เมื่อมีมากกว่า 1 รอบ): ตัวชี้วัดองค์กรรหัสเดียวกัน ทุกปี/ทุกรอบที่บันทึกไว้
   const tp = document.getElementById('krTrendPanel');
@@ -4752,13 +4766,90 @@ function renderKpiView(strategies){
   if(cols.length < 2){ tp.style.display = 'none'; return; }
   tp.style.display = '';
   const orgs = [...new Set(L.filter(k => k.level === 'org').map(k => k.org))].sort((a, b) => a.localeCompare(b, 'th', {numeric:true}));
-  document.getElementById('krTrend').innerHTML = `<table class="kr-tbl"><thead><tr><th>ตัวชี้วัดองค์กร</th>${cols.map(c => `<th style="text-align:center">${c.fy}${c.period < KR_FULL ? `<br><span style="font-weight:400">${krPeriodLabel(c.period)}</span>` : ''}</th>`).join('')}</tr></thead><tbody>${
+  // หัวตาราง 2 ชั้น: ปีงบประมาณ → รอบ (ไตรมาส 1–3 / ผลสิ้นปี) · เส้นคั่นระหว่างปี
+  const ysep = i => (i === 0 || cols[i - 1].fy !== cols[i].fy) ? 'kr-ysep' : '';
+  document.getElementById('krTrend').innerHTML = `<table class="kr-tbl kr-trend"><thead><tr><th rowspan="2">ตัวชี้วัดองค์กร</th>${[...new Set(cols.map(c => c.fy))].map(y => `<th class="kr-ysep" colspan="${cols.filter(c => c.fy === y).length}" style="text-align:center">ปีงบประมาณ ${y}</th>`).join('')}</tr>
+    <tr>${cols.map((c, i) => `<th class="${ysep(i)}" style="text-align:center; font-weight:500">${c.period < KR_FULL ? krPeriodLabel(c.period) : 'ผลสิ้นปี'}</th>`).join('')}</tr></thead><tbody>${
     orgs.map(org => {
       const byC = cols.map(c => L.find(k => k.fy === c.fy && k.period === c.period && k.level === 'org' && k.org === org));
       const last = byC.filter(Boolean).pop();
-      return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div></td>${byC.map(k => `<td style="text-align:center; white-space:nowrap">${
+      return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div></td>${byC.map((k, i) => `<td class="${ysep(i)}" style="text-align:center; white-space:nowrap">${
         k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; margin-bottom:3px">${krPctTxt(k.pct)}${k.isForecast ? '*' : ''}</div>${krBadge(k.status)}` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
     }).join('')}</tbody></table><div class="panel-sub" style="margin-top:8px">รอบไตรมาส: ร้อยละจากค่าคาดการณ์สิ้นปีของรอบนั้น (ถ้าผลสะสมยังไม่ถึงเป้า) · * = ร้อยละจากค่าคาดการณ์</div>`;
+}
+
+// ---------- เป้าหมาย 5 ปี (แผนวิสาหกิจ · ชีต "เป้าหมาย 5 ปี") ----------
+// 1 แถว = ตัวชี้วัด 1 ตัวในแผน · เชื่อมกับผลรายปีในชีต "ผลตัวชี้วัดที่สำคัญ" ด้วยคอลัมน์ "ลำดับในแผน" (เลขคงที่ทุกปี เช่น 1, 5.2, 1.1)
+// ผลสะสม: วิธีนับ "สะสม" = รวมผลทุกปี · "เฉลี่ย" = ค่าเฉลี่ย · อื่น ๆ ("ค่าล่าสุด") = ผลปีล่าสุดที่มี (ผู้ใช้กำหนด พ.ย. 2569 ตามไฟล์แผนวิสาหกิจ)
+window.ACP_PLAN5 = null;
+function buildPlan5(rows){
+  if(!rows || !rows.length) return null;
+  const fields = (rows.__fields || Object.keys(rows[0])).map(f => String(f).replace(/\s+/g,' ').trim());
+  const raw = rows.__raw || rows.map(o => fields.map(f => o[f]));
+  const idx = re => fields.findIndex(f => re.test(f));
+  const C = { plan: idx(/^ลำดับในแผน/), level: idx(/^ระดับ/), st: idx(/^Strategy_Code$/i), name: idx(/^ชื่อตัวชี้วัด/),
+    unit: idx(/^หน่วย/), target: idx(/^เป้าหมาย/), method: idx(/วิธีนับ/), dir: idx(/^ทิศทาง/) };
+  if(C.plan < 0 || C.target < 0) return null;
+  const ys = (fields[C.target].match(/(25\d\d)/) || [])[1];
+  const endYear = ys ? Number(ys) : 2570;
+  const txt = v => String(v ?? '').replace(/\s+/g,' ').trim();
+  const val = v => { const s = txt(v); return (s === '' || s === '-') ? '' : s; };
+  const items = raw.map(r => {
+    const at = i => i >= 0 ? r[i] : '';
+    const plan = txt(at(C.plan));
+    if(!plan) return null;
+    const name = txt(at(C.name)), dTxt = txt(at(C.dir)), m = txt(at(C.method));
+    return { plan, level: /องค์กร|org/i.test(txt(at(C.level))) ? 'org' : 'st', st: txt(at(C.st)), name, unit: txt(at(C.unit)),
+      targetText: val(at(C.target)), target: parseNum(val(at(C.target))),
+      method: /สะสม|รวม/.test(m) ? 'sum' : /เฉลี่ย/.test(m) ? 'avg' : 'last', methodText: m || 'ค่าล่าสุด',
+      down: dTxt ? /น้อย|ไม่เกิน|ลด/.test(dTxt) : /ไม่เกิน|ไม่สูงกว่า|ไม่มากกว่า/.test(name) };
+  }).filter(Boolean);
+  return items.length ? { endYear, startYear: endYear - 4, items } : null;
+}
+function renderPlan5(stName){
+  const panel = document.getElementById('krPlanPanel');
+  if(!panel) return;
+  const P = window.ACP_PLAN5;
+  if(!P){ panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  const L = window.ACP_KPI_RESULTS || [];
+  const years = []; for(let y = P.startYear; y <= P.endYear; y++) years.push(y);
+  const fmt = v => v == null ? '-' : Number(v).toLocaleString('en-US', {maximumFractionDigits: 4});
+  // ผลของตัวชี้วัดในปีหนึ่ง = รอบทั้งปีถ้ามี ไม่งั้นรอบล่าสุดของปีนั้น
+  const recOf = (plan, fy) => L.filter(k => k.fy === fy && k.plan === plan).sort((a, b) => b.period - a.period)[0] || null;
+  const cell = k => {
+    if(!k) return '<span style="color:var(--ink-400)">-</span>';
+    const v = k.result != null ? k.resultText : k.forecastText ? 'คาดการณ์ ' + k.forecastText : '-';
+    return `<div class="kr-y kr-c-${KR_CLS(k.status)}" title="${krEsc(k.status)}">${krEsc(v)}</div>` +
+      `<div class="kr-yt">เป้า ${krEsc(k.targetText || '-')}${k.period < KR_FULL ? ' · ' + krPeriodLabel(k.period) : ''}</div>`;
+  };
+  // ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน (ให้ตรงกับไฟล์แผนวิสาหกิจ — ผู้ใช้เลือก พ.ย. 2569) และแสดงเครื่องหมาย *
+  const cum = it => {
+    const ks = years.map(y => recOf(it.plan, y)).filter(k => k && (k.result != null || k.forecast != null));
+    if(!ks.length) return { v: null, fc: false };
+    const vals = ks.map(k => k.result != null ? k.result : k.forecast);
+    const v = it.method === 'sum' ? vals.reduce((a, b) => a + b, 0) : it.method === 'avg' ? vals.reduce((a, b) => a + b, 0) / vals.length : vals[vals.length - 1];
+    const fc = it.method === 'last' ? ks[ks.length - 1].result == null : ks.some(k => k.result == null);
+    return { v, fc };
+  };
+  const pctOf = (it, v) => (it.target == null || v == null) ? null : it.down ? (v <= 0 ? 1 : it.target / v) : (it.target > 0 ? v / it.target : null);
+  const bar = p => p == null ? '<span style="color:var(--ink-400)">-</span>'
+    : `<div class="tap-inline"><div class="tap-bar ${p >= 1 ? 'great' : p >= 0.8 ? 'fair' : 'poor'}"><div class="fill" style="width:${Math.max(0, Math.min(100, p * 100))}%"></div></div><span class="v">${krPctTxt(p)}</span></div>`;
+  const cmp = (a, b) => String(a).localeCompare(String(b), 'th', {numeric:true});
+  const sts = [...new Set(P.items.map(it => it.st || '-'))].sort(cmp);
+  const ncol = years.length + 5;
+  document.getElementById('krPlanTitle').textContent = `ความก้าวหน้าตามแผนวิสาหกิจ 5 ปี (พ.ศ. ${P.startYear} – ${P.endYear})`;
+  document.getElementById('krPlanSub').textContent = `ผลรายปีเทียบเป้าหมายรายปี และผลสะสมเทียบเป้าหมาย ณ สิ้นปี ${P.endYear} (ที่มา: ชีต "เป้าหมาย 5 ปี" และ "ผลตัวชี้วัดที่สำคัญ")`;
+  document.getElementById('krPlan').innerHTML = `<table class="kr-tbl kr-plan"><colgroup><col style="width:280px">${years.map(() => '<col style="width:112px">').join('')}<col style="width:110px"><col style="width:100px"><col style="width:180px"><col style="width:90px"></colgroup><thead><tr><th>ตัวชี้วัด</th>${years.map(y => `<th style="text-align:center">${y}</th>`).join('')}<th class="num">เป้าหมาย 5 ปี</th><th class="num">ผลสะสม</th><th>% เทียบเป้าหมาย 5 ปี</th><th>วิธีนับผลสะสม</th></tr></thead><tbody>${
+    sts.map(st => `<tr class="kr-grp"><td colspan="${ncol}">${krEsc(krStLabel(st))}${stName[st] ? ' · ' + krEsc(stName[st]) : ''}</td></tr>` +
+      P.items.filter(it => (it.st || '-') === st).sort((a, b) => (a.level === b.level ? 0 : a.level === 'org' ? -1 : 1)).map(it => {
+        const c = cum(it);
+        return `<tr class="${it.level === 'org' ? 'kr-org' : 'kr-st'}"><td><div class="kr-nm">${krEsc(it.name)}</div><div class="kr-yt">${krEsc(it.unit)}</div></td>` +
+          years.map(y => `<td style="text-align:center">${cell(recOf(it.plan, y))}</td>`).join('') +
+          `<td class="num">${krEsc(it.targetText || '-')}</td><td class="num">${fmt(c.v)}${c.fc ? '*' : ''}</td><td style="min-width:160px">${bar(pctOf(it, c.v))}${c.fc ? '<div class="kr-yt">* รวมค่าคาดการณ์</div>' : ''}</td><td><span class="kr-yt">${krEsc(it.methodText)}</span></td></tr>`;
+      }).join('')).join('')}</tbody></table>
+    <div class="panel-sub" style="margin-top:8px">สีของผลรายปี: เขียว = บรรลุเป้าหมาย · แดง = ไม่บรรลุ · ฟ้า = คาดว่าบรรลุ · ส้ม = เสี่ยงไม่บรรลุ · เทา = รอผล ·
+      ผลสะสม: "สะสม" = รวมผลทุกปี, "ค่าล่าสุด" = ผลของปีล่าสุดที่มีผล · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>`;
 }
 
 function parseNum(v){
@@ -4991,6 +5082,7 @@ async function loadAndRender(){
     window.ACP_YEAR_END = buildYearEnd(await fetchSheetBySpec('yearEnd'));
     // ผลตัวชี้วัดองค์กรและรายปี (ทุกปีงบ ไม่กรองตามปีปัจจุบัน) — ไม่ critical
     try{ window.ACP_KPI_RESULTS = buildKpiResults(await fetchSheetBySpec('kpiResult')); }catch(krErr){ console.warn('[Dashboard] อ่านผลตัวชี้วัดไม่สำเร็จ:', krErr); }
+    try{ window.ACP_PLAN5 = buildPlan5(await fetchSheetBySpec('plan5')); }catch(p5Err){ console.warn('[Dashboard] อ่านเป้าหมาย 5 ปีไม่สำเร็จ:', p5Err); }
 
     // ---- ถ้าชีตมีหลายปีงบประมาณ (คอลัมน์ Fiscal_Year) ใช้เฉพาะปีล่าสุด ----
     const fyOf = r => parseInt(String(r['Fiscal_Year']||'').replace(/[^0-9]/g,''), 10);
