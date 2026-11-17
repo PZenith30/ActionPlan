@@ -409,6 +409,8 @@ window.addEventListener('load', function(){
   .kr-note{font-size:12px; color:var(--ink-600); line-height:1.5; min-width:180px;}
   .kr-fc .tap-bar, .kr-fc .v{opacity:.55;}
   .kr-fc-lbl{display:block; font-size:10.5px; color:var(--ink-400); text-align:right;}
+  .kr-st-body{padding:12px 18px 8px;}
+  #krBody .st-tree{display:flex; flex-direction:column; gap:12px;}
   .kr-st-title{font-family:'Kanit',sans-serif; font-weight:600; font-size:14px; color:var(--ink-900); margin:18px 0 8px;}
   .kr-st-title:first-child{margin-top:0;}
   .kr-res{display:block; margin-top:3px; font-size:11.5px; color:var(--ink-600);}
@@ -3259,10 +3261,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         const stN = window.ACP_KPI_ST_NAMES || {};
         const pctCell = k => k.pct == null ? '<span class="rp-dash">-</span>'
           : `<div class="rp-barw"><div class="rp-bar ${k.isForecast ? 'none' : KR_CLS(k.status)}"><i style="width:${Math.max(0, Math.min(100, k.pct * 100))}%"></i></div><span class="rp-bv">${krPctTxt(k.pct)}${k.isForecast ? '*' : ''}</span></div>`;
-        const tr = (k, org) => `<tr${org ? ' style="background:#f1f6f2"' : ''}><td><div class="rp-nm"${org ? ' style="font-weight:600"' : ' style="padding-left:12px"'}>${esc(k.name)}</div><div class="rp-sub"${org ? '' : ' style="padding-left:12px"'}>${esc(k.code)}${k.aliases.length ? ' (ใช้เป็น ' + esc(k.aliases.join(', ')) + ')' : ''}</div></td>` +
+        const tr = (k, org) => `<tr${org ? ' style="background:#f1f6f2"' : ''}><td><div class="rp-nm"${org ? ' style="font-weight:600"' : ' style="padding-left:12px"'}>${esc(k.name)}</div></td>` +
           `<td class="r">${esc(k.targetText || '-')}</td><td>${esc(k.unit)}</td><td class="r">${k.resultText ? esc(k.resultText) : k.forecastText ? 'คาดการณ์ ' + esc(k.forecastText) : '-'}</td>` +
           `<td>${pctCell(k)}</td><td class="c">${pill(k.status)}</td><td>${esc(k.note)}</td></tr>`;
-        kpiResultGroups(list).forEach(g => B.push({kind:'table', title:`${g.st}${stN[g.st] ? ' · ' + stN[g.st] : ''}`,
+        kpiResultGroups(list).forEach(g => B.push({kind:'table', title:`${krStLabel(g.st)}${stN[g.st] ? ' · ' + stN[g.st] : ''}`,
           cols:[['ตัวชี้วัด',33],['ค่าเป้าหมาย',10,'r'],['หน่วยนับ',8],['ผลการดำเนินงาน',11,'r'],['% เทียบเป้าหมาย',12,'c'],['สถานะ',10,'c'],['หมายเหตุ',16]],
           rows: g.orgs.flatMap(o => [...(o.head ? [tr(o.head, true)] : []), ...o.items.map(k => tr(k, false))])}));
         B.push({kind:'html', html:'<div class="rp-foot-note">% เทียบเป้าหมาย = ผลการดำเนินงาน ÷ ค่าเป้าหมาย (ตัวชี้วัดแบบ "ไม่เกิน" = ค่าเป้าหมาย ÷ ผล) · * = คำนวณจากค่าคาดการณ์ (ยังไม่มีผลจริง) · สรุปเป็นจำนวนตัวชี้วัด ไม่เฉลี่ยร้อยละข้ามตัวชี้วัดเพราะหน่วยต่างกัน</div>'});
@@ -4588,6 +4590,7 @@ function krBarHtml(k){
     (k.isForecast ? '<span class="kr-fc-lbl">จากค่าคาดการณ์</span>' : '');
 }
 const krBadge = s => `<span class="badge ${KR_CLS(s)}">${krEsc(s || '-')}</span>`;
+const krStLabel = st => { const m = String(st || '').match(/(\d+)\s*$/); return m ? 'ยุทธศาสตร์ที่ ' + Number(m[1]) : (st || 'ไม่ระบุยุทธศาสตร์'); };
 // ป้ายผลจริงเล็ก ๆ สำหรับหน้า "ความเชื่อมโยงยุทธศาสตร์"
 function kpiResultChip(code, fy){
   const k = kpiResultFor(code, fy);
@@ -4636,7 +4639,7 @@ function renderKpiView(strategies){
   note.innerHTML = '<b>% เทียบเป้าหมาย</b> = ผลการดำเนินงาน ÷ ค่าเป้าหมาย (ตัวชี้วัดแบบ "ไม่เกิน" = ค่าเป้าหมาย ÷ ผล) · แถบยาวสุดที่ 100% แต่ตัวเลขแสดงค่าจริง · ' +
     'ตัวชี้วัดที่ยังไม่มีผลแสดงร้อยละจากค่าคาดการณ์ (แถบสีจาง) · สถานะใช้ตามที่ระบุในชีต ถ้าไม่ระบุ: ผลถึงเป้า = บรรลุ, ไม่ถึงเป้า = ไม่บรรลุ, ยังไม่มีผล = รอผล';
   const row = (k, cls) => `<tr class="${cls}">
-      <td><div class="kr-nm">${krEsc(k.name)}${k.aliases.map(a => `<span class="kr-alias" title="ใช้ผลเดียวกับตัวชี้วัดรายปีนี้">= ${krEsc(a)}</span>`).join('')}</div><span class="kr-code">${krEsc(k.code)}</span></td>
+      <td><div class="kr-nm">${krEsc(k.name)}</div></td>
       <td class="num">${krEsc(k.targetText || '-')}</td>
       <td>${krEsc(k.unit || '')}</td>
       <td class="num">${k.resultText ? krEsc(k.resultText) : k.forecastText ? `<span style="color:var(--ink-400)">คาดการณ์ ${krEsc(k.forecastText)}</span>` : '-'}</td>
@@ -4658,14 +4661,21 @@ function renderKpiView(strategies){
       <div class="kpi-card c2"><div class="accent-bar"></div><span class="eyebrow">รอผล</span>
         <div class="value">${c.wait}<span class="unit">ตัวชี้วัด</span></div><div class="sub">ยังไม่มีผลการดำเนินงาน</div></div>`;
     document.getElementById('krSub').textContent = `ผลการดำเนินงานเทียบค่าเป้าหมาย ปีงบประมาณ ${fy} (ที่มา: ชีต "ผลตัวชี้วัดที่สำคัญ")`;
-    body.innerHTML = kpiResultGroups(list).map(g => `
-      <div class="kr-st-title">${krEsc(g.st)}${stName[g.st] ? ' · ' + krEsc(stName[g.st]) : ''}</div>
-      <div class="kr-tbl-wrap"><table class="kr-tbl"><colgroup><col><col style="width:110px"><col style="width:90px"><col style="width:140px"><col style="width:190px"><col style="width:140px"><col style="width:230px"></colgroup>
+    body.innerHTML = '<div class="st-tree">' + kpiResultGroups(list).map((g, gi) => {
+      const all = g.orgs.flatMap(o => (o.head ? [o.head] : []).concat(o.items)), cc = kpiResultCounts(all);
+      const chips = [['great', 'บรรลุ', cc.pass], ['poor', 'ไม่บรรลุ', cc.fail], ['none', 'รอผล', cc.wait]].filter(x => x[2]).map(x => `<span class="badge ${x[0]}">${x[1]} ${x[2]}</span>`).join('');
+      return `
+      <details class="st-node"${gi === 0 ? ' open' : ''}>
+        <summary><span class="st-lbl">${krEsc(krStLabel(g.st))}</span><span class="st-nm">${krEsc(stName[g.st] || '')}</span>
+          <span class="st-meta">${cc.n} ตัวชี้วัด</span><span class="st-counts">${chips}</span></summary>
+      <div class="kr-st-body"><div class="kr-tbl-wrap"><table class="kr-tbl"><colgroup><col><col style="width:110px"><col style="width:90px"><col style="width:140px"><col style="width:190px"><col style="width:140px"><col style="width:230px"></colgroup>
         <thead><tr><th>ตัวชี้วัด</th><th class="num">ค่าเป้าหมาย</th><th>หน่วยนับ</th><th class="num">ผลการดำเนินงาน</th><th>% เทียบเป้าหมาย</th><th style="text-align:center">สถานะ</th><th>หมายเหตุ</th></tr></thead>
         <tbody>${g.orgs.map(o => (o.head ? row(o.head, 'kr-org')
             : `<tr class="kr-org"><td colspan="7"><div class="kr-nm">ตัวชี้วัดองค์กร ${krEsc(o.org)}</div></td></tr>`) +
           o.items.map(k => row(k, 'kr-st')).join('')).join('')}</tbody>
-      </table></div>`).join('');
+      </table></div></div>
+      </details>`;
+    }).join('') + '</div>';
   };
   sel.onchange = draw;
   draw();
@@ -4680,7 +4690,7 @@ function renderKpiView(strategies){
     orgs.map(org => {
       const byY = asc.map(y => L.find(k => k.fy === y && k.level === 'org' && k.org === org));
       const last = byY.filter(Boolean).pop();
-      return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div><span class="kr-code">${krEsc(org)}</span></td>${byY.map(k => `<td style="text-align:center; white-space:nowrap">${
+      return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div></td>${byY.map(k => `<td style="text-align:center; white-space:nowrap">${
         k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; margin-bottom:3px">${krPctTxt(k.pct)}${k.isForecast ? '*' : ''}</div>${krBadge(k.status)}` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
     }).join('')}</tbody></table><div class="panel-sub" style="margin-top:8px">* ร้อยละจากค่าคาดการณ์ (ยังไม่มีผลจริง)</div>`;
 }
