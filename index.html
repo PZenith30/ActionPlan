@@ -4725,11 +4725,11 @@ function renderKpiView(strategies){
         <div class="value">${c.open}<span class="unit">ตัวชี้วัด</span></div><div class="sub">${partial ? 'ยังไม่มีค่าคาดการณ์สิ้นปี' : 'ยังไม่มีผลการดำเนินงาน'}</div></div>`;
     document.getElementById('krTitle').textContent = `ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ ประจำปีงบประมาณ ${fy}${pl}`;
     document.getElementById('krSub').textContent = `ผลการดำเนินงาน${partial ? 'สะสม' : ''}เทียบค่าเป้าหมาย${partial ? 'ทั้งปี' : ''} ปีงบประมาณ ${fy}${pl} (ที่มา: ชีต "ผลตัวชี้วัดที่สำคัญ")`;
-    body.innerHTML = '<div class="st-tree">' + kpiResultGroups(list).map((g, gi) => {
+    body.innerHTML = '<div class="st-tree">' + kpiResultGroups(list).map(g => {
       const all = g.orgs.flatMap(o => (o.head ? [o.head] : []).concat(o.items)), cc = kpiResultCounts(all);
       const chips = [['great', 'บรรลุ', cc.pass], ['good', 'คาดว่าบรรลุ', cc.likely], ['fair', 'เสี่ยง', cc.risk], ['poor', 'ไม่บรรลุ', cc.fail], ['none', 'รอผล', cc.open]].filter(x => x[2]).map(x => `<span class="badge ${x[0]}">${x[1]} ${x[2]}</span>`).join('');
       return `
-      <details class="st-node"${gi === 0 ? ' open' : ''}>
+      <details class="st-node">
         <summary><span class="st-lbl">${krEsc(krStLabel(g.st))}</span><span class="st-nm">${krEsc(stName[g.st] || '')}</span>
           <span class="st-meta">${cc.n} ตัวชี้วัด</span><span class="st-counts">${chips}</span></summary>
       <div class="kr-st-body"><div class="kr-tbl-wrap"><table class="kr-tbl"><colgroup><col><col style="width:110px"><col style="width:90px"><col style="width:140px"><col style="width:190px"><col style="width:150px"><col style="width:230px"></colgroup>
