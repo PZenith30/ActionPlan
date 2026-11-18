@@ -416,6 +416,10 @@ window.addEventListener('load', function(){
   .kr-c-great{color:#2f7a4f;} .kr-c-poor{color:#b5533c;} .kr-c-good{color:#3d7ea6;} .kr-c-fair{color:#c8933c;} .kr-c-none{color:var(--ink-400);}
   .kr-tbl thead th{position:static;}
   .kr-trend .kr-ysep{border-left:1px solid var(--line);}
+  /* ตารางแนวโน้ม: กว้างตามเนื้อหา (จอเล็กเลื่อนซ้าย-ขวาในกรอบ) ไม่บีบคอลัมน์จนข้อความทับกัน */
+  .kr-tbl.kr-trend{table-layout:auto; min-width:0; width:100%;}
+  .kr-trend th, .kr-trend td{white-space:nowrap; padding-left:14px; padding-right:14px;}
+  .kr-trend td:first-child{white-space:normal; min-width:200px; max-width:260px;}
   #krBody .st-node > summary{grid-template-columns:auto minmax(0,1fr) auto minmax(150px,280px) 26px;}
   #krBody .st-counts{justify-content:flex-end;}
   #krBody .st-tree > *, #krBody .st-node{min-width:0;}   /* ตารางกว้างเลื่อนในกรอบของตัวเอง ไม่ดันทั้งหน้าให้ล้นจอ */
@@ -4831,7 +4835,7 @@ function renderKpiView(strategies){
       const byC = cols.map(c => L.find(k => k.fy === c.fy && k.period === c.period && k.level === 'org' && k.org === org));
       const last = byC.filter(Boolean).pop();
       return `<tr><td><div class="kr-nm">${krEsc(last.name)}</div><div class="kr-yt">${krEsc(last.unit)}</div></td>${byC.map((k, i) => `<td class="${ysep(i)}" style="text-align:center; white-space:nowrap">${
-        k ? `<div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600">${k.isForecast ? `<span style="font-family:Sarabun,sans-serif; font-weight:400; color:var(--ink-400)">คาดการณ์</span> ${krEsc(k.forecastText)}` : krEsc(k.resultText || '-')}</div><div style="margin-top:3px">${krBadge(k.status)}</div><div class="kr-yt" style="margin-top:2px">เป้า ${krEsc(k.targetText || '-')}</div>` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
+        k ? `${k.isForecast ? '<div class="kr-yt" style="line-height:1.2">คาดการณ์</div>' : ''}<div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600">${krEsc(k.isForecast ? k.forecastText : (k.resultText || '-'))}</div><div style="margin-top:3px">${krBadge(k.status)}</div><div class="kr-yt" style="margin-top:2px">เป้า ${krEsc(k.targetText || '-')}</div>` : '<span style="color:var(--ink-400)">-</span>'}</td>`).join('')}</tr>`;
     }).join('')}</tbody></table><div class="panel-sub" style="margin-top:8px">แสดงผลการดำเนินงาน (ผลสะสมถึงรอบนั้น) · รอบไตรมาสที่ผลยังไม่ถึงเป้าแสดงค่าคาดการณ์สิ้นปีของรอบนั้นแทน · ผลสิ้นปีที่ยังรอผลประเมินแสดงค่าคาดการณ์</div>`;
 }
 
