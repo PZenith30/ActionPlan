@@ -389,6 +389,8 @@ window.addEventListener('load', function(){
   /* หมายเหตุคำสั่งมอบอำนาจ ใต้การ์ดสายงาน (จากชีต ส่วนงานภายใต้ผู้บริหาร) */
   .kpi-card .sub a.kpi-link{color:var(--forest-600); font-weight:600; text-decoration:none;}
   .kpi-card .sub a.kpi-link:hover{text-decoration:underline;}
+  .tag-budget{display:inline-block; margin-left:4px; padding:1px 8px; border-radius:999px; font-size:10.5px; font-weight:600; background:rgba(200,147,60,0.15); color:#a97f28; white-space:nowrap; vertical-align:middle; cursor:help;}
+  .bud-old{font-size:11px; color:var(--ink-400); text-decoration:line-through;}
   .tag-added{display:inline-block; margin-left:4px; padding:1px 8px; border-radius:999px; font-size:10.5px; font-weight:600; background:rgba(61,126,166,0.12); color:var(--status-good); white-space:nowrap; vertical-align:middle;}
   .dg-order-note{margin:-12px 0 24px; padding:10px 14px; border-left:3px solid var(--amber-500); background:var(--latex-50); border-radius:0 8px 8px 0; font-size:12.5px; line-height:1.65; color:var(--ink-600);}
   .dg-order-note b{color:var(--ink-900); font-weight:600;}
@@ -1236,6 +1238,10 @@ window.addEventListener('load', function(){
           <input type="checkbox" id="fAdded">
           เพิ่มระหว่างปีเท่านั้น
         </label>
+        <label class="toggle-important">
+          <input type="checkbox" id="fBudget">
+          ปรับงบระหว่างปีเท่านั้น
+        </label>
         <span class="result-count" id="resultCount"></span>
       </div>
 
@@ -1687,13 +1693,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const nWatch = PROJECTS.filter(p=>SCH.watch.includes(p.status)).length;   // Trigger Point: เฝ้าระวัง
 
   const nAdded = PROJECTS.filter(p => p.added).length;   // โครงการเพิ่มระหว่างปี (สถานะโครงการ "เพิ่ม/ปกติ")
+  const nBudChanged = PROJECTS.filter(p => p.budget_changed).length;   // ปรับงบตามแผนฉบับปรับปรุง
+  const budgetOrig = PROJECTS.reduce((a, p) => a + ((p.budget_orig !== undefined ? p.budget_orig : p.budget) || 0), 0);
   const kpiGrid = document.getElementById('kpiGrid');
   kpiGrid.innerHTML = `
     <div class="kpi-card c1">
       <div class="accent-bar"></div>
       <span class="eyebrow">งบประมาณรวมทั้งแผน</span>
       <div class="value">${fmtBahtShort(totalBudget)}<span class="unit">บาท</span></div>
-      <div class="sub">รวม ${nProjects} โครงการ ตาม 4 ยุทธศาสตร์${nAdded ? `<br><a href="#annual" class="kpi-link" id="addedLink">รวมโครงการเพิ่มระหว่างปี ${nAdded} โครงการ ›</a>` : ''}</div>
+      <div class="sub">รวม ${nProjects} โครงการ ตาม 4 ยุทธศาสตร์${nAdded ? `<br><a href="#annual" class="kpi-link" id="addedLink">รวมโครงการเพิ่มระหว่างปี ${nAdded} โครงการ ›</a>` : ''}${nBudChanged ? `<br><a href="#annual" class="kpi-link" id="budgetLink" title="งบตั้งต้นรวม ${fmtBahtShort(budgetOrig)} บาท">ปรับงบตามแผนปรับปรุง ${nBudChanged} โครงการ ›</a>` : ''}</div>
     </div>
     <div class="kpi-card c2">
       <div class="accent-bar"></div>
@@ -1716,6 +1724,14 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     ${cancelledCardHtml()}
   `;
   bindCancelledCard();
+  const budgetLink = document.getElementById('budgetLink');
+  if(budgetLink) budgetLink.addEventListener('click', e=>{
+    e.preventDefault();
+    const t = document.getElementById('fBudget');
+    if(t && !t.checked){ t.checked = true; t.dispatchEvent(new Event('change')); }
+    activateView('view-annual');
+    window.scrollTo(0, 0);
+  });
   const addedLink = document.getElementById('addedLink');
   if(addedLink) addedLink.addEventListener('click', e=>{
     e.preventDefault();
@@ -2003,6 +2019,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       budget: p.budget,
       disbursed: p.disbursed,
       disburse_pct: p.disburse_pct,
+      budget_orig: p.budget_orig, budget_rev: p.budget_rev || null, budget_changed: !!p.budget_changed,
       progress_cum: p.progress_cum,
       status: p.status,
       progress_pct_cum: p.progress_pct_cum ?? null,
@@ -2118,6 +2135,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const fSearch = document.getElementById('fSearch');
   const fImportant = document.getElementById('fImportant');
   const fAdded = document.getElementById('fAdded');
+  const fBudget = document.getElementById('fBudget');
   let activeStatus = '';
   // รอบปิดปีงบ (โครงการมีผลสิ้นปี): สถานะเหลือแค่ บรรลุ/ไม่บรรลุเป้าหมาย ทั้งป้ายในตารางและปุ่มกรอง
   const yeData = () => ACTIVE_DATA.some(p=>p.year_end_result);
@@ -2141,7 +2159,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   }
   setStatusChips(SCH);
 
-  [fStrategy, fOwner, fMasterPlan, fSearch, fImportant, fAdded].forEach(el=>{
+  [fStrategy, fOwner, fMasterPlan, fSearch, fImportant, fAdded, fBudget].forEach(el=>{
     el.addEventListener('input', render);
     el.addEventListener('change', render);
   });
@@ -2168,6 +2186,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       if(activeStatus && (ye ? yeStat(p) : p.status) !== activeStatus) return false;
       if(onlyImportant && !p.important) return false;
       if(fAdded.checked && !p.added) return false;
+      if(fBudget.checked && !p.budget_changed) return false;
       if(q && !(p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q))) return false;
       return true;
     });
@@ -2213,12 +2232,12 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         <tr>
           <td class="code">${p.code}</td>
           <td class="name">
-            <div class="nm">${p.important ? '<span class="star">★</span>' : ''}${p.name}${p.added ? ' <span class="tag-added">เพิ่มระหว่างปี</span>' : ''}</div>
+            <div class="nm">${p.important ? '<span class="star">★</span>' : ''}${p.name}${p.added ? ` <span class="tag-added"${p.budget_rev ? ` title="ตามแผน${p.budget_rev.edition}"` : ''}>เพิ่มระหว่างปี</span>` : ''}${p.budget_changed ? ` <span class="tag-budget" title="งบตามแผน${p.budget_rev.edition}${p.budget_rev.dateText ? ' (' + p.budget_rev.dateText + ')' : ''}: เดิม ${fmtBaht(p.budget_orig)} → ${fmtBaht(p.budget)} บาท">ปรับงบ</span>` : ''}</div>
             <div class="strat">${p.strategy || ''}</div>
           </td>
           <td class="owner">${p.owner}</td>
           <td class="mp-cell">${p.master_plans_label || ''}</td>
-          <td class="num">${fmtBaht(p.budget)}</td>
+          <td class="num">${fmtBaht(p.budget)}${p.budget_changed ? `<div class="bud-old">เดิม ${fmtBaht(p.budget_orig)}</div>` : ''}</td>
           <td>${ye ? '' : stTop(p.status_pct_cum, statusClass(p.status_pct_cum))}${tapBarHtml(p.progress_pct_cum, pctColorClass(p.progress_pct_cum))}</td>
           <td>${stTop(yrStat, yrCls)}${tapBarHtml(p.progress_year, pctColorClass(p.progress_year))}</td>
           <td>${ye ? '' : stTop(p.status_plan || p.status, statusClass(p.status_plan || p.status))}${tapBarHtml(p.progress_cum, pctColorClass(p.progress_cum))}</td>
@@ -2259,6 +2278,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       'หน่วยงาน': p.owner,
       'แผนแม่บทที่เกี่ยวข้อง': p.master_plans_label || '',
       'งบประมาณ (บาท)': p.budget!=null ? Math.round(p.budget) : '',
+      'งบประมาณตั้งต้น (บาท)': p.budget_orig!=null ? Math.round(p.budget_orig) : '',
+      'ฉบับแผนที่ใช้': p.budget_rev ? p.budget_rev.edition : '',
       '% ความก้าวหน้าเทียบแผนสะสม': p.progress_cum!=null ? +(p.progress_cum*100).toFixed(1) : '',
       [SCH.key==='tp' ? 'สถานะแจ้งเตือน (รวม)' : 'สถานะโครงการ (ผลเทียบแผนสะสม)']: p.status || '',
       '% ความก้าวหน้าจากเป้าหมายสะสม': p.progress_pct_cum!=null ? +(p.progress_pct_cum*100).toFixed(1) : '',
@@ -2857,6 +2878,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         code: h.code, name: y.name || h.name || L.name || h.code, owner: y.owner || h.owner || L.owner || '',
         strategy_code: strat, strategy: y.strategy || h.strategy || L.strategy || '',
         budget: h.budget, disbursed: h.disbursed, disburse_pct: h.disburse_pct,
+        budget_orig: h.budget_orig, budget_rev: h.budget_rev || null, budget_changed: !!h.budget_changed,
         progress_cum: h.progress_cum, status: h.status || 'ไม่มีข้อมูล',
         progress_pct_cum: h.progress_pct_cum ?? null,
         status_pct_cum: h.status_pct_cum || 'ไม่มีข้อมูล',
@@ -4189,6 +4211,7 @@ const SHEET_SPECS = {
   cbe:       { names:['Core_Business_Enabler'],             required:['CBE_Code'], optional:true },
   kpiResult: { names:['ผลตัวชี้วัดที่สำคัญ','ผลตัวชี้วัดองค์กรและรายปี'], required:['KPI_Org_Code'], optional:true },
   plan5:     { names:['เป้าหมาย 5 ปี','เป้าหมาย5ปี'],                  required:['ลำดับในแผน'], optional:true },
+  budgetRev: { names:['งบประมาณแผนปรับปรุง'],                 required:['PRJ_Code'], optional:true },
 };
 
 // ---------- ผลสิ้นปีงบประมาณ ----------
@@ -4971,6 +4994,51 @@ function renderPlan5(stName){
       ผลปัจจุบัน: ตัวชี้วัดแบบ "สะสม" = รวมผลทุกปี, แบบ "ค่าล่าสุด" = ผลของปีล่าสุดที่มีผล · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>`;
 }
 
+// ---------- งบประมาณตามแผนฉบับปรับปรุง (ชีต "งบประมาณแผนปรับปรุง") ----------
+// 1 แถว = โครงการ × ฉบับแผน: งบของโครงการตามเล่มแผนฉบับนั้น (ไม่ใช่ส่วนที่เพิ่ม) — ผู้ใช้กำหนด พ.ย. 2569
+// งบปัจจุบัน = ฉบับล่าสุดที่อนุมัติแล้ว ณ วันที่ของข้อมูล (ไม่มีแถว = งบตั้งต้นในชีต "โครงการ"/"ผลการดำเนินงาน")
+// งบหลังปรับเป็นฐานของ % เบิกจ่าย · งบประมาณจัดสรรในชีตผลการดำเนินงานใช้เทียบเท่านั้น
+window.ACP_BUDGET_REV = {};
+function buildBudgetRevisions(rows){
+  const out = {};
+  if(!rows || !rows.length) return out;
+  const fields = (rows.__fields || Object.keys(rows[0])).map(f => String(f).replace(/\s+/g, ' ').trim());
+  const raw = rows.__raw || rows.map(o => fields.map(f => o[f]));
+  const idx = re => fields.findIndex(f => re.test(f));
+  const C = { fy: idx(/^Fiscal_Year|^ปีงบ/i), prj: idx(/^PRJ_Code/i), ed: idx(/^ฉบับ/), date: idx(/วันที่/), bud: idx(/^งบประมาณ/), note: idx(/^หมายเหตุ/) };
+  const txt = v => String(v ?? '').replace(/\s+/g, ' ').trim();
+  // วันที่แบบ วว/ดด/ปปปป (พ.ศ.) → Date
+  const toDate = s => { const m = txt(s).match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/); if(!m) return null;
+    let y = Number(m[3]); if(y < 100) y += 2500; if(y > 2400) y -= 543; const d = new Date(y, Number(m[2]) - 1, Number(m[1])); return isNaN(d) ? null : d; };
+  raw.forEach((r, i) => {
+    const at = c => c >= 0 ? r[c] : '';
+    const code = normCode(at(C.prj)), fy = parseInt(txt(at(C.fy)).replace(/[^0-9]/g, ''), 10), budget = parseNum(at(C.bud));
+    if(!code || isNaN(fy) || budget == null) return;
+    (out[fy + '|' + code] = out[fy + '|' + code] || []).push({ edition: txt(at(C.ed)) || 'แผนปรับปรุง', dateText: txt(at(C.date)), date: toDate(at(C.date)), budget, note: txt(at(C.note)), order: i });
+  });
+  // เรียงตามวันที่อนุมัติ (ไม่มีวันที่ = ตามลำดับในชีต)
+  Object.values(out).forEach(list => list.sort((a, b) => ((a.date ? +a.date : 0) - (b.date ? +b.date : 0)) || (a.order - b.order)));
+  return out;
+}
+// ฉบับล่าสุดที่อนุมัติแล้ว ณ asOf (null = ล่าสุดทั้งหมด) · ฉบับที่ไม่ระบุวันที่ถือว่าใช้ได้ทุกรอบของปีนั้น
+function revisedBudget(code, fy, asOf){
+  const list = (window.ACP_BUDGET_REV || {})[fy + '|' + code];
+  if(!list) return null;
+  return list.filter(e => !asOf || !e.date || e.date <= asOf).pop() || null;
+}
+function applyBudgetRevisions(list, fy, asOf, addedSet){
+  (list || []).forEach(p => {
+    if(p.budget_orig === undefined) p.budget_orig = p.budget;
+    const rev = revisedBudget(p.code, fy, asOf);
+    if(!rev) return;
+    p.budget_rev = { edition: rev.edition, dateText: rev.dateText, budget: rev.budget, note: rev.note };
+    p.budget = rev.budget;
+    // ปรับงบ = งบเปลี่ยนจากงบตั้งต้น (โครงการเพิ่มระหว่างปีไม่มีงบตั้งต้นให้เทียบ จึงไม่นับ)
+    p.budget_changed = !(p.added || (addedSet && addedSet.has(p.code))) && Math.abs(rev.budget - (p.budget_orig || 0)) >= 1;
+    if(p.disbursed != null && rev.budget > 0) p.disburse_pct = p.disbursed / rev.budget;   // % เบิกจ่ายจากงบหลังปรับ
+  });
+}
+
 function parseNum(v){
   if(v==null) return null;
   let s = String(v).trim();
@@ -5234,6 +5302,9 @@ async function loadAndRender(){
       throw new Error(`โหลดข้อมูลสำเร็จแต่ไม่พบแถวโครงการในชีต "${projectRows.__sheetName||'โครงการ'}" (อ่านได้ ${projectRows.length} แถว) กรุณาตรวจสอบคอลัมน์ PRJ_Code`);
     }
     console.log('[Dashboard] จำนวนโครงการหลังประมวลผล:', records.length);
+    // งบประมาณตามแผนฉบับปรับปรุง (ฉบับล่าสุด) — ฐานของงบรวมและ % เบิกจ่าย
+    try{ window.ACP_BUDGET_REV = buildBudgetRevisions(await fetchSheetBySpec('budgetRev')); }catch(bErr){ console.warn('[Dashboard] อ่านงบประมาณแผนปรับปรุงไม่สำเร็จ:', bErr); }
+    applyBudgetRevisions(records, window.LIVE_FISCAL_YEAR, null);
 
     // ---- เชื่อมโยงโครงการ <-> แผนแม่บท ผ่านชีต "เชื่อมโยงโครงการ" ----
     const mpMap = {}, mpCbe = {};
@@ -5327,6 +5398,9 @@ async function loadAndRender(){
       const historyRows = await fetchHistorySheetRaw('ผลการดำเนินงานย้อนหลัง');
       console.log('[Dashboard] แถวข้อมูลย้อนหลังที่โหลดได้:', historyRows.length);
       historyPeriods = buildHistoryDataset(historyRows, records);
+      // รอบย้อนหลังใช้ฉบับแผนที่อนุมัติแล้ว ณ สิ้นเดือนของรอบนั้น
+      const addedSet = new Set(records.filter(r => r.added).map(r => r.code));
+      historyPeriods.forEach(per => applyBudgetRevisions(per.projects, per.fiscalYear, monthAsOfDate(per.fiscalYear, per.monthName), addedSet));
       console.log('[Dashboard] จำนวนรอบย้อนหลังที่พบ:', historyPeriods.length);
     }catch(histErr){
       console.warn('[Dashboard] โหลดข้อมูลย้อนหลังไม่สำเร็จ (ไม่กระทบแดชบอร์ดหลัก):', histErr);
