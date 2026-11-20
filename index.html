@@ -387,6 +387,9 @@ window.addEventListener('load', function(){
   }
   .panel .panel-sub{font-size:12.5px; color:var(--ink-400); margin-bottom:14px;}
   /* หมายเหตุคำสั่งมอบอำนาจ ใต้การ์ดสายงาน (จากชีต ส่วนงานภายใต้ผู้บริหาร) */
+  .kpi-card .sub a.kpi-link{color:var(--forest-600); font-weight:600; text-decoration:none;}
+  .kpi-card .sub a.kpi-link:hover{text-decoration:underline;}
+  .tag-added{display:inline-block; margin-left:4px; padding:1px 8px; border-radius:999px; font-size:10.5px; font-weight:600; background:rgba(61,126,166,0.12); color:var(--status-good); white-space:nowrap; vertical-align:middle;}
   .dg-order-note{margin:-12px 0 24px; padding:10px 14px; border-left:3px solid var(--amber-500); background:var(--latex-50); border-radius:0 8px 8px 0; font-size:12.5px; line-height:1.65; color:var(--ink-600);}
   .dg-order-note b{color:var(--ink-900); font-weight:600;}
   .dg-order-note p{margin:0;}
@@ -1229,6 +1232,10 @@ window.addEventListener('load', function(){
           <input type="checkbox" id="fImportant">
           โครงการสำคัญเท่านั้น
         </label>
+        <label class="toggle-important">
+          <input type="checkbox" id="fAdded">
+          เพิ่มระหว่างปีเท่านั้น
+        </label>
         <span class="result-count" id="resultCount"></span>
       </div>
 
@@ -1679,13 +1686,14 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const nGreat = YE_MODE ? PROJECTS.filter(p=>hStat(p)===YE_PASS).length : PROJECTS.filter(p=>SCH.good.includes(p.status)).length;
   const nWatch = PROJECTS.filter(p=>SCH.watch.includes(p.status)).length;   // Trigger Point: เฝ้าระวัง
 
+  const nAdded = PROJECTS.filter(p => p.added).length;   // โครงการเพิ่มระหว่างปี (สถานะโครงการ "เพิ่ม/ปกติ")
   const kpiGrid = document.getElementById('kpiGrid');
   kpiGrid.innerHTML = `
     <div class="kpi-card c1">
       <div class="accent-bar"></div>
       <span class="eyebrow">งบประมาณรวมทั้งแผน</span>
       <div class="value">${fmtBahtShort(totalBudget)}<span class="unit">บาท</span></div>
-      <div class="sub">รวม ${nProjects} โครงการ ตาม 4 ยุทธศาสตร์</div>
+      <div class="sub">รวม ${nProjects} โครงการ ตาม 4 ยุทธศาสตร์${nAdded ? `<br><a href="#annual" class="kpi-link" id="addedLink">รวมโครงการเพิ่มระหว่างปี ${nAdded} โครงการ ›</a>` : ''}</div>
     </div>
     <div class="kpi-card c2">
       <div class="accent-bar"></div>
@@ -1708,6 +1716,14 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     ${cancelledCardHtml()}
   `;
   bindCancelledCard();
+  const addedLink = document.getElementById('addedLink');
+  if(addedLink) addedLink.addEventListener('click', e=>{
+    e.preventDefault();
+    const t = document.getElementById('fAdded');
+    if(t && !t.checked){ t.checked = true; t.dispatchEvent(new Event('change')); }
+    activateView('view-annual');
+    window.scrollTo(0, 0);
+  });
 
   // ---------- การ์ดโครงการที่ยกเลิก (ชีตโครงการ คอลัมน์ "สถานะโครงการ" มีคำว่า ยกเลิก) ----------
   // โครงการเหล่านี้ถูกตัดออกจาก PROJECTS ตั้งแต่ตอนโหลดข้อมูล จึงไม่นับในการ์ด/กราฟอื่น
@@ -1974,6 +1990,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   // ---------- ช่วงเวลาข้อมูล (ปัจจุบัน / ย้อนหลัง) ----------
   let ACTIVE_DATA = PROJECTS;
 
+  const ADDED_CODES = new Set(PROJECTS.filter(p => p.added).map(p => p.code));
   function normalizeHistoricalProject(p){
     // เติมฟิลด์ที่ตารางหลักใช้แต่ข้อมูลย้อนหลังไม่มี ให้ค่า fallback ที่ปลอดภัย
     const matchedStrategy = STRATEGIES.find(s => s.name === p.strategy);
@@ -1992,6 +2009,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       status_pct_cum: p.status_pct_cum || 'ไม่มีข้อมูล',
       progress_year: p.progress_year ?? null,
       important: false,
+      added: ADDED_CODES.has(p.code),
       master_plans: [],
       master_plans_label: 'ไม่มีข้อมูล',
       dg_area: '',
@@ -2099,6 +2117,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
 
   const fSearch = document.getElementById('fSearch');
   const fImportant = document.getElementById('fImportant');
+  const fAdded = document.getElementById('fAdded');
   let activeStatus = '';
   // รอบปิดปีงบ (โครงการมีผลสิ้นปี): สถานะเหลือแค่ บรรลุ/ไม่บรรลุเป้าหมาย ทั้งป้ายในตารางและปุ่มกรอง
   const yeData = () => ACTIVE_DATA.some(p=>p.year_end_result);
@@ -2122,7 +2141,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   }
   setStatusChips(SCH);
 
-  [fStrategy, fOwner, fMasterPlan, fSearch, fImportant].forEach(el=>{
+  [fStrategy, fOwner, fMasterPlan, fSearch, fImportant, fAdded].forEach(el=>{
     el.addEventListener('input', render);
     el.addEventListener('change', render);
   });
@@ -2148,6 +2167,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       if(mp && !(p.master_plans||[]).some(m=>m.code===mp)) return false;
       if(activeStatus && (ye ? yeStat(p) : p.status) !== activeStatus) return false;
       if(onlyImportant && !p.important) return false;
+      if(fAdded.checked && !p.added) return false;
       if(q && !(p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q))) return false;
       return true;
     });
@@ -2193,7 +2213,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         <tr>
           <td class="code">${p.code}</td>
           <td class="name">
-            <div class="nm">${p.important ? '<span class="star">★</span>' : ''}${p.name}</div>
+            <div class="nm">${p.important ? '<span class="star">★</span>' : ''}${p.name}${p.added ? ' <span class="tag-added">เพิ่มระหว่างปี</span>' : ''}</div>
             <div class="strat">${p.strategy || ''}</div>
           </td>
           <td class="owner">${p.owner}</td>
@@ -2235,6 +2255,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const data = rows.map(p => ({
       'รหัสโครงการ': p.code,
       'ชื่อโครงการ': p.name,
+      'เพิ่มระหว่างปี': p.added ? '✓' : '',
       'หน่วยงาน': p.owner,
       'แผนแม่บทที่เกี่ยวข้อง': p.master_plans_label || '',
       'งบประมาณ (บาท)': p.budget!=null ? Math.round(p.budget) : '',
@@ -2842,9 +2863,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         progress_year: h.progress_year ?? null,
         completion: h.completion || 'อยู่ระหว่างดำเนินการ',
         important: !!L.important,
+        added: !!L.added,
         master_plans: L.master_plans || [],
         master_plans_label: L.master_plans_label || 'ไม่เกี่ยวข้องกับแผนแม่บท',
-        dg_area_label: execFor(per.fiscalYear).ownerToExec[normOwner(y.owner || h.owner || L.owner || '')] || L.dg_area_label || 'ไม่ระบุ',   // สายงานตามปีงบของรอบนั้น
+        dg_area_label: (m => m[ownerUnitKey(y.owner || h.owner || L.owner || '', m)])(execFor(per.fiscalYear).ownerToExec) || L.dg_area_label || 'ไม่ระบุ',   // สายงานตามปีงบของรอบนั้น
         is_pa: !!L.is_pa, is_mou: !!L.is_mou,
       };
     });
@@ -4082,6 +4104,8 @@ window.ACPDash = (function(){
     if(window.ACP_EXEC_BY_FY){ const ex = execFor(per.fiscalYear); window.ACP_EXEC_UNITS = ex.units; window.ACP_EXEC_ORDERS = ex.orders; }   // สายงานตามปีงบของรอบที่ดู
 
     renderDashboard(projects, LIVE.strategies, LIVE.orgKpis, LIVE.historyPeriods, LIVE.masterPlans);
+    // หน้าตัวชี้วัดอยู่ในส่วนที่ถูกวาดใหม่ จึงต้องวาดซ้ำทุกครั้งที่เปลี่ยนรอบ (เปิดปีตามรอบที่เลือก)
+    try{ renderKpiView(LIVE.strategies, per.fiscalYear); }catch(e){ console.warn('[Dashboard] แสดงผลตัวชี้วัดไม่สำเร็จ:', e); }
     activateView(activeView);
     window.scrollTo(0, scrollY);
 
@@ -4401,12 +4425,26 @@ function execFor(fy){
   const pick = yrs.filter(y => y <= Number(fy)).pop();
   return (pick != null ? M[pick] : M['']) || (yrs.length ? M[yrs[0]] : null) || { ownerToExec:{}, units:{}, orders:[] };
 }
+// หน่วยงานเจ้าของโครงการ → ชื่อหน่วยงานในชีต "ส่วนงานภายใต้ผู้บริหาร" (ตั้งแต่ปีงบ 2570 ช่อง Owner ใส่ "ฝ่าย/กอง" เช่น ฝสผ./กยท.ข.):
+// ตรงตัว → ไล่ทีละส่วนที่คั่นด้วย "/" ใช้ส่วนแรกที่ตรงหรือขึ้นต้นด้วยชื่อหน่วยงานในชีต (หน่วยงานหลัก = หน่วยงานแรกที่ระบุ) → ไม่พบ = ชื่อเดิม
+function ownerUnitKey(owner, known){
+  const k = normOwner(owner);
+  if(!known || known[k] !== undefined) return k;
+  const keys = Object.keys(known).filter(Boolean).sort((a, b) => b.length - a.length);
+  for(const part of String(owner || '').split('/').map(normOwner).filter(Boolean)){
+    if(known[part] !== undefined) return part;
+    const pre = keys.find(u => part.startsWith(u));
+    if(pre) return pre;
+  }
+  return k;
+}
 function lineUnits(label, projs){
-  const units = [], seen = {};
+  const units = [], seen = {}, known = {};
+  Object.values(window.ACP_EXEC_UNITS || {}).forEach(list => list.forEach(u => { known[normOwner(u)] = true; }));
   const add = (name, k) => { if(k && !seen[k]){ seen[k] = { key:k, name, n:0, projects:[] }; units.push(seen[k]); } };
   ((window.ACP_EXEC_UNITS || {})[label] || []).forEach(u => add(u, normOwner(u)));
-  (projs || []).forEach(p => add(p.owner, normOwner(p.owner)));
-  (projs || []).forEach(p => { const u = seen[normOwner(p.owner)]; if(u){ u.n++; u.projects.push(p); } });
+  (projs || []).forEach(p => add(p.owner, ownerUnitKey(p.owner, known)));
+  (projs || []).forEach(p => { const u = seen[ownerUnitKey(p.owner, known)]; if(u){ u.n++; u.projects.push(p); } });
   return units.map((u,i)=>({u,i})).sort((a,b)=> (b.u.n - a.u.n) || (a.i - b.i)).map(x=>x.u);
 }
 
@@ -4758,7 +4796,7 @@ function kpiResultCounts(list){
   c.good = c.pass + c.likely; c.bad = c.fail + c.risk; c.open = c.wait + c.prog;   // สรุป 3 กลุ่มสำหรับการ์ด
   return c;
 }
-function renderKpiView(strategies){
+function renderKpiView(strategies, wantFY){   // wantFY = ปีงบของรอบที่เลือกด้านบน (ไม่มีข้อมูลปีนั้น → ปีปัจจุบัน/ล่าสุดที่มี)
   const sel = document.getElementById('krYear'), psel = document.getElementById('krPeriod');
   if(!sel) return;
   const L = window.ACP_KPI_RESULTS || [];
@@ -4776,7 +4814,8 @@ function renderKpiView(strategies){
     return;
   }
   sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-  sel.value = String(years.includes(window.LIVE_FISCAL_YEAR) ? window.LIVE_FISCAL_YEAR : years[0]);
+  const want = [Number(wantFY), window.LIVE_FISCAL_YEAR].find(y => years.includes(y));
+  sel.value = String(want != null ? want : years[0]);
   note.style.display = '';
   note.innerHTML = '<b>% เทียบเป้าหมาย</b> = ผลการดำเนินงาน ÷ ค่าเป้าหมายทั้งปี (ตัวชี้วัดแบบ "ไม่เกิน" = ค่าเป้าหมาย ÷ ผล) · แถบยาวสุดที่ 100% แต่ตัวเลขแสดงค่าจริง · ' +
     '<b>รอบทั้งปี</b>: ผลถึงเป้า = บรรลุ, ไม่ถึง = ไม่บรรลุ, ยังไม่มีผล = รอผล (ร้อยละจากค่าคาดการณ์ แถบสีจาง) · ' +
@@ -4988,6 +5027,9 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
   // โครงการหนึ่งอาจมีหลายแถวในชีตโครงการ — ถ้าแถวใดแถวหนึ่งระบุ "ยกเลิก" ถือว่าทั้งโครงการยกเลิก
   // (ใช้แถวที่ระบุยกเลิกเป็นข้อมูลแสดงผล เพราะมักเป็นแถวที่มีเหตุผลการยกเลิก)
   const isCancelledRow = r => /ยกเลิก/.test(String(r['สถานะโครงการ']||''));
+  // สถานะโครงการ 3 แบบ (ผู้ใช้กำหนด พ.ย. 2569): ปกติ · เพิ่ม/ปกติ (โครงการเข้าใหม่ระหว่างปีงบ) · ยกเลิก
+  const addedCodes = new Set();
+  projectRows.forEach(r=>{ if(/เพิ่ม/.test(String(r['สถานะโครงการ']||''))) addedCodes.add(normCode(r['PRJ_Code'])); });
   const cancelledRowByCode = {};
   projectRows.forEach(r=>{
     const code = normCode(r['PRJ_Code']);
@@ -5112,6 +5154,7 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
       status_pct_cum: wk.status || 'ไม่มีข้อมูล',
       completion,
       important: importantSet.has(code),
+      added: addedCodes.has(code),   // เพิ่มระหว่างปีงบประมาณ
       dg_area: dgAreaRaw,
       dg_area_label: DG_AREA_LABELS[dgAreaRaw] || dgAreaRaw || 'ไม่ระบุ',
       is_pa: isYes(paRaw),
@@ -5262,7 +5305,7 @@ async function loadAndRender(){
       execCols.map(normExecLabel).forEach(l=>{ if(l && !DG_ORDER_GLOBAL.includes(l)) DG_ORDER_GLOBAL.push(l); });
       let mapped = 0;
       records.forEach(rec=>{
-        const lab = ex.ownerToExec[normOwner(rec.owner)];
+        const lab = ex.ownerToExec[ownerUnitKey(rec.owner, ex.ownerToExec)];
         if(lab){ rec.dg_area_label = lab; mapped++; }
       });
       console.log('[Dashboard] จับคู่ส่วนงานภายใต้ผู้บริหารได้', mapped, '/', records.length, 'โครงการ (ปีงบ', window.LIVE_FISCAL_YEAR, ')');
