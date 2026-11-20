@@ -2844,7 +2844,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         important: !!L.important,
         master_plans: L.master_plans || [],
         master_plans_label: L.master_plans_label || 'ไม่เกี่ยวข้องกับแผนแม่บท',
-        dg_area_label: L.dg_area_label || 'ไม่ระบุ',
+        dg_area_label: execFor(per.fiscalYear).ownerToExec[normOwner(y.owner || h.owner || L.owner || '')] || L.dg_area_label || 'ไม่ระบุ',   // สายงานตามปีงบของรอบนั้น
         is_pa: !!L.is_pa, is_mou: !!L.is_mou,
       };
     });
@@ -3413,7 +3413,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     if(!P.length) throw new Error('ไม่พบข้อมูลโครงการในรอบที่เลือก');
     SCHr = statusScheme(per.fiscalYear);
     YE = isYearEndPeriod(per);          // ต้องตั้งก่อน computeReport (ค่าเฉลี่ย/จำนวนตามสถานะขึ้นกับโหมด)
+    const exSaved = window.ACP_EXEC_UNITS;   // ส่วนงานภายใต้สายงานตามปีงบของรอบรายงาน (ไม่เปลี่ยนสิ่งที่แสดงบนแดชบอร์ด)
+    if(window.ACP_EXEC_BY_FY) window.ACP_EXEC_UNITS = execFor(per.fiscalYear).units;
     const R = computeReport(P);
+    window.ACP_EXEC_UNITS = exSaved;
     R.yearEnd = YE;                     // รอบสุดท้ายของปีที่ปิดแล้ว → ป้าย "บรรลุ / ไม่บรรลุเป้าหมาย"
     R.yearBands = yearPctBandCounts(P);
     R.L_DONE = R.yearEnd ? 'บรรลุเป้าหมาย' : 'สำเร็จ';
@@ -4076,6 +4079,7 @@ window.ACPDash = (function(){
     window.__dashPeriodLabel = per.isLive ? '' : label;
     window.__yearEndFY = isYearEndPeriod(per) ? String(per.fiscalYear) : null;
     window.__viewFY = per.fiscalYear;   // ปีงบของรอบที่กำลังดู (ใช้ในหัวรายงานแบบพิมพ์)
+    if(window.ACP_EXEC_BY_FY){ const ex = execFor(per.fiscalYear); window.ACP_EXEC_UNITS = ex.units; window.ACP_EXEC_ORDERS = ex.orders; }   // สายงานตามปีงบของรอบที่ดู
 
     renderDashboard(projects, LIVE.strategies, LIVE.orgKpis, LIVE.historyPeriods, LIVE.masterPlans);
     activateView(activeView);
@@ -4390,6 +4394,13 @@ const YEAR_PCT_BANDS = [
 // ส่วนงานภายใต้สายงาน (ใช้ทั้งหน้า "แผนปฏิบัติการตามสายงาน" และรายงาน):
 // รายชื่อจากชีต "ส่วนงานภายใต้ผู้บริหาร" (window.ACP_EXEC_UNITS) + ส่วนงานที่มีโครงการแต่ไม่อยู่ในชีต
 // เรียงตามจำนวนโครงการ มากไปน้อย (เท่ากันคงลำดับตามชีต) — ส่วนงานที่ไม่มีโครงการอยู่ท้ายสุด
+// การจัดสายงานของปีงบหนึ่ง (ชีต "ส่วนงานภายใต้ผู้บริหาร" คอลัมน์ ปีงบ): ปีนั้นพอดี → ปีล่าสุดที่ไม่เกินปีนั้น → แถวที่ไม่ระบุปี → ปีแรกที่มี
+function execFor(fy){
+  const M = window.ACP_EXEC_BY_FY || {};
+  const yrs = Object.keys(M).filter(k => k).map(Number).sort((a, b) => a - b);
+  const pick = yrs.filter(y => y <= Number(fy)).pop();
+  return (pick != null ? M[pick] : M['']) || (yrs.length ? M[yrs[0]] : null) || { ownerToExec:{}, units:{}, orders:[] };
+}
 function lineUnits(label, projs){
   const units = [], seen = {};
   const add = (name, k) => { if(k && !seen[k]){ seen[k] = { key:k, name, n:0, projects:[] }; units.push(seen[k]); } };
@@ -5211,12 +5222,14 @@ async function loadAndRender(){
     });
     // ---- ส่วนงานภายใต้ผู้บริหาร: จับคู่หน่วยงาน (Owner) กับผู้บริหารจากชีต "ส่วนงานภายใต้ผู้บริหาร" ----
     // แถว = หน่วยงาน, คอลัมน์ = ผู้บริหาร (TRUE = อยู่ภายใต้) · ถ้าไม่พบหน่วยงานในชีตนี้ จะใช้ค่าคอลัมน์ในชีตโครงการแทน
+    // คอลัมน์ "ปีงบ" (ไม่บังคับ): แยกการจัดสายงาน/คำสั่งตามปีงบ ให้ข้อมูลย้อนหลังใช้สายงานของปีนั้น (ผู้ใช้กำหนด พ.ย. 2569)
+    //   แถวที่ปีงบว่าง = ใช้กับปีที่ไม่มีแถวของตัวเอง · ปีที่ไม่มีแถว → ใช้ปีล่าสุดที่ไม่เกินปีนั้น (ดู execFor)
     if(execRows.length){
       const fields = execRows.__fields || Object.keys(execRows[0]);
       const ownerCol = fields[0];
       // คอลัมน์ผู้บริหาร = หัวคอลัมน์ที่มีคำว่า ผวก./ผู้ว่าการ เท่านั้น (คอลัมน์คำสั่ง/เรื่อง/ลงวันที่ ไม่ใช่สายงาน)
       const execCols = fields.slice(1).filter(f => /ผวก|ผู้ว่าการ/.test(f));
-      const ownerToExec = {};
+      const fFY = fields.find(f => /^\s*(ปีงบ|Fiscal_Year)/i.test(f));
       // หมายเหตุใต้การ์ดสายงาน: คำสั่งที่ใช้จัดสายงาน (ทุกแถวที่กรอกเลขที่/เรื่อง/วันที่ไว้)
       const fOrder = fields.find(f => /คำสั่ง/.test(f));
       const fSubj  = fields.find(f => /^\s*เรื่อง/.test(f));
@@ -5225,32 +5238,34 @@ async function loadAndRender(){
       // ช่องติ๊ก "ใช้อยู่" = คำสั่งที่ยึดปัจจุบัน (หัวคอลัมน์ ใช้อยู่/ปัจจุบัน/ยึด/มีผล หรือคอลัมน์ไม่มีหัว)
       let fActive = fields.find(f => /ใช้อยู่|ปัจจุบัน|ยึด|มีผล/.test(f));
       if(fActive == null && fields.includes('')) fActive = '';
-      const orders = execRows.map(r => ({
-        no: fOrder ? clean(r[fOrder]) : '', subject: fSubj ? clean(r[fSubj]) : '', date: fDate ? clean(r[fDate]) : '',
-        active: fActive != null && isYes(r[fActive])
-      })).filter(o => o.no || o.subject || o.date);
-      // ติ๊กไว้อย่างน้อย 1 คำสั่ง → แสดงเฉพาะที่ติ๊ก · ไม่ได้ติ๊กเลย → แสดงทุกคำสั่งที่กรอกไว้
-      window.ACP_EXEC_ORDERS = orders.some(o => o.active) ? orders.filter(o => o.active) : orders;
-      // รายชื่อส่วนงานภายใต้แต่ละสายงาน (ตามลำดับในชีต) — ใช้แสดงปุ่มเลือกส่วนงานในหน้า "แผนปฏิบัติการตามสายงาน"
-      const execUnits = {};
+      const byFY = {};
       execRows.forEach(r=>{
+        const y = fFY ? parseInt(String(r[fFY] || '').replace(/[^0-9]/g, ''), 10) : NaN;
+        const g = byFY[isNaN(y) ? '' : String(y)] || (byFY[isNaN(y) ? '' : String(y)] = { ownerToExec:{}, units:{}, ordersAll:[] });
         const o = normOwner(r[ownerCol]);
-        if(!o) return;
-        const hit = execCols.find(f => isYes(r[f]));
+        const hit = o ? execCols.find(f => isYes(r[f])) : null;
         if(hit){
           const lab = normExecLabel(hit);
-          ownerToExec[o] = lab;
-          (execUnits[lab] = execUnits[lab] || []).push(String(r[ownerCol]).trim());
+          g.ownerToExec[o] = lab;
+          (g.units[lab] = g.units[lab] || []).push(String(r[ownerCol]).trim());   // ปุ่มเลือกส่วนงาน (ตามลำดับในชีต)
         }
+        const ord = { no: fOrder ? clean(r[fOrder]) : '', subject: fSubj ? clean(r[fSubj]) : '', date: fDate ? clean(r[fDate]) : '',
+          active: fActive != null && isYes(r[fActive]) };
+        if(ord.no || ord.subject || ord.date) g.ordersAll.push(ord);
       });
-      window.ACP_EXEC_UNITS = execUnits;
+      // ติ๊กไว้อย่างน้อย 1 คำสั่ง → แสดงเฉพาะที่ติ๊ก · ไม่ได้ติ๊กเลย → แสดงทุกคำสั่งที่กรอกไว้ (แยกตามปี)
+      Object.values(byFY).forEach(g=>{ g.orders = g.ordersAll.some(o => o.active) ? g.ordersAll.filter(o => o.active) : g.ordersAll; });
+      window.ACP_EXEC_BY_FY = byFY;
+      const ex = execFor(window.LIVE_FISCAL_YEAR);
+      window.ACP_EXEC_ORDERS = ex.orders;
+      window.ACP_EXEC_UNITS = ex.units;
       execCols.map(normExecLabel).forEach(l=>{ if(l && !DG_ORDER_GLOBAL.includes(l)) DG_ORDER_GLOBAL.push(l); });
       let mapped = 0;
       records.forEach(rec=>{
-        const lab = ownerToExec[normOwner(rec.owner)];
+        const lab = ex.ownerToExec[normOwner(rec.owner)];
         if(lab){ rec.dg_area_label = lab; mapped++; }
       });
-      console.log('[Dashboard] จับคู่ส่วนงานภายใต้ผู้บริหารได้', mapped, '/', records.length, 'โครงการ');
+      console.log('[Dashboard] จับคู่ส่วนงานภายใต้ผู้บริหารได้', mapped, '/', records.length, 'โครงการ (ปีงบ', window.LIVE_FISCAL_YEAR, ')');
     }
 
     const masterPlans = Object.keys(mpMap)
