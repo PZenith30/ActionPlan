@@ -2457,25 +2457,24 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     }else{
       html += section(no(), SCH.key === 'tp' ? 'OUTPUT – ผลผลิต' : 'ตัวชี้วัดโครงการ', ks, p.progress_pct_cum, p.progress_year, 'รวม');
     }
-    // Milestone: แผนสะสม เทียบ ผลสะสม (ร้อยละของงานทั้งปี ถ่วงน้ำหนักขั้นตอน จากแบบฟอร์ม) เพื่อดูว่าดำเนินการได้ตามแผนหรือไม่
+    // Milestone: แผนสะสม (100%) เทียบ ร้อยละความก้าวหน้าเทียบแผนสะสม · ms_plan / ms_actual ใช้แค่ตัดสินระยะโครงการ (applyTriggerPoint)
     // ระยะของโครงการ (applyTriggerPoint): wait = รอตามแผน · pending = ถึงกำหนดแล้วยังไม่เริ่ม · late = เลยกำหนดเริ่มแล้วยังไม่ดำเนินการ · active
     const ph = p.phase || 'active';
     const startTxt = p.ms_start ? fiscalMonthLabel(Number(p.ms_start), vfy) : '';
     const lvl = p.status_plan === TP_NOT_DUE ? '' : (p.status_plan || (SCH.key === 'tp' ? tpLevel(p.progress_cum) : p.status) || '');
     const actCls = ph === 'late' ? 'poor' : ph === 'pending' ? 'none' : ({ 'ปกติ':'great', 'เฝ้าระวัง':'fair', 'วิกฤต':'poor' }[lvl] || pctColorClass(p.progress_cum));
-    const hasMs = p.ms_plan != null || p.ms_actual != null;
-    const planV = hasMs ? p.ms_plan : null, actV = ph === 'wait' ? null : (hasMs ? p.ms_actual : null);
+    // แผนสะสม ณ เดือนนี้ = 100% · ผลจริง = ร้อยละความก้าวหน้าเทียบแผนสะสม (แถวรวมส่วนแผนในแบบฟอร์ม) ให้ตรงกับที่หน่วยงานรายงาน (ผู้ใช้เลือก พ.ย. 2569)
+    const planDueNow = ph !== 'wait' && p.progress_cum != null;
+    const planV = planDueNow ? 1 : null, actV = planDueNow ? p.progress_cum : null;
     const varPts = (planV != null && actV != null) ? Math.round((actV - planV) * 1000) / 10 : null;
     const PH = { wait: ['รอตามแผน', 'wait', 'ยังไม่ถึงกำหนดเริ่มดำเนินงาน'], pending: ['รอเริ่มดำเนินการ', 'pend', 'ถึงกำหนดเริ่มแล้ว แต่ยังไม่เริ่มดำเนินงาน'],
                  late: ['ล่าช้า', 'poor', 'เลยกำหนดเริ่มแล้ว แต่ยังไม่ดำเนินการ'] }[ph];
     const phBadge = PH ? `<span class="badge ${PH[1]}">${PH[0]}</span>` :
       (varPts == null ? '' : `<span class="badge ${varPts < -0.05 ? (actCls === 'great' ? 'fair' : statusClass(lvl) || 'poor') : 'great'}">${varPts < -0.05 ? `ช้ากว่าแผน ${Math.abs(varPts)} จุดร้อยละ` : varPts > 0.05 ? `เร็วกว่าแผน ${varPts} จุดร้อยละ` : 'เป็นไปตามแผน'}</span>`);
     html += `<div class="pd-sec"><h3><span class="pd-no">${no()}</span> MILESTONE – ความก้าวหน้าเทียบแผน</h3>` +
-      (hasMs
-        ? `<div class="pd-cards pd-cards2">${card('ความก้าวหน้าตามแผน (แผนสะสม)', pct(planV), 'ร้อยละของงานทั้งปีที่ควรเสร็จ ณ เดือนนี้')}` +
-            card('ความก้าวหน้าจริง (ผลสะสม)', actV == null ? '–' : pct(actV), actV == null ? 'ยังไม่เริ่มดำเนินงาน' : 'ร้อยละของงานทั้งปีที่ทำได้แล้ว', actV == null ? ' pd-nd' : ' pd-' + actCls) + `</div>` +
-          `<div class="pd-bl"><span>แผนสะสม ${pct(planV)}</span><span>ผลสะสม ${actV == null ? '–' : pct(actV)}</span></div>${bar(planV, 'pd-plan')}${bar(actV, actCls)}`
-        : `<div class="pd-cards pd-cards2">${card('ร้อยละความก้าวหน้าเทียบแผนสะสม', ph === 'wait' ? '–' : pct(p.progress_cum), ph === 'wait' ? 'ยังไม่ถึงกำหนดเริ่มดำเนินงาน' : 'ผลสะสม ÷ แผนสะสม', ph === 'wait' || ph === 'pending' ? ' pd-nd' : pcCls(p.progress_cum))}</div>${ph === 'wait' ? '' : bar(p.progress_cum, ph === 'pending' ? 'none' : '')}`) +
+      `<div class="pd-cards pd-cards2">${card('ความก้าวหน้าตามแผน (แผนสะสม)', planV == null ? '–' : pct(planV), planV == null ? 'ยังไม่ถึงกำหนดตามแผน' : 'งานที่ควรเสร็จตามแผน ณ เดือนนี้')}` +
+        card('ความก้าวหน้าจริง (เทียบแผนสะสม)', actV == null ? '–' : pct(actV), actV == null ? 'ยังไม่ถึงกำหนดตามแผน' : 'ผลสะสม ÷ แผนสะสม (ตามแบบฟอร์มหน่วยงาน)', actV == null || ph === 'pending' ? ' pd-nd' : ' pd-' + actCls) + `</div>` +
+      (planV == null ? '' : `<div class="pd-bl"><span>แผนสะสม ${pct(planV)}</span><span>ผลจริง ${pct(actV)}</span></div>${bar(planV, 'pd-plan')}${bar(actV, ph === 'pending' ? 'none' : actCls)}`) +
       `<div class="pd-bl pd-foot"><span>${p.ms_done ? 'ดำเนินการแล้ว ' + esc(p.ms_done) + ' ขั้นตอน' : PH ? PH[2] : ''}</span>${phBadge}</div>` +
       (startTxt ? `<div class="pd-start">📅 กำหนดเริ่มดำเนินงานตามแผน: <b>${esc(startTxt)}</b></div>` : '') + `</div>`;
     // สรุปสถานะโครงการ
