@@ -327,6 +327,11 @@ window.addEventListener('load', function(){
   .kpi-card.clickable:hover{box-shadow:var(--shadow-md); transform:translateY(-1px);}
   .kpi-card.clickable:focus-visible{outline:2px solid var(--forest-600); outline-offset:2px;}
   .kpi-card .more{margin-top:6px; font-size:12px; font-weight:600; color:var(--bark-700);}
+  /* ตัวกรองจากการ์ดสรุปหน้าหลัก (กดการ์ด → ตารางประจำปีแสดงเฉพาะโครงการในการ์ดนั้น) */
+  .card-preset{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; padding:4px 6px 4px 10px; border-radius:999px; background:color-mix(in srgb, var(--forest-600) 10%, transparent); color:var(--forest-700); border:1px solid color-mix(in srgb, var(--forest-600) 35%, transparent);}
+  .card-preset[hidden]{display:none;}
+  .card-preset button{font:inherit; font-size:12px; line-height:1; border:0; background:transparent; color:inherit; cursor:pointer; padding:2px 4px; border-radius:50%;}
+  .card-preset button:hover{background:rgba(0,0,0,.08);}
 
   /* ---------- รายการโครงการที่ยกเลิก (หน้าต่างป๊อปอัป ใช้สไตล์ rm-*) ---------- */
   .cx-list{list-style:none; margin:0 0 14px; padding:0; display:flex; flex-direction:column; gap:10px;}
@@ -1330,6 +1335,7 @@ window.addEventListener('load', function(){
             <option value="kpi">ปรับตัวชี้วัด</option>
           </select>
         </label>
+        <span class="card-preset" id="cardPreset" hidden></span>
         <span class="result-count" id="resultCount"></span>
       </div>
 
@@ -1801,41 +1807,59 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   };
   const budgetOrig = PROJECTS.reduce((a, p) => a + ((p.budget_orig !== undefined ? p.budget_orig : p.budget) || 0), 0);
   const kpiGrid = document.getElementById('kpiGrid');
+  // กดการ์ด → หน้าความก้าวหน้าแผนปฏิบัติการประจำปี แสดงเฉพาะโครงการของการ์ดนั้น (ผู้ใช้ขอ พ.ย. 2569)
+  // เงื่อนไขเดียวกับตัวเลขบนการ์ด จำนวนในตารางจึงเท่ากับตัวเลขที่กด
+  const goodLabel = YE_MODE ? 'โครงการบรรลุเป้าหมาย' : SCH.labels.goodCard, poorLabel = YE_MODE ? 'โครงการไม่บรรลุเป้าหมาย' : SCH.labels.poorCard;
+  const CARD_PRESETS = {
+    c1: null,
+    c2: { label: 'มีการเบิกจ่ายแล้ว', test: p => (p.disbursed || 0) > 0, sort: 'disbursed' },
+    c3: { label: goodLabel, test: YE_MODE ? (p => hStat(p) === YE_PASS) : (p => SCH.good.includes(p.status)) },
+    c4: { label: poorLabel, test: YE_MODE ? (p => hStat(p) === YE_FAIL) : (p => SCH.poor.includes(p.status)) },
+  };
+  const cardAttr = c => ` clickable" data-card="${c}" role="button" tabindex="0" title="ดูรายชื่อโครงการในหน้าความก้าวหน้าแผนปฏิบัติการประจำปี`;
   kpiGrid.innerHTML = `
-    <div class="kpi-card c1">
+    <div class="kpi-card c1${cardAttr('c1')}">
       <div class="accent-bar"></div>
       <span class="eyebrow">งบประมาณรวมทั้งแผน</span>
       <div class="value">${fmtBahtShort(totalBudget)}<span class="unit">บาท</span></div>
       <div class="sub">รวม ${nProjects} โครงการ ตาม 4 ยุทธศาสตร์${planChangeLine()}</div>
     </div>
-    <div class="kpi-card c2">
+    <div class="kpi-card c2${cardAttr('c2')}">
       <div class="accent-bar"></div>
       <span class="eyebrow">เบิกจ่ายสะสม</span>
       <div class="value">${fmtPct(disburseRate)}</div>
-      <div class="sub">${fmtBahtShort(totalDisbursed)} บาท จากวงเงินที่จัดสรร</div>
+      <div class="sub">${fmtBahtShort(totalDisbursed)} บาท จากวงเงินที่จัดสรร · เบิกจ่ายแล้ว ${PROJECTS.filter(CARD_PRESETS.c2.test).length} โครงการ</div>
     </div>
-    <div class="kpi-card c3">
+    <div class="kpi-card c3${cardAttr('c3')}">
       <div class="accent-bar"></div>
-      <span class="eyebrow">${YE_MODE ? 'โครงการบรรลุเป้าหมาย' : SCH.labels.goodCard}</span>
+      <span class="eyebrow">${goodLabel}</span>
       <div class="value">${nGreat}<span class="unit">/ ${nProjects} โครงการ</span></div>
       <div class="sub">${((nGreat/nProjects)*100).toFixed(0)}% ของโครงการทั้งหมด${(!YE_MODE && SCH.key==='tp') ? ` · เฝ้าระวัง ${nWatch} โครงการ` : ''}</div>
     </div>
-    <div class="kpi-card c4">
+    <div class="kpi-card c4${cardAttr('c4')}">
       <div class="accent-bar"></div>
-      <span class="eyebrow">${YE_MODE ? 'โครงการไม่บรรลุเป้าหมาย' : SCH.labels.poorCard}</span>
+      <span class="eyebrow">${poorLabel}</span>
       <div class="value">${nPoor}<span class="unit">โครงการ</span></div>
       <div class="sub">${nProjects ? ((nPoor/nProjects)*100).toFixed(0) : 0}% ของโครงการทั้งหมด · เป็นโครงการสำคัญ ${nPoorImportant} โครงการ</div>
     </div>
     ${cancelledCardHtml()}
   `;
   bindCancelledCard();
+  kpiGrid.querySelectorAll('.kpi-card[data-card]').forEach(card => {
+    const go = () => { if(window.ACP_openAnnual) window.ACP_openAnnual(CARD_PRESETS[card.dataset.card]); };
+    card.addEventListener('click', e => { if(!e.target.closest('a')) go(); });
+    card.addEventListener('keydown', e => { if(e.target === card && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); go(); } });
+  });
   // ลิงก์ "ปรับแผนระหว่างปี" → ตารางประจำปีที่กรองตามเรื่อง
   document.querySelectorAll('#kpiGrid a[data-plan]').forEach(a => a.addEventListener('click', e=>{
     e.preventDefault();
-    const sel = document.getElementById('fPlanChange');
-    if(sel){ sel.value = a.dataset.plan; sel.dispatchEvent(new Event('change')); }
-    activateView('view-annual');
-    window.scrollTo(0, 0);
+    if(window.ACP_openAnnual) window.ACP_openAnnual(null, { plan: a.dataset.plan });
+    else{
+      const sel = document.getElementById('fPlanChange');
+      if(sel){ sel.value = a.dataset.plan; sel.dispatchEvent(new Event('change')); }
+      activateView('view-annual');
+      window.scrollTo(0, 0);
+    }
   }));
 
   // ---------- การ์ดโครงการที่ยกเลิก (ชีตโครงการ คอลัมน์ "สถานะโครงการ" มีคำว่า ยกเลิก) ----------
@@ -2262,6 +2286,31 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   }
   setStatusChips(SCH);
 
+  // ตัวกรองจากการ์ดสรุปหน้าหลัก: { label, test(p), sort? } — แสดงเป็นป้าย #cardPreset กด ✕ เพื่อล้าง
+  let cardPreset = null;
+  const presetEl = document.getElementById('cardPreset');
+  function showPreset(){
+    if(!presetEl) return;
+    presetEl.hidden = !cardPreset;
+    presetEl.innerHTML = cardPreset ? `จากการ์ด: ${cardPreset.label} <button type="button" aria-label="ล้างตัวกรองจากการ์ด" title="ล้างตัวกรอง">✕</button>` : '';
+    if(cardPreset) presetEl.querySelector('button').addEventListener('click', ()=>{ cardPreset = null; showPreset(); render(); });
+  }
+  showPreset();
+  // เปิดหน้าความก้าวหน้าแผนปฏิบัติการประจำปีจากการ์ดหน้าหลัก: ล้างตัวกรองเดิมทั้งหมดก่อน แล้วใช้ตัวกรองของการ์ด
+  window.ACP_openAnnual = (preset, opt) => {
+    opt = opt || {};
+    fStrategy.value = ''; fOwner.value = ''; fMasterPlan.value = ''; fSearch.value = '';
+    fImportant.checked = false; fPlanChange.value = opt.plan || '';
+    activeStatus = '';
+    document.querySelectorAll('#statusChips .chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+    cardPreset = preset || null;
+    if(cardPreset && cardPreset.sort){ sortKey = cardPreset.sort; sortDir = -1; }
+    showPreset();
+    render();
+    activateView('view-annual');
+    window.scrollTo(0, 0);
+  };
+
   [fStrategy, fOwner, fMasterPlan, fSearch, fImportant, fPlanChange].forEach(el=>{
     el.addEventListener('input', render);
     el.addEventListener('change', render);
@@ -2283,6 +2332,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const onlyImportant = fImportant.checked;
     const ye = yeData();
     return ACTIVE_DATA.filter(p=>{
+      if(cardPreset && !cardPreset.test(p)) return false;
       if(strat && p.strategy_code !== strat) return false;
       if(owner && p.owner !== owner) return false;
       if(mp && !(p.master_plans||[]).some(m=>m.code===mp)) return false;
@@ -2987,8 +3037,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       showUnit('');
 
       function showUnit(key){
-        const projs = key ? all.filter(p => normOwner(p.owner) === key) : all;
+        // ใช้รายการโครงการของปุ่มส่วนงาน (lineUnits จับคู่ด้วย ownerUnitKey: Owner ปี 2570 เป็น "ฝ่าย/กอง" เช่น ฝสผ./กยท.ข.)
+        // ไม่เทียบ Owner ตรงตัว ซึ่งทำให้ปุ่มนับได้ 10 แต่ตารางว่าง
         const u = units.find(x => x.key === key);
+        const projs = key ? (u ? u.projects : []) : all;
         document.getElementById('dgDrilldownSub').textContent = key
           ? `ส่วนงาน ${u ? u.name : key} · ${projs.length} โครงการ`
           : `พบ ${all.length} โครงการ จาก ${nWith} ส่วนงาน · ส่วนงานภายใต้สายงานนี้ทั้งหมด ${units.length} ส่วนงาน (กดเลือกเพื่อดูโครงการของแต่ละส่วนงาน)`;
