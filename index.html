@@ -2276,7 +2276,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     if(!ks.length) return mp || '<div class="kd-mp">ไม่มีข้อมูลตัวชี้วัด</div>';
     return mp + `<div class="kd-wrap"><table class="kd-tbl"><thead><tr><th>ตัวชี้วัด</th><th class="r">ค่าเป้าหมาย</th><th class="r">เป้าหมายสะสม</th><th class="r">ผลจริง</th><th class="r">% จากเป้าหมายสะสม</th><th class="r">% จากเป้าหมายทั้งปี</th><th class="c">สถานะ</th><th class="c">ผลเทียบเป้าทั้งปี</th></tr></thead><tbody>${
       ks.map(k => {
-        const info = names[k.code] || {}, c = chg[k.code];
+        const vfy = Number(window.__viewFY || window.LIVE_FISCAL_YEAR);
+        const info = names[vfy + '|' + k.code] || names['|' + k.code] || {}, c = vfy === Number(window.LIVE_FISCAL_YEAR) ? chg[k.code] : null;   // การปรับตัวชี้วัดมีเฉพาะปีปัจจุบัน
         const st = tp ? tpLevel(k.pctCum) : k.status;
         const tag = c ? ` <span class="${c.status === 'ยกเลิก' ? 'kd-x' : c.status === 'เพิ่ม' ? 'tag-added' : 'tag-kpi'}">${esc(c.status)}${c.status === 'ปรับค่าเป้าหมาย' && c.oldTarget ? ` (เดิม ${esc(c.oldTarget)})` : ''}</span>` : '';
         return `<tr${k.cancelled ? ' class="kd-cancel" title="ไม่นับในการคำนวณ"' : ''}><td><div>${esc(info.name || k.code)}${tag}</div><div class="kd-code">${esc(k.code)}${info.unit ? ' · ' + esc(info.unit) : ''}</div></td>` +
@@ -5205,7 +5206,7 @@ const DG_AREA_LABELS = {
 function buildDashboardData(strategyRows, projectRows, resultRows, importantRows, kpiRows){
   // ชื่อ/หน่วยของตัวชี้วัดโครงการ (ชีต "ตัวชี้วัดโครงการ") ใช้แสดงรายละเอียดตัวชี้วัดในตารางประจำปี
   const kpiNames = {};
-  [...(window.__ACP_ALL_KPI_ROWS || []), ...(kpiRows || [])].forEach(r => { const k = (r['KPI_PRJ_Code'] || '').trim(); if(k) kpiNames[k] = { name: (r['ชื่อตัวชี้วัดโครงการ'] || '').trim(), unit: (r['หน่วย'] || '').trim() }; });
+  (window.__ACP_ALL_KPI_ROWS || kpiRows || []).forEach(r => { const k = (r['KPI_PRJ_Code'] || '').trim(); if(k) kpiNames[String(r['Fiscal_Year'] || '').replace(/[^0-9]/g, '') + '|' + k] = { name: (r['ชื่อตัวชี้วัดโครงการ'] || '').trim(), unit: (r['หน่วย'] || '').trim() }; });   // คีย์ "ปีงบ|รหัส" เพราะรหัสตัวชี้วัดใช้ซ้ำข้ามปี (เช่น KPI-PRJ-004)
   window.ACP_KPI_NAMES = kpiNames;
   const strategyMap = {};
   strategyRows.forEach(r=>{
