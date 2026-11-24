@@ -5205,7 +5205,7 @@ const DG_AREA_LABELS = {
 function buildDashboardData(strategyRows, projectRows, resultRows, importantRows, kpiRows){
   // ชื่อ/หน่วยของตัวชี้วัดโครงการ (ชีต "ตัวชี้วัดโครงการ") ใช้แสดงรายละเอียดตัวชี้วัดในตารางประจำปี
   const kpiNames = {};
-  (kpiRows || []).forEach(r => { const k = (r['KPI_PRJ_Code'] || '').trim(); if(k) kpiNames[k] = { name: (r['ชื่อตัวชี้วัดโครงการ'] || '').trim(), unit: (r['หน่วย'] || '').trim() }; });
+  [...(window.__ACP_ALL_KPI_ROWS || []), ...(kpiRows || [])].forEach(r => { const k = (r['KPI_PRJ_Code'] || '').trim(); if(k) kpiNames[k] = { name: (r['ชื่อตัวชี้วัดโครงการ'] || '').trim(), unit: (r['หน่วย'] || '').trim() }; });
   window.ACP_KPI_NAMES = kpiNames;
   const strategyMap = {};
   strategyRows.forEach(r=>{
@@ -5400,6 +5400,7 @@ async function loadAndRender(){
     try{ window.ACP_KPI_RESULTS = buildKpiResults(await fetchSheetBySpec('kpiResult')); }catch(krErr){ console.warn('[Dashboard] อ่านผลตัวชี้วัดไม่สำเร็จ:', krErr); }
     try{ window.ACP_PLAN5 = buildPlan5(await fetchSheetBySpec('plan5')); }catch(p5Err){ console.warn('[Dashboard] อ่านเป้าหมาย 5 ปีไม่สำเร็จ:', p5Err); }
 
+    window.__ACP_ALL_KPI_ROWS = kpiRows;   // ทุกปี: ใช้หาชื่อตัวชี้วัดของข้อมูลย้อนหลัง
     // ---- ถ้าชีตมีหลายปีงบประมาณ (คอลัมน์ Fiscal_Year) ใช้เฉพาะปีล่าสุด ----
     const fyOf = r => parseInt(String(r['Fiscal_Year']||'').replace(/[^0-9]/g,''), 10);
     const fys = projectRows.map(fyOf).filter(n=>!isNaN(n));
