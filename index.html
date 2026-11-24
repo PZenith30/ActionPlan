@@ -566,6 +566,7 @@ window.addEventListener('load', function(){
   .pd-klist{margin-top:12px; display:grid; gap:8px;}
   .pd-k{padding:10px 12px; border:1px solid var(--latex-200); border-radius:10px; background:#fff;}
   .pd-kn{font-size:13.5px; font-weight:600; line-height:1.5;}
+  .pd-kname{font-size:14px; font-weight:600; line-height:1.5; margin:-2px 0 10px; color:var(--ink-900);}
   .pd-kc{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-400); margin-top:1px;}
   .pd-kg{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:8px 0 4px;}
   .pd-kg > div{background:var(--latex-50); border-radius:8px; padding:6px 8px; min-width:0;}
@@ -2429,7 +2430,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         rows = `<div class="pd-klist">${list.map(kCard).join('')}</div>`;
       }
       if(list.length === 1) rows = `<div class="pd-tags">${kBadges(list[0])}</div>`;
-      return `<div class="pd-sec"><h3><span class="pd-no">${no}</span> ${title}</h3><div class="pd-cards">${cards}</div>` +
+      // ตัวชี้วัดเดียว: ชื่อตัวชี้วัดเหนือการ์ด (หลายตัว: ชื่ออยู่ในการ์ดรายตัวด้านล่าง)
+      const kName = list.length === 1 ? (k => { const i = info(k); return `<div class="pd-kname">${esc(i.name || k.code)}<div class="pd-kc">${esc(k.code)}${i.unit ? ' · ' + esc(i.unit) : ''}</div></div>`; })(list[0]) : '';
+      return `<div class="pd-sec"><h3><span class="pd-no">${no}</span> ${title}</h3>${kName}<div class="pd-cards">${cards}</div>` +
         `<div class="pd-bl"><span>ความสำเร็จเทียบเป้าหมายทั้งปี</span><b>${pct(yr)}</b></div>${bar(yr)}${rows}</div>`;
     };
     const hasTypes = ocK.length > 0;
