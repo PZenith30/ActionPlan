@@ -5015,7 +5015,7 @@ function buildHistoryDataset(historyRows, projectRecords){
         strategy: master.strategy || '',
         budget: agg.budget!=null ? agg.budget : 0,
         disbursed: agg.disbursed!=null ? agg.disbursed : 0,
-        disburse_pct: agg.disbursePct,
+        disburse_pct: agg.budget > 0 ? (agg.disbursed || 0) / agg.budget : agg.disbursePct,   // เบิกจ่าย ÷ งบประมาณ (บาท) เหมือนข้อมูลล่าสุด
         kpis: agg.kpiList || [],
         progress_cum: agg.progressCum,
         status: worstStatus(agg.statuses) || 'ไม่มีข้อมูล',
@@ -5676,7 +5676,8 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
       source: r['แหล่งงบประมาณ'],
       budget,
       disbursed: a.disbursed!=null ? a.disbursed : 0,
-      disburse_pct: a.disburse_pct,
+      // % เบิกจ่าย = เบิกจ่าย ÷ งบประมาณ (บาท) คำนวณเอง (ผู้ใช้กำหนด พ.ย. 2569) · ไม่มีงบ → ใช้ค่าในชีตสำรอง
+      disburse_pct: budget > 0 ? (a.disbursed || 0) / budget : a.disburse_pct,
       progress_cum: a.progressCum!=null ? a.progressCum : null,
       progress_year: pyS.main,
       status: a.progressCumStatus || worstStatus(a.statuses||[]) || 'ไม่มีข้อมูล',
