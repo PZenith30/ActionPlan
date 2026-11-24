@@ -551,6 +551,11 @@ window.addEventListener('load', function(){
   .pd-no{color:var(--ink-400); font-weight:500;}
   .pd-cards{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
   .pd-cards2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .pd-cards4{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .pd-cards4 .pd-cv{font-size:18px; overflow-wrap:normal; white-space:nowrap;}
+  .pd-cards4 .pd-card{padding:10px;}
+  .pd-start{margin-top:10px; font-size:12.5px; color:var(--ink-600);}
+  .ph-note{text-align:center; font-size:10.5px; color:var(--status-poor); margin:-2px 0 4px;}
   .pd-card{border:1px solid var(--latex-200); border-radius:10px; padding:10px 12px; background:var(--latex-50); min-width:0;}
   .pd-cl{font-size:11.5px; color:var(--ink-400);}
   .pd-cv{font-family:'Kanit',sans-serif; font-size:22px; font-weight:600; color:var(--ink-900); line-height:1.3;}
@@ -588,7 +593,7 @@ window.addEventListener('load', function(){
   .pd-sum > div{font-size:13px; line-height:1.8;}
   .pd-more{margin:8px 0 14px; font-size:13px;}
   .pd-more summary{cursor:pointer; color:var(--forest-600); font-weight:600; margin-bottom:8px;}
-  @media (max-width:600px){ .pd-cards{grid-template-columns:repeat(2,minmax(0,1fr));} .pd-cards .pd-card:first-child{grid-column:1 / -1;} .pd-cards2 .pd-card:first-child{grid-column:auto;} .pd-cv{font-size:19px;} }
+  @media (max-width:600px){ .pd-cards{grid-template-columns:repeat(2,minmax(0,1fr));} .pd-cards .pd-card:first-child{grid-column:1 / -1;} .pd-cards2 .pd-card:first-child{grid-column:auto;} .pd-cards4 .pd-card:first-child{grid-column:auto;} .pd-cv{font-size:19px;} }
 
   .badge{
     display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:600;
@@ -599,6 +604,8 @@ window.addEventListener('load', function(){
   .badge.fair{background:rgba(200,147,60,0.14); color:var(--status-fair);}
   .badge.poor{background:rgba(181,83,60,0.13); color:var(--status-poor);}
   .badge.none{background:rgba(154,148,136,0.15); color:var(--status-none);}
+  .badge.wait{background:rgba(61,126,166,0.13); color:#3d7ea6;}
+  .badge.pend{background:rgba(224,123,57,0.15); color:#c0622a;}
 
   /* signature: tapping-line progress bar */
   .tap-bar{
@@ -1020,6 +1027,7 @@ window.addEventListener('load', function(){
   .rp-pill{display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:#eeeae0; color:#7d776b; white-space:nowrap;}
   .rp-pill.great{background:#e3f1e8; color:#2f7a4f;} .rp-pill.good{background:#e3eef5; color:#3d7ea6;}
   .rp-pill.fair{background:#f7eedc; color:#a97f28;} .rp-pill.poor{background:#f6e3de; color:#b5533c;}
+  .rp-pill.wait{background:#e3eef5; color:#3d7ea6;} .rp-pill.pend{background:#fbe9dc; color:#c0622a;}
   .rp-bar{height:6px; border-radius:3px; background:#ece6d6; overflow:hidden;}
   .rp-bar i{display:block; height:100%; border-radius:3px; background:#9a9488;}
   .rp-bar.great i{background:#2f7a4f;} .rp-bar.good i{background:#d9a916;} .rp-bar.fair i{background:#e07b39;} .rp-bar.poor i{background:#b5533c;}
@@ -1550,7 +1558,7 @@ window.addEventListener('load', function(){
           <dt>% ความก้าวหน้าจากเป้าหมายสะสม</dt><dd>ผลจริงเทียบเป้าหมายสะสมของแต่ละตัวชี้วัด</dd>
           <dt>% ความก้าวหน้าจากเป้าหมายทั้งปี</dt><dd>ผลจริงเทียบเป้าหมายทั้งปีของแต่ละตัวชี้วัด</dd>
           <dt>แผนฉบับปรับปรุงระหว่างปี</dt><dd>ตัวชี้วัดโครงการที่ "ยกเลิก" ตามแผนปรับปรุงไม่นับในร้อยละ สถานะ และการบรรลุเป้าหมายทั้งปี (นับตั้งแต่เดือนที่แผนอนุมัติ) · ตัวชี้วัด "ปรับค่าเป้าหมาย" ใช้ค่าเป้าหมายใหม่ · งบประมาณใช้ฉบับล่าสุดที่อนุมัติแล้ว และเป็นฐานของร้อยละการเบิกจ่าย</dd>
-          <dt>ยังไม่ถึงกำหนด</dt><dd>ปีงบประมาณ 2570 เป็นต้นไป โครงการที่ยังไม่ถึงระยะเวลาดำเนินการตามแผน (ยังไม่มีขั้นตอนในแผนหรือตัวชี้วัดใดถึงกำหนดในเดือนที่รายงาน) แสดงสถานะ "ยังไม่ถึงกำหนด" แทน 0% / วิกฤต</dd>
+          <dt>ระยะของโครงการ</dt><dd>ปีงบประมาณ 2570 เป็นต้นไป โครงการที่ยังไม่มีผลดำเนินงาน ไม่ถูกตัดสินเป็น 0% / วิกฤตโดยอัตโนมัติ: <b>รอตามแผน</b> = ยังไม่ถึงกำหนดเริ่มดำเนินงาน (ตัวชี้วัดแสดง N/A) · <b>รอเริ่มดำเนินการ</b> = ถึงกำหนดเริ่มในเดือนที่รายงาน แต่ยังไม่เริ่ม · <b>ล่าช้า</b> = เลยกำหนดเริ่มแล้วแต่ยังไม่ดำเนินการ (นับเป็นวิกฤต) · เริ่มแล้ว = ใช้ระดับ Trigger Point ตามปกติ · กำหนดเริ่มมาจากเดือนแรกที่มีแผนในส่วนติดตามการดำเนินงานตามแผนของแบบฟอร์ม</dd>
           <dt>ตัวชี้วัด Output / Outcome</dt><dd>ปีงบประมาณ 2570 เป็นต้นไป % จากเป้าหมายสะสมและ % จากเป้าหมายทั้งปีของโครงการ (และสถานะแจ้งเตือน) คิดจาก<b>ตัวชี้วัด Output</b> ส่วนตัวชี้วัด Outcome แสดงแยกเป็นบรรทัด "ผลลัพธ์" ใต้แถบ · โครงการที่มีแต่ตัวชี้วัด Outcome ใช้ Outcome แทน · ตัวเลขใช้ค่า % ในแถว "รวมผลผลิต" / "รวมผลลัพธ์" ของแบบฟอร์มหน่วยงานโดยตรง (ไม่มีค่าในแบบฟอร์มจึงใช้ค่าเฉลี่ยของตัวชี้วัด) · ผลผลิตที่ยังไม่มีตัวชี้วัดถึงกำหนดแสดงเป็น "-"</dd>
           <dt>สีของแถบความก้าวหน้า</dt><dd>ปีงบประมาณ 2570 เป็นต้นไป: <span class="md-sw great"></span>90% ขึ้นไป · <span class="md-sw good"></span>70% ถึงต่ำกว่า 90% · <span class="md-sw poor"></span>ต่ำกว่า 70% (ตามเกณฑ์ Trigger Point)<br>
             ปีงบประมาณ 2569: <span class="md-sw great"></span>100% ขึ้นไป · <span class="md-sw good"></span>90–99% · <span class="md-sw fair"></span>80–89% · <span class="md-sw poor"></span>ต่ำกว่า 80%</dd>
@@ -1752,7 +1760,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const statusClass = s => ({
     'ดีมาก':'great', 'ดี':'good', 'พอใช้':'fair', 'ต้องปรับปรุง':'poor',
     'ปกติ':'great', 'เฝ้าระวัง':'fair', 'วิกฤต':'poor',
-    'บรรลุเป้าหมาย':'great', 'ไม่บรรลุเป้าหมาย':'poor'
+    'บรรลุเป้าหมาย':'great', 'ไม่บรรลุเป้าหมาย':'poor', 'รอตามแผน':'wait', 'รอเริ่มดำเนินการ':'pend'
   }[s] || 'none');
 
   // เกณฑ์สถานะของปีที่กำลังดู: 2569 = 4 ระดับจากชีต · 2570+ = Trigger Point (ดู statusScheme)
@@ -1941,8 +1949,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     ? yearPctBandCounts(PROJECTS)
     : SCH.levels.map(s=>({label:s, color:SCH.colors[s], n:PROJECTS.filter(p=>p.status===s).length}));
   if(!YE_MODE && SCH.key === 'tp'){
-    const nND = PROJECTS.filter(p=>p.status===TP_NOT_DUE).length;
-    if(nND) donut.push({ label:TP_NOT_DUE, color:'#b9b2a4', n:nND });
+    [[TP_PENDING, '#e07b39'], [TP_WAIT, '#7fa9c4']].forEach(([s, c]) => { const n = PROJECTS.filter(p=>p.status===s).length; if(n) donut.push({ label:s, color:c, n }); });
   }
   {
     const sp = document.getElementById('statusChart').closest('.panel');
@@ -2121,7 +2128,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       progress_year: p.progress_year ?? null,
       progress_year_oc: p.progress_year_oc ?? null,
       progress_pct_cum_oc: p.progress_pct_cum_oc ?? null,
-      ms_plan: p.ms_plan ?? null, ms_actual: p.ms_actual ?? null, ms_done: p.ms_done || '',
+      ms_plan: p.ms_plan ?? null, ms_actual: p.ms_actual ?? null, ms_done: p.ms_done || '', ms_start: p.ms_start ?? null,
       important: false,
       added: ADDED_CODES.has(p.code),
       master_plans: [],
@@ -2147,7 +2154,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   }
 
   function renderHistorySummaryCards(period){
-    const projs = applyTriggerPoint(period.projects, period.fiscalYear);   // ปีงบ ≥ 2570: สถานะ Trigger Point
+    const projs = applyTriggerPoint(period.projects, period.fiscalYear, period.monthName ? monthAsOfDate(period.fiscalYear, period.monthName) : null);   // ปีงบ ≥ 2570: สถานะ Trigger Point
     const SCHp = statusScheme(period.fiscalYear);
     const n = projs.length;
     const totalBudget = projs.reduce((a,p)=>a+(p.budget||0),0);
@@ -2196,7 +2203,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       annualHistorySummary.style.display = 'none';
     }else{
       const period = HISTORY_PERIODS[Number(fPeriod.value)];
-      ACTIVE_DATA = applyTriggerPoint(period.projects.map(normalizeHistoricalProject), period.fiscalYear);
+      ACTIVE_DATA = applyTriggerPoint(period.projects.map(normalizeHistoricalProject), period.fiscalYear, period.monthName ? monthAsOfDate(period.fiscalYear, period.monthName) : null);
       setStatusChips(statusScheme(period.fiscalYear));
       tableViewBanner.style.display = '';
       tableViewBanner.innerHTML = `<span class="badge-hist">ข้อมูลย้อนหลัง</span> กำลังแสดงข้อมูลรอบ <b>${period.label}</b> &middot; บันทึกเมื่อ ${period.timestamp || '-'} &middot; คอลัมน์ที่ไม่มีในข้อมูลย้อนหลังจะแสดง "-" หรือ "ไม่มีข้อมูล"`;
@@ -2329,7 +2336,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       // ป้ายสถานะวางเหนือแถบของ % ที่เป็นที่มา · ทั้งปี: สำเร็จ = ทุกตัวชี้วัดสำเร็จ (สิ้นปีที่ปิดแล้ว = บรรลุ/ไม่บรรลุเป้าหมาย)
       const yrStat = ye ? yeStat(p) : (p.completion || '');
       const yrCls = (yrStat === 'สำเร็จ' || yrStat === 'บรรลุเป้าหมาย') ? 'great' : statusClass(yrStat);
-      const stTop = (s, cls) => s ? `<div style="text-align:center; margin-bottom:5px;"><span class="badge ${cls}"${s === TP_NOT_DUE ? ' title="ยังไม่ถึงระยะเวลาดำเนินการตามแผน"' : ''}>${s}</span></div>` : '';
+      const stTop = (s, cls) => s ? `<div style="text-align:center; margin-bottom:5px;"><span class="badge ${cls}"${({'รอตามแผน':' title="ยังไม่ถึงกำหนดเริ่มดำเนินงานตามแผน"', 'รอเริ่มดำเนินการ':' title="ถึงกำหนดเริ่มแล้ว แต่ยังไม่เริ่มดำเนินงาน"', 'ยังไม่ถึงกำหนด':' title="ยังไม่ถึงระยะเวลาดำเนินการตามแผน"'})[s] || ''}>${s}</span></div>` : '';
       // แถบย่อ 3 เส้น: ผลผลิต / ผลลัพธ์ (จากเป้าหมายสะสม · สิ้นปี = ทั้งปี) และแผน — รายละเอียดเต็มอยู่ในหน้ารายละเอียด (pdOpen)
       const vOut = ye ? p.progress_year : p.progress_pct_cum, vOc = ye ? p.progress_year_oc : p.progress_pct_cum_oc;
       const hasOc = vOc != null || (p.kpis || []).some(k => kpiIsOutcome(window.__viewFY || window.LIVE_FISCAL_YEAR, k.code));
@@ -2345,7 +2352,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           </td>
           <td class="owner">${p.owner}</td>
           <td class="num">${fmtBaht(p.budget)}${p.budget_changed ? `<div class="bud-old">เดิม ${fmtBaht(p.budget_orig)}</div>` : ''}</td>
-          <td class="prog-cell">${stTop(ovStat, ye ? yrCls : statusClass(ovStat))}
+          <td class="prog-cell">${stTop(ovStat, ye ? yrCls : statusClass(ovStat))}${!ye && p.phase === 'late' ? '<div class="ph-note">เลยกำหนดเริ่ม ยังไม่ดำเนินการ</div>' : ''}
             ${mini(hasOc || SCH.key === 'tp' ? 'ผลผลิต' : 'เป้าหมาย', vOut, p.status_pct_cum === TP_NOT_DUE ? 'ยังไม่ถึงกำหนด' : '')}
             ${hasOc ? mini('ผลลัพธ์', vOc) : ''}
             ${ye ? '' : mini('แผน', p.progress_cum, p.status_plan === TP_NOT_DUE ? 'ยังไม่ถึงกำหนด' : '')}
@@ -2421,13 +2428,18 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         `<div class="pd-tags">${kBadges(k)}</div>`) + `</div>`; };
     // ส่วนผลผลิต / ผลลัพธ์: ทุกตัวชี้วัดใช้รูปแบบเดียวกัน (ชื่อ · การ์ด ผลจริง / % เป้าสะสม / % เป้าทั้งปี · แถบทั้งปี · ป้าย)
     // หลายตัวในกลุ่มเดียว = เรียงต่อกัน แล้วปิดท้ายด้วยแถบ "รวมผลผลิต / รวมผลลัพธ์" (ค่าตามแถวรวมในแบบฟอร์ม) เหมือนแบบฟอร์มหน่วยงาน
-    const kBlock = k => { const i = info(k), u = i.unit || '';
+    // การ์ดตัวชี้วัด: ค่าเป้าหมาย · ผลจริง · % เป้าสะสม · % เป้าทั้งปี — ยังไม่ถึงรอบวัดผล (เป้าสะสมและผลเป็น 0) = "–" / N/A ไม่ใช่ 0% สีแดง
+    // โครงการที่ยังไม่เริ่ม (รอตามแผน / รอเริ่มดำเนินการ) แสดงค่าเป็นสีกลาง และติดป้ายระยะของโครงการแทนระดับ วิกฤต
+    const waitPh = p.phase === 'wait' || p.phase === 'pending';
+    const kBlock = k => { const i = info(k), u = i.unit || '', nd = cumND(k) || p.phase === 'wait';
+      const cls = v => nd || waitPh ? ' pd-nd' : pcCls(v);
       return `<div class="pd-kblock"><div class="pd-kname">${esc(i.name || k.code)}<div class="pd-kc">${esc(k.code)}${u ? ' · ' + esc(u) : ''}</div></div>` +
-        `<div class="pd-cards">${card('ผลจริง', esc(k.actual || '-'), esc(u))}` +
-        card('% เป้าสะสม', cumPct(k), `${esc(k.actual || '-')} / ${esc(k.cumTarget || '-')} ${esc(u)}`, cumND(k) ? ' pd-nd' : pcCls(k.pctCum)) +
-        card('% เป้าทั้งปี', pct(k.pctYear), `${esc(k.actual || '-')} / ${esc(k.target || '-')} ${esc(u)}`, pcCls(k.pctYear)) + `</div>` +
-        `<div class="pd-bl"><span>ความสำเร็จเทียบเป้าหมายทั้งปี</span><b>${pct(k.pctYear)}</b></div>${bar(k.pctYear)}` +
-        `<div class="pd-tags">${kBadges(k)}</div></div>`; };
+        `<div class="pd-cards pd-cards4">${card('ค่าเป้าหมาย (ทั้งปี)', esc(k.target || '-'), `${esc(u)}${k.cumTarget ? ' · เป้าสะสม ' + esc(k.cumTarget) : ''}`)}` +
+        card('ผลจริง', nd ? '–' : esc(k.actual || '-'), nd ? 'ยังไม่ถึงกำหนด' : waitPh ? 'ยังไม่เริ่มดำเนินงาน' : esc(u), nd || waitPh ? ' pd-nd' : '') +
+        card('% เป้าสะสม', nd ? 'N/A' : pct(k.pctCum), nd ? 'ยังไม่ประเมิน' : `${esc(k.actual || '-')} / ${esc(k.cumTarget || '-')}`, cls(k.pctCum)) +
+        card('% เป้าทั้งปี', nd ? 'N/A' : pct(k.pctYear), nd ? 'ยังไม่ประเมิน' : `${esc(k.actual || '-')} / ${esc(k.target || '-')}`, cls(k.pctYear)) + `</div>` +
+        (nd ? '' : `<div class="pd-bl"><span>ความสำเร็จเทียบเป้าหมายทั้งปี</span><b>${pct(k.pctYear)}</b></div>${bar(k.pctYear, waitPh ? 'none' : '')}`) +
+        `<div class="pd-tags">${waitPh ? `<span class="badge ${statusClass(p.status)}">${esc(p.status)}</span>` + (k.completion ? `<span class="badge none">${esc(k.completion)}</span>` : '') : kBadges(k)}</div></div>`; };
     const section = (no, title, list, cum, yr, totalLbl) => {
       if(!list.length) return '';
       const allND = list.every(cumND);
@@ -2445,28 +2457,40 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     }else{
       html += section(no(), SCH.key === 'tp' ? 'OUTPUT – ผลผลิต' : 'ตัวชี้วัดโครงการ', ks, p.progress_pct_cum, p.progress_year, 'รวม');
     }
-    // Milestone: % แผนสะสม เทียบ % ผลสะสม (ถ่วงน้ำหนักขั้นตอน จากแบบฟอร์ม) · สีตามระดับของ % เทียบแผนสะสม
-    const planND = p.status_plan === TP_NOT_DUE;
-    const lvl = planND ? TP_NOT_DUE : (p.status_plan || (SCH.key === 'tp' ? tpLevel(p.progress_cum) : p.status) || '');
-    const varPts = (p.ms_plan != null && p.ms_actual != null) ? Math.round((p.ms_actual - p.ms_plan) * 1000) / 10 : null;
-    const varTxt = planND ? 'ยังไม่ถึงระยะเวลาดำเนินการตามแผน' : varPts == null ? '' : varPts < 0 ? `ล่าช้า ${Math.abs(varPts)} จุดร้อยละ` : varPts > 0 ? `เร็วกว่าแผน ${varPts} จุดร้อยละ` : 'เป็นไปตามแผน';
-    const actCls = { 'ปกติ':'great', 'เฝ้าระวัง':'fair', 'วิกฤต':'poor' }[lvl] || pctColorClass(p.progress_cum);
+    // Milestone: แผนสะสม เทียบ ผลสะสม (ร้อยละของงานทั้งปี ถ่วงน้ำหนักขั้นตอน จากแบบฟอร์ม) เพื่อดูว่าดำเนินการได้ตามแผนหรือไม่
+    // ระยะของโครงการ (applyTriggerPoint): wait = รอตามแผน · pending = ถึงกำหนดแล้วยังไม่เริ่ม · late = เลยกำหนดเริ่มแล้วยังไม่ดำเนินการ · active
+    const ph = p.phase || 'active';
+    const startTxt = p.ms_start ? fiscalMonthLabel(Number(p.ms_start), vfy) : '';
+    const lvl = p.status_plan === TP_NOT_DUE ? '' : (p.status_plan || (SCH.key === 'tp' ? tpLevel(p.progress_cum) : p.status) || '');
+    const actCls = ph === 'late' ? 'poor' : ph === 'pending' ? 'none' : ({ 'ปกติ':'great', 'เฝ้าระวัง':'fair', 'วิกฤต':'poor' }[lvl] || pctColorClass(p.progress_cum));
+    const hasMs = p.ms_plan != null || p.ms_actual != null;
+    const planV = hasMs ? p.ms_plan : null, actV = ph === 'wait' ? null : (hasMs ? p.ms_actual : null);
+    const varPts = (planV != null && actV != null) ? Math.round((actV - planV) * 1000) / 10 : null;
+    const PH = { wait: ['รอตามแผน', 'wait', 'ยังไม่ถึงกำหนดเริ่มดำเนินงาน'], pending: ['รอเริ่มดำเนินการ', 'pend', 'ถึงกำหนดเริ่มแล้ว แต่ยังไม่เริ่มดำเนินงาน'],
+                 late: ['ล่าช้า', 'poor', 'เลยกำหนดเริ่มแล้ว แต่ยังไม่ดำเนินการ'] }[ph];
+    const phBadge = PH ? `<span class="badge ${PH[1]}">${PH[0]}</span>` :
+      (varPts == null ? '' : `<span class="badge ${varPts < -0.05 ? (actCls === 'great' ? 'fair' : statusClass(lvl) || 'poor') : 'great'}">${varPts < -0.05 ? `ช้ากว่าแผน ${Math.abs(varPts)} จุดร้อยละ` : varPts > 0.05 ? `เร็วกว่าแผน ${varPts} จุดร้อยละ` : 'เป็นไปตามแผน'}</span>`);
     html += `<div class="pd-sec"><h3><span class="pd-no">${no()}</span> MILESTONE – ความก้าวหน้าเทียบแผน</h3>` +
-      (p.ms_plan != null || p.ms_actual != null
-        ? `<div class="pd-cards pd-cards2">${card('ความก้าวหน้าตามแผน', pct(p.ms_plan))}${card('ความก้าวหน้าจริง', pct(p.ms_actual), '', ' pd-' + actCls)}</div>` +
-          `<div class="pd-bl"><span>แผน ${pct(p.ms_plan)}</span><span>ผลจริง ${pct(p.ms_actual)}</span></div>${bar(p.ms_plan, 'pd-plan')}${bar(p.ms_actual, actCls)}`
-        : `<div class="pd-cards pd-cards2">${card('ร้อยละความก้าวหน้าเทียบแผนสะสม', planND ? 'ยังไม่ถึงกำหนด' : pct(p.progress_cum), 'ผลสะสม ÷ แผนสะสม', planND ? '' : pcCls(p.progress_cum))}</div>${planND ? '' : bar(p.progress_cum)}`) +
-      `<div class="pd-bl pd-foot"><span>${p.ms_done ? 'ดำเนินการแล้ว ' + esc(p.ms_done) + ' ขั้นตอน' : (p.progress_cum != null ? 'เทียบแผนสะสม ' + pct(p.progress_cum) : '')}</span>${varTxt ? `<span class="badge ${planND ? 'none' : statusClass(lvl)}">${varTxt}</span>` : ''}</div></div>`;
+      (hasMs
+        ? `<div class="pd-cards pd-cards2">${card('ความก้าวหน้าตามแผน (แผนสะสม)', pct(planV), 'ร้อยละของงานทั้งปีที่ควรเสร็จ ณ เดือนนี้')}` +
+            card('ความก้าวหน้าจริง (ผลสะสม)', actV == null ? '–' : pct(actV), actV == null ? 'ยังไม่เริ่มดำเนินงาน' : 'ร้อยละของงานทั้งปีที่ทำได้แล้ว', actV == null ? ' pd-nd' : ' pd-' + actCls) + `</div>` +
+          `<div class="pd-bl"><span>แผนสะสม ${pct(planV)}</span><span>ผลสะสม ${actV == null ? '–' : pct(actV)}</span></div>${bar(planV, 'pd-plan')}${bar(actV, actCls)}`
+        : `<div class="pd-cards pd-cards2">${card('ร้อยละความก้าวหน้าเทียบแผนสะสม', ph === 'wait' ? '–' : pct(p.progress_cum), ph === 'wait' ? 'ยังไม่ถึงกำหนดเริ่มดำเนินงาน' : 'ผลสะสม ÷ แผนสะสม', ph === 'wait' || ph === 'pending' ? ' pd-nd' : pcCls(p.progress_cum))}</div>${ph === 'wait' ? '' : bar(p.progress_cum, ph === 'pending' ? 'none' : '')}`) +
+      `<div class="pd-bl pd-foot"><span>${p.ms_done ? 'ดำเนินการแล้ว ' + esc(p.ms_done) + ' ขั้นตอน' : PH ? PH[2] : ''}</span>${phBadge}</div>` +
+      (startTxt ? `<div class="pd-start">📅 กำหนดเริ่มดำเนินงานตามแผน: <b>${esc(startTxt)}</b></div>` : '') + `</div>`;
     // สรุปสถานะโครงการ
     const st = ye ? yeStat(p) : p.status;
     const issues = [];
     if(!ye && SCH.key === 'tp'){
-      const lo = p.status_pct_cum, lp = p.status_plan;
-      if(lo === 'วิกฤต' || lo === 'เฝ้าระวัง') issues.push('ผลผลิตต่ำกว่าเป้าหมายสะสม');
-      if(lp === 'วิกฤต' || lp === 'เฝ้าระวัง') issues.push('ความก้าวหน้าของงานต่ำกว่าแผน');
-      if(!issues.length) issues.push(st === TP_NOT_DUE ? 'ยังไม่ถึงระยะเวลาดำเนินการตามแผน' : st === 'ปกติ' ? 'ผลผลิตและความก้าวหน้าเป็นไปตามแผน' : '');
+      if(PH) issues.push(PH[2] + (ph === 'wait' && startTxt ? ' (เริ่ม ' + startTxt + ')' : ''));
+      else{
+        const lo = p.status_pct_cum, lp = p.status_plan;
+        if(lo === 'วิกฤต' || lo === 'เฝ้าระวัง') issues.push('ผลผลิตต่ำกว่าเป้าหมายสะสม');
+        if(lp === 'วิกฤต' || lp === 'เฝ้าระวัง') issues.push('ความก้าวหน้าของงานต่ำกว่าแผน');
+        if(!issues.length && st === 'ปกติ') issues.push('อยู่ระหว่างดำเนินการ ผลผลิตและความก้าวหน้าเป็นไปตามแผน');
+      }
     }
-    html += `<div class="pd-sec pd-sum"><h3>สรุปสถานะโครงการ</h3><div>${st ? `<span class="badge ${statusClass(st)}">${esc(st)}</span>` : ''} ${esc(issues.filter(Boolean).join(' และ'))}</div></div>`;
+    html += `<div class="pd-sec pd-sum"><h3>สรุปสถานะโครงการ</h3><div>${st ? `<span class="badge ${statusClass(st)}">${esc(st)}</span>` : ''}${ph === 'late' ? ' <span class="badge poor">ล่าช้า</span>' : ''} ${esc(issues.filter(Boolean).join(' และ'))}</div></div>`;
     // ตารางตัวชี้วัดเต็ม (ค่าทุกช่อง รวมตัวที่ยกเลิก) + แผนแม่บท
     // ข้อมูลเพิ่มเติม: แผนแม่บทที่เกี่ยวข้อง และตัวชี้วัดที่ยกเลิก (มีเมื่อมีข้อมูลเท่านั้น)
     const cx = (p.kpis || []).filter(k => k.cancelled), mps = p.master_plans || [];
@@ -3087,7 +3111,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     return Math.round(n).toLocaleString('th-TH');
   };
   const fmtPct = n => num(n)==null ? '-' : (n*100).toFixed(1)+'%';
-  const statusClass = s => ({'ดีมาก':'great','ดี':'good','พอใช้':'fair','ต้องปรับปรุง':'poor','ปกติ':'great','เฝ้าระวัง':'fair','วิกฤต':'poor','บรรลุเป้าหมาย':'great','ไม่บรรลุเป้าหมาย':'poor'}[s] || 'none');
+  const statusClass = s => ({'ดีมาก':'great','ดี':'good','พอใช้':'fair','ต้องปรับปรุง':'poor','ปกติ':'great','เฝ้าระวัง':'fair','วิกฤต':'poor','บรรลุเป้าหมาย':'great','ไม่บรรลุเป้าหมาย':'poor','รอตามแผน':'wait','รอเริ่มดำเนินการ':'pend'}[s] || 'none');
   const pctClass = v => num(v)==null ? 'none' : sch().bar(v);   // เกณฑ์สีแถบตามปี (ดู STATUS_SCHEMES)
   const PCT_COLORS = {great:'#2f7a4f', good:'#d9a916', fair:'#e07b39', poor:'#b5533c', none:'#9a9488'};
   const byCode = (a,b)=> String(a.code).localeCompare(String(b.code),'th');
@@ -3150,7 +3174,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         progress_year: h.progress_year ?? null,
         progress_year_oc: h.progress_year_oc ?? null,
         progress_pct_cum_oc: h.progress_pct_cum_oc ?? null,
-        ms_plan: h.ms_plan ?? null, ms_actual: h.ms_actual ?? null, ms_done: h.ms_done || '',
+        ms_plan: h.ms_plan ?? null, ms_actual: h.ms_actual ?? null, ms_done: h.ms_done || '', ms_start: h.ms_start ?? null,
         completion: h.completion || 'อยู่ระหว่างดำเนินการ',
         important: !!L.important,
         added: !!L.added,
@@ -3160,7 +3184,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         is_pa: !!L.is_pa, is_mou: !!L.is_mou,
       };
     });
-    const outTP = applyTriggerPoint(out, per.fiscalYear);   // ปีงบ ≥ 2570: สถานะ Trigger Point
+    const outTP = applyTriggerPoint(out, per.fiscalYear, periodAsOf(per));   // ปีงบ ≥ 2570: สถานะ Trigger Point
     return isYearEndPeriod(per) ? applyYearEnd(outTP, per.fiscalYear) : outTP;
   }
 
@@ -3189,8 +3213,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   function computeReport(P){
     const all = aggGroup({name:'รวมทั้งหมด', projects:P});
     const statusCounts = (YE ? [YE_PASS, YE_FAIL] : sch().levels).map(s=>({status:s, n:P.filter(p=>hS(p)===s).length}));
-    const nND = YE ? 0 : P.filter(p=>hS(p)===TP_NOT_DUE).length;
-    if(nND>0) statusCounts.push({status:TP_NOT_DUE, n:nND});
+    if(!YE) [TP_PENDING, TP_WAIT].forEach(s => { const n = P.filter(p=>hS(p)===s).length; if(n) statusCounts.push({status:s, n}); });
     const nOther = P.length - statusCounts.reduce((a,x)=>a+x.n,0);
     if(nOther>0) statusCounts.push({status:'ไม่มีข้อมูล', n:nOther});
 
@@ -4692,21 +4715,42 @@ function tpWorst(){
 }
 // ปีงบ ≥ 2570: แทนสถานะจากชีตด้วย Trigger Point
 //   status_plan = ด้านเทียบแผน (จาก progress_cum) · status_pct_cum = ด้านเทียบเป้าหมาย (ตัวชี้วัดต่ำสุด) · status = สถานะแจ้งเตือนรวม
-const TP_NOT_DUE = 'ยังไม่ถึงกำหนด';   // ป้ายสั้น (คอลัมน์แคบบนมือถือ) · ความหมายเต็มอยู่ใน title และหน้านิยาม
-function applyTriggerPoint(projects, fy){
+const TP_NOT_DUE = 'ยังไม่ถึงกำหนด';   // ด้านใดด้านหนึ่ง (แผน / เป้าหมาย) ยังไม่ถึงรอบวัดผล — ใช้กับแถบและการ์ด
+// ระยะของโครงการ (ผู้ใช้กำหนด พ.ย. 2569) — แยก "ยังไม่ถึงกำหนดเริ่ม" กับ "ถึงกำหนดแล้วแต่ยังไม่เริ่ม" ไม่ให้เป็น 0% สีแดงอัตโนมัติ
+const TP_WAIT = 'รอตามแผน';               // ยังไม่ถึงกำหนดเริ่มดำเนินงาน
+const TP_PENDING = 'รอเริ่มดำเนินการ';     // ถึงกำหนดเริ่มในเดือนที่รายงาน แต่ยังไม่เริ่ม (เลยกำหนดแล้ว = วิกฤต + phase "late")
+// เดือนในปีงบ 1 = ต.ค. … 12 = ก.ย.
+function fiscalMonthOf(d){ return d ? ((d.getMonth() + 3) % 12) + 1 : null; }
+function fiscalMonthLabel(fm, fy){
+  if(!(fm >= 1 && fm <= 12)) return '';
+  const m = ['ต.ค.','พ.ย.','ธ.ค.','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.'][fm - 1];
+  return m + ' ' + String(fm <= 3 ? Number(fy) - 1 : Number(fy)).slice(-2) + ' (ไตรมาส ' + Math.ceil(fm / 3) + ')';
+}
+function applyTriggerPoint(projects, fy, asOf){
   if(!(Number(fy) >= TP_FROM_FY)) return projects;
+  const repFm = fiscalMonthOf(asOf || liveAsOfDate(fy, window.ACP_SYNCED_AT));
   return projects.map(p=>{
     const a = tpLevel(p.progress_cum), b = tpLevel(p.progress_pct_cum);
-    // ยังไม่ถึงระยะเวลาดำเนินการตามแผน (ผู้ใช้ขอ พ.ย. 2569): ไม่ใช่ "ไม่มีข้อมูล" และไม่ใช่ 0% "วิกฤต"
-    // · ด้านแผน: % เทียบแผนว่าง ทั้งที่โครงการมีแถวผล (เมนูดึงผลเว้นว่างเมื่อไม่มีขั้นตอนใดถึงกำหนด)
-    // · ด้านเป้าหมาย: ไม่มีตัวชี้วัดใดที่เป้าหมายสะสมหรือผลจริงไม่เป็น 0
+    // ด้านแผน: % เทียบแผนว่าง ทั้งที่โครงการมีแถวผล (เมนูดึงผลเว้นว่างเมื่อไม่มีขั้นตอนใดถึงกำหนด)
+    // ด้านเป้าหมาย: ไม่มีตัวชี้วัดใดที่เป้าหมายสะสมหรือผลจริงไม่เป็น 0
     const ks = (p.kpis || []).filter(k => !k.cancelled);
-    const kpiDue = ks.some(k => (parseNum(k.cumTarget) || 0) !== 0 || (parseNum(k.actual) || 0) !== 0);
+    const n0 = v => (parseNum(v) || 0) !== 0;
+    const kpiDue = ks.some(k => n0(k.cumTarget)), kpiActual = ks.some(k => n0(k.actual));
     const planND = !a && p.progress_cum == null && ks.length > 0;
-    const cumND = !b && p.progress_pct_cum == null && ks.length > 0 && !kpiDue;
-    const nd = s => s ? TP_NOT_DUE : 'ไม่มีข้อมูล';
-    return Object.assign({}, p, { status_plan: a || nd(planND), status_pct_cum: b || nd(cumND),
-      status: tpWorst(a, b) || nd(planND || cumND), not_due: !a && !b && (planND || cumND) });
+    const cumND = !b && p.progress_pct_cum == null && ks.length > 0 && !kpiDue && !kpiActual;
+    const dimND = s => s ? TP_NOT_DUE : 'ไม่มีข้อมูล';
+    const out = { status_plan: a || dimND(planND), status_pct_cum: b || dimND(cumND), phase: 'active' };
+    // ระยะของโครงการ: เริ่มแล้ว = มีผลจริงของตัวชี้วัด หรือมีผลตามแผน (Milestone / % เทียบแผน > 0)
+    const started = kpiActual || (p.ms_actual || 0) > 0 || (p.progress_cum || 0) > 0;
+    const planDue = (p.ms_plan != null ? p.ms_plan > 0 : p.progress_cum != null) || kpiDue;
+    if(ks.length && !started && !planDue){ out.phase = 'wait'; out.status = TP_WAIT; }
+    else if(ks.length && !started){
+      const late = p.ms_start && repFm ? Number(p.ms_start) < repFm : false;
+      out.phase = late ? 'late' : 'pending';
+      out.status = late ? 'วิกฤต' : TP_PENDING;
+    }else out.status = tpWorst(a, b) || dimND(planND || cumND);
+    out.not_due = out.phase === 'wait';
+    return Object.assign({}, p, out);
   });
 }
 // หัวคอลัมน์ยาว → แบ่ง 2 บรรทัดที่จุดที่อ่านง่าย (ใช้กับ innerHTML ของ <th>; ข้อความในโค้ดเป็นค่าคงที่ ไม่มีข้อมูลจากผู้ใช้)
@@ -4883,10 +4927,10 @@ function formGrpField(r, h){
   return k === undefined ? undefined : r[k];
 }
 // Milestone ในหน้ารายละเอียดโครงการ (เมนูดึงผลเขียนแถวแรกของโครงการ ชีตผลการดำเนินงาน/ย้อนหลัง Y–AA) — ต้องตรงกับ MILESTONE_HEADERS ใน AppScript
-const MILESTONE_COLS = ['ร้อยละความก้าวหน้าตามแผน', 'ร้อยละความก้าวหน้าจริง', 'ขั้นตอนที่แล้วเสร็จ'];
-function readMilestone(plan, act, done){
-  const p = parseNum(plan), a = parseNum(act), d = String(done ?? '').trim();
-  return (p != null || a != null || d) ? { plan: p, act: a, done: d } : null;
+const MILESTONE_COLS = ['ร้อยละความก้าวหน้าตามแผน', 'ร้อยละความก้าวหน้าจริง', 'ขั้นตอนที่แล้วเสร็จ', 'เดือนเริ่มตามแผน'];   // Y–AB
+function readMilestone(plan, act, done, start){
+  const p = parseNum(plan), a = parseNum(act), d = String(done ?? '').trim(), s = parseNum(start);   // start = เดือนในปีงบ 1 (ต.ค.) – 12 (ก.ย.)
+  return (p != null || a != null || d || s != null) ? { plan: p, act: a, done: d, start: s } : null;
 }
 function readFormGrp(vals){
   const v = vals.map(x => parseNum(x));
@@ -4956,7 +5000,7 @@ function buildHistoryDataset(historyRows, projectRecords){
     if(agg.disbursed==null){ const v = parseNum(row[18]); if(v!=null) agg.disbursed = v; } // S
     if(agg.disbursePct==null){ const v = parseNum(row[19]); if(v!=null) agg.disbursePct = v; } // T
     if(!agg.formGrp) agg.formGrp = readFormGrp([row[20], row[21], row[22], row[23]]);   // U–X = % รวมผลผลิต/ผลลัพธ์ จากแบบฟอร์ม
-    if(!agg.ms) agg.ms = readMilestone(row[24], row[25], row[26]);   // Y–AA = Milestone
+    if(!agg.ms) agg.ms = readMilestone(row[24], row[25], row[26], row[27]);   // Y–AB = Milestone
   });
 
   const periods = Object.values(periodMap).map(period=>{
@@ -4979,7 +5023,7 @@ function buildHistoryDataset(historyRows, projectRecords){
         progress_pct_cum: pc.main,   // หลายตัวชี้วัด = ค่าเฉลี่ยของตัวชี้วัด Output
         progress_year: py.main,
         progress_pct_cum_oc: pc.oc,
-        ms_plan: agg.ms ? agg.ms.plan : null, ms_actual: agg.ms ? agg.ms.act : null, ms_done: agg.ms ? agg.ms.done : '',
+        ms_plan: agg.ms ? agg.ms.plan : null, ms_actual: agg.ms ? agg.ms.act : null, ms_done: agg.ms ? agg.ms.done : '', ms_start: agg.ms ? agg.ms.start : null,
         progress_year_oc: py.oc,
         status_pct_cum: worstStatus(agg.kpiStatuses) || 'ไม่มีข้อมูล',
         completion: agg.completions.length   // บรรลุเป้าหมาย = ทุกตัวชี้วัดทั้ง Output และ Outcome
@@ -5640,7 +5684,7 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
       progress_pct_cum: pcS.main,   // หลายตัวชี้วัด = ค่าเฉลี่ยของตัวชี้วัด Output (ผู้ใช้กำหนด พ.ย. 2569)
       progress_year_oc: pyS.oc,     // Outcome แสดงแยก (ปีงบ 2570 เป็นต้นไป)
       progress_pct_cum_oc: pcS.oc,
-      ms_plan: a.ms ? a.ms.plan : null, ms_actual: a.ms ? a.ms.act : null, ms_done: a.ms ? a.ms.done : '',   // Milestone (แผน/ผลจริง ถ่วงน้ำหนักขั้นตอน)
+      ms_plan: a.ms ? a.ms.plan : null, ms_actual: a.ms ? a.ms.act : null, ms_done: a.ms ? a.ms.done : '', ms_start: a.ms ? a.ms.start : null,   // Milestone (แผน/ผลจริง ถ่วงน้ำหนักขั้นตอน)
       status_pct_cum: wk.status || 'ไม่มีข้อมูล',
       completion,
       important: importantSet.has(code),
