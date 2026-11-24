@@ -1498,6 +1498,7 @@ window.addEventListener('load', function(){
           <dt>% ความก้าวหน้าจากเป้าหมายสะสม</dt><dd>ผลจริงเทียบเป้าหมายสะสมของแต่ละตัวชี้วัด</dd>
           <dt>% ความก้าวหน้าจากเป้าหมายทั้งปี</dt><dd>ผลจริงเทียบเป้าหมายทั้งปีของแต่ละตัวชี้วัด</dd>
           <dt>แผนฉบับปรับปรุงระหว่างปี</dt><dd>ตัวชี้วัดโครงการที่ "ยกเลิก" ตามแผนปรับปรุงไม่นับในร้อยละ สถานะ และการบรรลุเป้าหมายทั้งปี (นับตั้งแต่เดือนที่แผนอนุมัติ) · ตัวชี้วัด "ปรับค่าเป้าหมาย" ใช้ค่าเป้าหมายใหม่ · งบประมาณใช้ฉบับล่าสุดที่อนุมัติแล้ว และเป็นฐานของร้อยละการเบิกจ่าย</dd>
+          <dt>ยังไม่ถึงกำหนด</dt><dd>ปีงบประมาณ 2570 เป็นต้นไป โครงการที่ยังไม่ถึงระยะเวลาดำเนินการตามแผน (ยังไม่มีขั้นตอนในแผนหรือตัวชี้วัดใดถึงกำหนดในเดือนที่รายงาน) แสดงสถานะ "ยังไม่ถึงกำหนด" แทน 0% / วิกฤต</dd>
           <dt>ตัวชี้วัด Output / Outcome</dt><dd>ปีงบประมาณ 2570 เป็นต้นไป % จากเป้าหมายสะสมและ % จากเป้าหมายทั้งปีของโครงการ (และสถานะแจ้งเตือน) คิดจาก<b>ตัวชี้วัด Output</b> ส่วนตัวชี้วัด Outcome แสดงแยกเป็นบรรทัด "ผลลัพธ์" ใต้แถบ · โครงการที่มีแต่ตัวชี้วัด Outcome ใช้ Outcome แทน · ตัวเลขใช้ค่า % ในแถว "รวมผลผลิต" / "รวมผลลัพธ์" ของแบบฟอร์มหน่วยงานโดยตรง (ไม่มีค่าในแบบฟอร์มจึงใช้ค่าเฉลี่ยของตัวชี้วัด) · ผลผลิตที่ยังไม่มีตัวชี้วัดถึงกำหนดแสดงเป็น "-"</dd>
           <dt>สีของแถบความก้าวหน้า</dt><dd>ปีงบประมาณ 2570 เป็นต้นไป: <span class="md-sw great"></span>90% ขึ้นไป · <span class="md-sw good"></span>70% ถึงต่ำกว่า 90% · <span class="md-sw poor"></span>ต่ำกว่า 70% (ตามเกณฑ์ Trigger Point)<br>
             ปีงบประมาณ 2569: <span class="md-sw great"></span>100% ขึ้นไป · <span class="md-sw good"></span>90–99% · <span class="md-sw fair"></span>80–89% · <span class="md-sw poor"></span>ต่ำกว่า 80%</dd>
@@ -1873,6 +1874,10 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const donut = YE_MODE
     ? yearPctBandCounts(PROJECTS)
     : SCH.levels.map(s=>({label:s, color:SCH.colors[s], n:PROJECTS.filter(p=>p.status===s).length}));
+  if(!YE_MODE && SCH.key === 'tp'){
+    const nND = PROJECTS.filter(p=>p.status===TP_NOT_DUE).length;
+    if(nND) donut.push({ label:TP_NOT_DUE, color:'#b9b2a4', n:nND });
+  }
   {
     const sp = document.getElementById('statusChart').closest('.panel');
     if(YE_MODE){
@@ -2257,7 +2262,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       // ป้ายสถานะวางเหนือแถบของ % ที่เป็นที่มา · ทั้งปี: สำเร็จ = ทุกตัวชี้วัดสำเร็จ (สิ้นปีที่ปิดแล้ว = บรรลุ/ไม่บรรลุเป้าหมาย)
       const yrStat = ye ? yeStat(p) : (p.completion || '');
       const yrCls = (yrStat === 'สำเร็จ' || yrStat === 'บรรลุเป้าหมาย') ? 'great' : statusClass(yrStat);
-      const stTop = (s, cls) => s ? `<div style="text-align:center; margin-bottom:5px;"><span class="badge ${cls}">${s}</span></div>` : '';
+      const stTop = (s, cls) => s ? `<div style="text-align:center; margin-bottom:5px;"><span class="badge ${cls}"${s === TP_NOT_DUE ? ' title="ยังไม่ถึงระยะเวลาดำเนินการตามแผน"' : ''}>${s}</span></div>` : '';
       return `
         <tr>
           <td class="code">${p.code}</td>
@@ -3001,6 +3006,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   function computeReport(P){
     const all = aggGroup({name:'รวมทั้งหมด', projects:P});
     const statusCounts = (YE ? [YE_PASS, YE_FAIL] : sch().levels).map(s=>({status:s, n:P.filter(p=>hS(p)===s).length}));
+    const nND = YE ? 0 : P.filter(p=>hS(p)===TP_NOT_DUE).length;
+    if(nND>0) statusCounts.push({status:TP_NOT_DUE, n:nND});
     const nOther = P.length - statusCounts.reduce((a,x)=>a+x.n,0);
     if(nOther>0) statusCounts.push({status:'ไม่มีข้อมูล', n:nOther});
 
@@ -4502,11 +4509,21 @@ function tpWorst(){
 }
 // ปีงบ ≥ 2570: แทนสถานะจากชีตด้วย Trigger Point
 //   status_plan = ด้านเทียบแผน (จาก progress_cum) · status_pct_cum = ด้านเทียบเป้าหมาย (ตัวชี้วัดต่ำสุด) · status = สถานะแจ้งเตือนรวม
+const TP_NOT_DUE = 'ยังไม่ถึงกำหนด';   // ป้ายสั้น (คอลัมน์แคบบนมือถือ) · ความหมายเต็มอยู่ใน title และหน้านิยาม
 function applyTriggerPoint(projects, fy){
   if(!(Number(fy) >= TP_FROM_FY)) return projects;
   return projects.map(p=>{
     const a = tpLevel(p.progress_cum), b = tpLevel(p.progress_pct_cum);
-    return Object.assign({}, p, { status_plan: a || 'ไม่มีข้อมูล', status_pct_cum: b || 'ไม่มีข้อมูล', status: tpWorst(a, b) || 'ไม่มีข้อมูล' });
+    // ยังไม่ถึงระยะเวลาดำเนินการตามแผน (ผู้ใช้ขอ พ.ย. 2569): ไม่ใช่ "ไม่มีข้อมูล" และไม่ใช่ 0% "วิกฤต"
+    // · ด้านแผน: % เทียบแผนว่าง ทั้งที่โครงการมีแถวผล (เมนูดึงผลเว้นว่างเมื่อไม่มีขั้นตอนใดถึงกำหนด)
+    // · ด้านเป้าหมาย: ไม่มีตัวชี้วัดใดที่เป้าหมายสะสมหรือผลจริงไม่เป็น 0
+    const ks = (p.kpis || []).filter(k => !k.cancelled);
+    const kpiDue = ks.some(k => (parseNum(k.cumTarget) || 0) !== 0 || (parseNum(k.actual) || 0) !== 0);
+    const planND = !a && p.progress_cum == null && ks.length > 0;
+    const cumND = !b && p.progress_pct_cum == null && ks.length > 0 && !kpiDue;
+    const nd = s => s ? TP_NOT_DUE : 'ไม่มีข้อมูล';
+    return Object.assign({}, p, { status_plan: a || nd(planND), status_pct_cum: b || nd(cumND),
+      status: tpWorst(a, b) || nd(planND || cumND), not_due: !a && !b && (planND || cumND) });
   });
 }
 // หัวคอลัมน์ยาว → แบ่ง 2 บรรทัดที่จุดที่อ่านง่าย (ใช้กับ innerHTML ของ <th>; ข้อความในโค้ดเป็นค่าคงที่ ไม่มีข้อมูลจากผู้ใช้)
