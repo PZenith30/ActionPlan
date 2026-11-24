@@ -531,6 +531,45 @@ window.addEventListener('load', function(){
   .kd-x{display:inline-block; margin-left:4px; padding:1px 8px; border-radius:999px; font-size:10.5px; font-weight:600; background:rgba(181,83,60,0.13); color:var(--status-poor);}
   tr.kd-grp > td{padding:6px 10px; font-size:11.5px; font-weight:600; color:var(--forest-600); background:var(--latex-100);}
   tr.kd-total > td{font-weight:600; background:var(--latex-50); border-top:1px solid var(--latex-200);}
+  /* ตารางประจำปีแบบย่อ + หน้ารายละเอียดโครงการ */
+  tr.prj-row{cursor:pointer;}
+  tr.prj-row:focus-visible{outline:2px solid var(--forest-600); outline-offset:-2px;}
+  .prj-open{display:inline-block; margin-top:5px; font-size:11.5px; color:var(--forest-600); font-weight:600;}
+  tr.prj-row:hover .prj-open{text-decoration:underline;}
+  th.prog-th{text-align:center; min-width:190px;}
+  td.prog-cell{min-width:190px;}
+  .mb{display:grid; grid-template-columns:46px minmax(60px,1fr) auto; align-items:center; gap:6px; margin-top:4px; font-size:11.5px;}
+  .mb-l{color:var(--ink-600);}
+  .tap-bar.mb-t{display:block; height:7px; width:auto; margin:0;}
+  .tap-bar.mb-t .fill{display:block; height:100%;}
+  .mb-v{text-align:right; font-family:'JetBrains Mono',monospace; font-size:11px; white-space:nowrap;}
+  .pd-dialog{max-width:760px;}
+  .pd-kicker{font-size:11.5px; color:var(--ink-400); margin-bottom:2px;}
+  .pd-sec{padding:14px 0 16px; border-bottom:1px solid var(--latex-200);}
+  .pd-sec:last-of-type{border-bottom:none;}
+  .pd-sec h3{margin:0 0 10px; font-family:'Kanit',sans-serif; font-size:15px; color:var(--forest-900);}
+  .pd-no{color:var(--ink-400); font-weight:500;}
+  .pd-cards{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
+  .pd-cards2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .pd-card{border:1px solid var(--latex-200); border-radius:10px; padding:10px 12px; background:var(--latex-50); min-width:0;}
+  .pd-cl{font-size:11.5px; color:var(--ink-400);}
+  .pd-cv{font-family:'Kanit',sans-serif; font-size:22px; font-weight:600; color:var(--ink-900); line-height:1.3;}
+  .pd-cv.pd-great{color:var(--pct-great);} .pd-cv.pd-good{color:var(--pct-good);} .pd-cv.pd-fair{color:var(--pct-fair);} .pd-cv.pd-poor{color:var(--pct-poor);}
+  .pd-cs{font-size:11.5px; color:var(--ink-400); overflow-wrap:anywhere;}
+  .pd-cv{overflow-wrap:anywhere;}
+  .pd-dialog{overflow-x:hidden;}
+  .pd-bl{display:flex; justify-content:space-between; gap:8px; margin:12px 0 4px; font-size:12px; color:var(--ink-600);}
+  .tap-bar.pd-bar{height:10px; width:auto; margin:4px 0 0;}
+  .tap-bar.pd-plan .fill{background-color:#6b7a86;}
+  .pd-foot{align-items:center; margin-top:8px;}
+  .pd-klist{margin-top:12px; display:grid; gap:8px;}
+  .pd-k{padding:8px 10px; border:1px solid var(--latex-200); border-radius:8px;}
+  .pd-kn{font-size:13px; font-weight:600;}
+  .pd-km{font-size:11.5px; color:var(--ink-600); margin-top:2px;}
+  .pd-sum > div{font-size:13px; line-height:1.8;}
+  .pd-more{margin:8px 0 14px; font-size:13px;}
+  .pd-more summary{cursor:pointer; color:var(--forest-600); font-weight:600; margin-bottom:8px;}
+  @media (max-width:600px){ .pd-cards{grid-template-columns:repeat(2,minmax(0,1fr));} .pd-cards .pd-card:first-child{grid-column:1 / -1;} .pd-cards2 .pd-card:first-child{grid-column:auto;} .pd-cv{font-size:19px;} }
 
   .badge{
     display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:600;
@@ -671,7 +710,7 @@ window.addEventListener('load', function(){
   @page{size:A4 landscape; margin:0;}
   @media print{
     body{background:#fff !important;}
-    body > .page, #reportModal, #cancelModal, #methodModal, #reportStage, #reportChartHolder{display:none !important;}
+    body > .page, #reportModal, #cancelModal, #prjModal, #methodModal, #reportStage, #reportChartHolder{display:none !important;}
     #printArea{display:block !important;}
     #printArea.legacy{padding:10mm;}
     #printArea.report .rp-page{break-after:page; page-break-after:always;}
@@ -1286,14 +1325,8 @@ window.addEventListener('load', function(){
                 <th data-key="name">ชื่อโครงการ<span class="arrow">▾</span></th>
                 <th data-key="owner" class="nw" style="width:110px;">หน่วยงาน<span class="arrow">▾</span></th>
                 <th data-key="budget" class="nw" style="text-align:right">งบประมาณ (บาท)<span class="arrow">▾</span></th>
-                <th data-key="progress_pct_cum" style="text-align:center" title="ป้ายด้านบน: สถานะโครงการ (ร้อยละความก้าวหน้า จากเป้าหมายสะสม)">
-                  % ความก้าวหน้า<br>จากเป้าหมายสะสม<span class="arrow">▾</span>
-                </th>
-                <th data-key="progress_year" style="text-align:center" title="ป้ายด้านบน: สถานะโครงการ (ผลเทียบเป้าทั้งปี)">
-                  % ความก้าวหน้า<br>จากเป้าหมายทั้งปี<span class="arrow">▾</span>
-                </th>
-                <th data-key="progress_cum" style="text-align:center" title="ป้ายด้านบน: สถานะโครงการ (ผลเทียบแผนสะสม)">
-                  % ความก้าวหน้า<br>เทียบแผนสะสม<span class="arrow">▾</span>
+                <th data-key="progress_cum" class="prog-th" title="ป้าย: สถานะโครงการ · แถบ: ผลผลิต / ผลลัพธ์ (จากเป้าหมายสะสม) และความก้าวหน้าเทียบแผนสะสม">
+                  สถานะ / ความก้าวหน้า<span class="arrow">▾</span>
                 </th>
               </tr>
             </thead>
@@ -1301,8 +1334,8 @@ window.addEventListener('load', function(){
           </table>
         </div>
         <div class="footnote-box">
-          หมายเหตุ: บางโครงการประกอบด้วยตัวชี้วัดย่อยหลายตัว ตัวเลข "% ความก้าวหน้าจากเป้าหมายสะสม" และ "% ความก้าวหน้าจากเป้าหมายทั้งปี"
-          ที่แสดงในตารางนี้เป็นค่าเฉลี่ยของทุกตัวชี้วัดของโครงการ · ปีงบประมาณ 2570 เป็นต้นไป แถบคิดจากตัวชี้วัดผลผลิต (Output) และแสดงผลลัพธ์ (Outcome) แยกใต้แถบ ตามแถวรวมในแบบฟอร์มของหน่วยงาน
+          หมายเหตุ: กดที่โครงการเพื่อดูรายละเอียด ผลผลิต (Output) · ผลลัพธ์ (Outcome) · ความก้าวหน้าเทียบแผน (Milestone) และตัวชี้วัดทุกรายการ ·
+          แถบ "ผลผลิต" / "ผลลัพธ์" = ร้อยละจากเป้าหมายสะสมตามแถวรวมในแบบฟอร์มของหน่วยงาน (ไม่มีค่าในแบบฟอร์มจึงใช้ค่าเฉลี่ยของตัวชี้วัด) · แถบ "แผน" = ร้อยละความก้าวหน้าเทียบแผนสะสม
         </div>
       </div>
 
@@ -1561,6 +1594,20 @@ window.addEventListener('load', function(){
         </dl>
       </section>
     </div>
+  </div>
+</div>
+
+<div id="prjModal" class="rm-backdrop" hidden>
+  <div class="rm-dialog pd-dialog" role="dialog" aria-modal="true" aria-labelledby="pdTitle">
+    <div class="rm-head">
+      <div>
+        <div class="pd-kicker">ติดตามผลการดำเนินงานรายโครงการ</div>
+        <h2 id="pdTitle"></h2>
+        <p id="pdSub"></p>
+      </div>
+      <button type="button" class="rm-x" id="pdClose" aria-label="ปิด">×</button>
+    </div>
+    <div class="rm-body" id="pdBody"></div>
   </div>
 </div>
 
@@ -2055,6 +2102,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       progress_year: p.progress_year ?? null,
       progress_year_oc: p.progress_year_oc ?? null,
       progress_pct_cum_oc: p.progress_pct_cum_oc ?? null,
+      ms_plan: p.ms_plan ?? null, ms_actual: p.ms_actual ?? null, ms_done: p.ms_done || '',
       important: false,
       added: ADDED_CODES.has(p.code),
       master_plans: [],
@@ -2263,19 +2311,26 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       const yrStat = ye ? yeStat(p) : (p.completion || '');
       const yrCls = (yrStat === 'สำเร็จ' || yrStat === 'บรรลุเป้าหมาย') ? 'great' : statusClass(yrStat);
       const stTop = (s, cls) => s ? `<div style="text-align:center; margin-bottom:5px;"><span class="badge ${cls}"${s === TP_NOT_DUE ? ' title="ยังไม่ถึงระยะเวลาดำเนินการตามแผน"' : ''}>${s}</span></div>` : '';
+      // แถบย่อ 3 เส้น: ผลผลิต / ผลลัพธ์ (จากเป้าหมายสะสม · สิ้นปี = ทั้งปี) และแผน — รายละเอียดเต็มอยู่ในหน้ารายละเอียด (pdOpen)
+      const vOut = ye ? p.progress_year : p.progress_pct_cum, vOc = ye ? p.progress_year_oc : p.progress_pct_cum_oc;
+      const hasOc = vOc != null || (p.kpis || []).some(k => kpiIsOutcome(window.__viewFY || window.LIVE_FISCAL_YEAR, k.code));
+      const mini = (lbl, v, note) => `<div class="mb"><span class="mb-l">${lbl}</span><span class="tap-bar mb-t ${pctColorClass(v)}"><span class="fill" style="width:${v==null ? 0 : Math.max(0, Math.min(100, v*100))}%"></span></span><span class="mb-v">${v==null ? (note || '-') : (v*100).toFixed(1)+'%'}</span></div>`;
+      const ovStat = ye ? yrStat : p.status;
       return `
-        <tr>
+        <tr class="prj-row" data-code="${p.code}" tabindex="0" title="กดเพื่อดูรายละเอียดโครงการ">
           <td class="code">${p.code}</td>
           <td class="name">
             <div class="nm">${p.important ? '<span class="star">★</span>' : ''}${p.name}${p.added ? ` <span class="tag-added"${p.budget_rev ? ` title="ตามแผน${p.budget_rev.edition}"` : ''}>เพิ่มระหว่างปี</span>` : ''}${p.budget_changed ? ` <span class="tag-budget" title="งบตามแผน${p.budget_rev.edition}${p.budget_rev.dateText ? ' (' + p.budget_rev.dateText + ')' : ''}: เดิม ${fmtBaht(p.budget_orig)} → ${fmtBaht(p.budget)} บาท">ปรับงบ</span>` : ''}${p.kpi_changes ? ` <span class="tag-kpi" title="${String(p.kpi_changes.detail).replace(/"/g, '&quot;')}">ปรับตัวชี้วัด</span>` : ''}</div>
             <div class="strat">${p.strategy || ''}</div>
-            ${((p.kpis || []).length || (p.master_plans || []).length) ? `<button type="button" class="kpi-toggle" data-code="${p.code}" aria-expanded="false">${(p.kpis || []).length ? `ตัวชี้วัด ${(p.kpis || []).filter(k => !k.cancelled).length} รายการ` : 'รายละเอียด'} <span class="kt-caret">▾</span></button>` : ''}
+            <span class="prj-open">ดูรายละเอียด ›</span>
           </td>
           <td class="owner">${p.owner}</td>
           <td class="num">${fmtBaht(p.budget)}${p.budget_changed ? `<div class="bud-old">เดิม ${fmtBaht(p.budget_orig)}</div>` : ''}</td>
-          <td>${ye ? '' : stTop(p.status_pct_cum, statusClass(p.status_pct_cum))}${tapBarHtml(p.progress_pct_cum, pctColorClass(p.progress_pct_cum))}${ocLine(p.progress_pct_cum_oc)}</td>
-          <td>${stTop(yrStat, yrCls)}${tapBarHtml(p.progress_year, pctColorClass(p.progress_year))}${ocLine(p.progress_year_oc)}</td>
-          <td>${ye ? '' : stTop(p.status_plan || p.status, statusClass(p.status_plan || p.status))}${tapBarHtml(p.progress_cum, pctColorClass(p.progress_cum))}</td>
+          <td class="prog-cell">${stTop(ovStat, ye ? yrCls : statusClass(ovStat))}
+            ${mini(hasOc || SCH.key === 'tp' ? 'ผลผลิต' : 'เป้าหมาย', vOut, p.status_pct_cum === TP_NOT_DUE ? 'ยังไม่ถึงกำหนด' : '')}
+            ${hasOc ? mini('ผลลัพธ์', vOc) : ''}
+            ${ye ? '' : mini('แผน', p.progress_cum, p.status_plan === TP_NOT_DUE ? 'ยังไม่ถึงกำหนด' : '')}
+          </td>
         </tr>
       `;
     }).join('');
@@ -2311,18 +2366,104 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         head('ผลลัพธ์ (Outcome)') + ocK.map(row).join('') + total('รวมผลลัพธ์', p.progress_pct_cum_oc, p.progress_year_oc);
     return mp + `<div class="kd-wrap"><table class="kd-tbl"><thead><tr><th>ตัวชี้วัด</th><th class="r">ค่าเป้าหมาย</th><th class="r">เป้าหมายสะสม</th><th class="r">ผลจริง</th><th class="r">% จากเป้าหมายสะสม</th><th class="r">% จากเป้าหมายทั้งปี</th><th class="c">สถานะ</th><th class="c">ผลเทียบเป้าทั้งปี</th></tr></thead><tbody>${body}</tbody></table></div>`;
   }
-  document.getElementById('tblBody').addEventListener('click', e=>{
-    const btn = e.target.closest && e.target.closest('.kpi-toggle');
-    if(!btn) return;
-    const tr = btn.closest('tr'), next = tr.nextElementSibling;
-    if(next && next.classList.contains('kpi-detail')){ next.remove(); btn.setAttribute('aria-expanded', 'false'); return; }
-    const p = ACTIVE_DATA.find(x => x.code === btn.dataset.code);
+  // ---------- หน้ารายละเอียดโครงการ (กดที่แถวในตารางประจำปี) — 01 ผลผลิต · 02 ผลลัพธ์ · 03 Milestone · สรุปสถานะ ----------
+  // ผลผลิตกับผลลัพธ์แสดงแยกกันเสมอ ไม่รวมเป็นคะแนนเดียว (ผู้ใช้กำหนด พ.ย. 2569)
+  function pdHtml(p){
+    const esc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const pct = v => v == null ? '-' : (v * 100).toFixed(1) + '%';
+    const vfy = Number(window.__viewFY || window.LIVE_FISCAL_YEAR);
+    const names = window.ACP_KPI_NAMES || {};
+    const info = k => names[vfy + '|' + k.code] || names['|' + k.code] || {};
+    const ye = yeData();
+    const ks = (p.kpis || []).filter(k => !k.cancelled);
+    const outK = ks.filter(k => !kpiIsOutcome(vfy, k.code)), ocK = ks.filter(k => kpiIsOutcome(vfy, k.code));
+    const pcCls = v => v == null ? '' : ' pd-' + pctColorClass(v);
+    const bar = (v, cls) => `<div class="tap-bar pd-bar ${cls || pctColorClass(v)}"><div class="fill" style="width:${v == null ? 0 : Math.max(0, Math.min(100, v * 100))}%"></div></div>`;
+    const card = (lbl, big, sub, cls) => `<div class="pd-card"><div class="pd-cl">${lbl}</div><div class="pd-cv${cls || ''}">${big}</div>${sub ? `<div class="pd-cs">${sub}</div>` : ''}</div>`;
+    // ส่วนผลผลิต / ผลลัพธ์: ตัวชี้วัดเดียว = การ์ด ผลจริง · % เป้าสะสม · % เป้าทั้งปี (เหมือนตัวอย่าง) · หลายตัว = การ์ดรวม + รายการรายตัวชี้วัด
+    const section = (no, title, list, cum, yr) => {
+      if(!list.length) return '';
+      let cards, rows = '';
+      if(list.length === 1){
+        const k = list[0], u = info(k).unit || '';
+        cards = card('ผลจริง', esc(k.actual || '-'), esc(u)) +
+          card('% เป้าสะสม', pct(k.pctCum), `${esc(k.actual || '-')} / ${esc(k.cumTarget || '-')} ${esc(u)}`, pcCls(k.pctCum)) +
+          card('% เป้าทั้งปี', pct(k.pctYear), `${esc(k.actual || '-')} / ${esc(k.target || '-')} ${esc(u)}`, pcCls(k.pctYear));
+      }else{
+        cards = card('ตัวชี้วัด', list.length + ' รายการ', 'ดูรายตัวด้านล่าง') +
+          card('% เป้าสะสม (รวม)', pct(cum), 'ตามแถวรวมในแบบฟอร์ม', pcCls(cum)) +
+          card('% เป้าทั้งปี (รวม)', pct(yr), 'ตามแถวรวมในแบบฟอร์ม', pcCls(yr));
+        rows = `<div class="pd-klist">${list.map(k => { const i = info(k); return `<div class="pd-k"><div class="pd-kn">${esc(i.name || k.code)}<span class="kd-code"> ${esc(k.code)}</span></div>` +
+          `<div class="pd-km">ผลจริง ${esc(k.actual || '-')} / เป้าสะสม ${esc(k.cumTarget || '-')} / ทั้งปี ${esc(k.target || '-')} ${esc(i.unit || '')} · <b>${pct(k.pctCum)}</b> สะสม · <b>${pct(k.pctYear)}</b> ทั้งปี</div>${bar(k.pctYear)}</div>`; }).join('')}</div>`;
+      }
+      return `<div class="pd-sec"><h3><span class="pd-no">${no}</span> ${title}</h3><div class="pd-cards">${cards}</div>` +
+        `<div class="pd-bl"><span>ความสำเร็จเทียบเป้าหมายทั้งปี</span><b>${pct(yr)}</b></div>${bar(yr)}${rows}</div>`;
+    };
+    const hasTypes = ocK.length > 0;
+    let n = 0, html = '';
+    const no = () => String(++n).padStart(2, '0') + ' |';
+    if(hasTypes){
+      html += section(no(), 'OUTPUT – ผลผลิต', outK, p.progress_pct_cum, p.progress_year);
+      html += section(no(), 'OUTCOME – ผลลัพธ์', ocK, p.progress_pct_cum_oc, p.progress_year_oc);
+    }else{
+      html += section(no(), SCH.key === 'tp' ? 'OUTPUT – ผลผลิต' : 'ตัวชี้วัดโครงการ', ks, p.progress_pct_cum, p.progress_year);
+    }
+    // Milestone: % แผนสะสม เทียบ % ผลสะสม (ถ่วงน้ำหนักขั้นตอน จากแบบฟอร์ม) · สีตามระดับของ % เทียบแผนสะสม
+    const planND = p.status_plan === TP_NOT_DUE;
+    const lvl = planND ? TP_NOT_DUE : (p.status_plan || (SCH.key === 'tp' ? tpLevel(p.progress_cum) : p.status) || '');
+    const varPts = (p.ms_plan != null && p.ms_actual != null) ? Math.round((p.ms_actual - p.ms_plan) * 1000) / 10 : null;
+    const varTxt = planND ? 'ยังไม่ถึงระยะเวลาดำเนินการตามแผน' : varPts == null ? '' : varPts < 0 ? `ล่าช้า ${Math.abs(varPts)} จุดร้อยละ` : varPts > 0 ? `เร็วกว่าแผน ${varPts} จุดร้อยละ` : 'เป็นไปตามแผน';
+    const actCls = { 'ปกติ':'great', 'เฝ้าระวัง':'fair', 'วิกฤต':'poor' }[lvl] || pctColorClass(p.progress_cum);
+    html += `<div class="pd-sec"><h3><span class="pd-no">${no()}</span> MILESTONE – ความก้าวหน้าเทียบแผน</h3>` +
+      (p.ms_plan != null || p.ms_actual != null
+        ? `<div class="pd-cards pd-cards2">${card('ความก้าวหน้าตามแผน', pct(p.ms_plan))}${card('ความก้าวหน้าจริง', pct(p.ms_actual), '', ' pd-' + actCls)}</div>` +
+          `<div class="pd-bl"><span>แผน ${pct(p.ms_plan)}</span><span>ผลจริง ${pct(p.ms_actual)}</span></div>${bar(p.ms_plan, 'pd-plan')}${bar(p.ms_actual, actCls)}`
+        : `<div class="pd-cards pd-cards2">${card('ร้อยละความก้าวหน้าเทียบแผนสะสม', planND ? 'ยังไม่ถึงกำหนด' : pct(p.progress_cum), 'ผลสะสม ÷ แผนสะสม', planND ? '' : pcCls(p.progress_cum))}</div>${planND ? '' : bar(p.progress_cum)}`) +
+      `<div class="pd-bl pd-foot"><span>${p.ms_done ? 'ดำเนินการแล้ว ' + esc(p.ms_done) + ' ขั้นตอน' : (p.progress_cum != null ? 'เทียบแผนสะสม ' + pct(p.progress_cum) : '')}</span>${varTxt ? `<span class="badge ${planND ? 'none' : statusClass(lvl)}">${varTxt}</span>` : ''}</div></div>`;
+    // สรุปสถานะโครงการ
+    const st = ye ? yeStat(p) : p.status;
+    const issues = [];
+    if(!ye && SCH.key === 'tp'){
+      const lo = p.status_pct_cum, lp = p.status_plan;
+      if(lo === 'วิกฤต' || lo === 'เฝ้าระวัง') issues.push('ผลผลิตต่ำกว่าเป้าหมายสะสม');
+      if(lp === 'วิกฤต' || lp === 'เฝ้าระวัง') issues.push('ความก้าวหน้าของงานต่ำกว่าแผน');
+      if(!issues.length) issues.push(st === TP_NOT_DUE ? 'ยังไม่ถึงระยะเวลาดำเนินการตามแผน' : st === 'ปกติ' ? 'ผลผลิตและความก้าวหน้าเป็นไปตามแผน' : '');
+    }
+    html += `<div class="pd-sec pd-sum"><h3>สรุปสถานะโครงการ</h3><div>${st ? `<span class="badge ${statusClass(st)}">${esc(st)}</span>` : ''} ${esc(issues.filter(Boolean).join(' และ'))}</div></div>`;
+    // ตารางตัวชี้วัดเต็ม (ค่าทุกช่อง รวมตัวที่ยกเลิก) + แผนแม่บท
+    html += `<details class="pd-more"><summary>ตารางตัวชี้วัดทั้งหมดและแผนแม่บทที่เกี่ยวข้อง</summary>${kpiDetailHtml(p)}</details>`;
+    return html;
+  }
+  function pdOpen(code){
+    const p = ACTIVE_DATA.find(x => x.code === code);
     if(!p) return;
-    const d = document.createElement('tr');
-    d.className = 'kpi-detail';
-    d.innerHTML = `<td colspan="${tr.children.length}">${kpiDetailHtml(p)}</td>`;
-    tr.after(d);
-    btn.setAttribute('aria-expanded', 'true');
+    const esc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const per = window.__dashPeriodLabel || ('ข้อมูลล่าสุด · ปีงบประมาณ ' + (window.__viewFY || ''));
+    document.getElementById('pdTitle').textContent = p.name;
+    document.getElementById('pdSub').innerHTML = `${esc(p.code)} · ${esc(p.owner)} · งบประมาณ ${fmtBaht(p.budget)} บาท · เบิกจ่าย ${p.budget > 0 ? ((p.disbursed || 0) / p.budget * 100).toFixed(1) + '%' : '-'}<br>${esc(per)}`;
+    document.getElementById('pdBody').innerHTML = pdHtml(p);
+    const m = document.getElementById('prjModal');
+    m.hidden = false; m.dataset.from = code;
+    document.getElementById('pdClose').focus();
+  }
+  {
+    const m = document.getElementById('prjModal');
+    if(m && !m.dataset.bound){   // ผูกปุ่มปิดครั้งเดียว (renderDashboard ถูกเรียกซ้ำเมื่อเปลี่ยนรอบข้อมูล)
+      m.dataset.bound = '1';
+      const close = ()=>{ m.hidden = true; const r = document.querySelector(`tr.prj-row[data-code="${m.dataset.from}"]`); if(r) r.focus(); };
+      document.getElementById('pdClose').addEventListener('click', close);
+      m.addEventListener('click', e=>{ if(e.target === m) close(); });
+      document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && !m.hidden) close(); });
+    }
+  }
+  const tblBodyEl = document.getElementById('tblBody');
+  tblBodyEl.addEventListener('click', e=>{
+    const tr = e.target.closest && e.target.closest('tr.prj-row');
+    if(tr && !(e.target.closest('a'))) pdOpen(tr.dataset.code);
+  });
+  tblBodyEl.addEventListener('keydown', e=>{
+    const tr = e.target.closest && e.target.closest('tr.prj-row');
+    if(tr && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); pdOpen(tr.dataset.code); }
   });
 
   render();
@@ -2968,6 +3109,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         progress_year: h.progress_year ?? null,
         progress_year_oc: h.progress_year_oc ?? null,
         progress_pct_cum_oc: h.progress_pct_cum_oc ?? null,
+        ms_plan: h.ms_plan ?? null, ms_actual: h.ms_actual ?? null, ms_done: h.ms_done || '',
         completion: h.completion || 'อยู่ระหว่างดำเนินการ',
         important: !!L.important,
         added: !!L.added,
@@ -4699,6 +4841,12 @@ function formGrpField(r, h){
   const k = Object.keys(r).find(x => String(x).replace(/\s+/g, ' ').trim() === h);
   return k === undefined ? undefined : r[k];
 }
+// Milestone ในหน้ารายละเอียดโครงการ (เมนูดึงผลเขียนแถวแรกของโครงการ ชีตผลการดำเนินงาน/ย้อนหลัง Y–AA) — ต้องตรงกับ MILESTONE_HEADERS ใน AppScript
+const MILESTONE_COLS = ['ร้อยละความก้าวหน้าตามแผน', 'ร้อยละความก้าวหน้าจริง', 'ขั้นตอนที่แล้วเสร็จ'];
+function readMilestone(plan, act, done){
+  const p = parseNum(plan), a = parseNum(act), d = String(done ?? '').trim();
+  return (p != null || a != null || d) ? { plan: p, act: a, done: d } : null;
+}
 function readFormGrp(vals){
   const v = vals.map(x => parseNum(x));
   return v.some(x => x != null) ? { outCum: v[0], outYear: v[1], ocCum: v[2], ocYear: v[3] } : null;
@@ -4767,6 +4915,7 @@ function buildHistoryDataset(historyRows, projectRecords){
     if(agg.disbursed==null){ const v = parseNum(row[18]); if(v!=null) agg.disbursed = v; } // S
     if(agg.disbursePct==null){ const v = parseNum(row[19]); if(v!=null) agg.disbursePct = v; } // T
     if(!agg.formGrp) agg.formGrp = readFormGrp([row[20], row[21], row[22], row[23]]);   // U–X = % รวมผลผลิต/ผลลัพธ์ จากแบบฟอร์ม
+    if(!agg.ms) agg.ms = readMilestone(row[24], row[25], row[26]);   // Y–AA = Milestone
   });
 
   const periods = Object.values(periodMap).map(period=>{
@@ -4789,6 +4938,7 @@ function buildHistoryDataset(historyRows, projectRecords){
         progress_pct_cum: pc.main,   // หลายตัวชี้วัด = ค่าเฉลี่ยของตัวชี้วัด Output
         progress_year: py.main,
         progress_pct_cum_oc: pc.oc,
+        ms_plan: agg.ms ? agg.ms.plan : null, ms_actual: agg.ms ? agg.ms.act : null, ms_done: agg.ms ? agg.ms.done : '',
         progress_year_oc: py.oc,
         status_pct_cum: worstStatus(agg.kpiStatuses) || 'ไม่มีข้อมูล',
         completion: agg.completions.length   // บรรลุเป้าหมาย = ทุกตัวชี้วัดทั้ง Output และ Outcome
@@ -5370,6 +5520,7 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
     if(a.disbursed==null){ const v = parseNum(r['เบิกจ่าย (บาท)']); if(v!=null) a.disbursed = v; }
     if(a.disburse_pct==null){ const v = parseNum(r['การเบิกจ่ายงบประมาณ (ร้อยละ)']); if(v!=null) a.disburse_pct = v; }
     if(!a.formGrp) a.formGrp = readFormGrp(FORM_GRP_COLS.map(h => formGrpField(r, h)));   // % รวมผลผลิต/ผลลัพธ์ จากแบบฟอร์มหน่วยงาน
+    if(!a.ms) a.ms = readMilestone(...MILESTONE_COLS.map(h => formGrpField(r, h)));
     if(a.progressCum==null){
       const v = parseNum(getField(r, ['ความก้าวหน้าเทียบแผนสะสม', 'ร้อยละความก้าวหน้าเทียบแผนสะสม']));
       if(v!=null){
@@ -5448,6 +5599,7 @@ function buildDashboardData(strategyRows, projectRows, resultRows, importantRows
       progress_pct_cum: pcS.main,   // หลายตัวชี้วัด = ค่าเฉลี่ยของตัวชี้วัด Output (ผู้ใช้กำหนด พ.ย. 2569)
       progress_year_oc: pyS.oc,     // Outcome แสดงแยก (ปีงบ 2570 เป็นต้นไป)
       progress_pct_cum_oc: pcS.oc,
+      ms_plan: a.ms ? a.ms.plan : null, ms_actual: a.ms ? a.ms.act : null, ms_done: a.ms ? a.ms.done : '',   // Milestone (แผน/ผลจริง ถ่วงน้ำหนักขั้นตอน)
       status_pct_cum: wk.status || 'ไม่มีข้อมูล',
       completion,
       important: importantSet.has(code),
