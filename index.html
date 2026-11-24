@@ -554,6 +554,7 @@ window.addEventListener('load', function(){
   .pd-card{border:1px solid var(--latex-200); border-radius:10px; padding:10px 12px; background:var(--latex-50); min-width:0;}
   .pd-cl{font-size:11.5px; color:var(--ink-400);}
   .pd-cv{font-family:'Kanit',sans-serif; font-size:22px; font-weight:600; color:var(--ink-900); line-height:1.3;}
+  .pd-cv.pd-nd{font-size:16px; color:var(--ink-400); font-weight:500;}
   .pd-cv.pd-great{color:var(--pct-great);} .pd-cv.pd-good{color:var(--pct-good);} .pd-cv.pd-fair{color:var(--pct-fair);} .pd-cv.pd-poor{color:var(--pct-poor);}
   .pd-cs{font-size:11.5px; color:var(--ink-400); overflow-wrap:anywhere;}
   .pd-cv{overflow-wrap:anywhere;}
@@ -563,9 +564,21 @@ window.addEventListener('load', function(){
   .tap-bar.pd-plan .fill{background-color:#6b7a86;}
   .pd-foot{align-items:center; margin-top:8px;}
   .pd-klist{margin-top:12px; display:grid; gap:8px;}
-  .pd-k{padding:8px 10px; border:1px solid var(--latex-200); border-radius:8px;}
-  .pd-kn{font-size:13px; font-weight:600;}
-  .pd-km{font-size:11.5px; color:var(--ink-600); margin-top:2px;}
+  .pd-k{padding:10px 12px; border:1px solid var(--latex-200); border-radius:10px; background:#fff;}
+  .pd-kn{font-size:13.5px; font-weight:600; line-height:1.5;}
+  .pd-kc{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-400); margin-top:1px;}
+  .pd-kg{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:8px 0 4px;}
+  .pd-kg > div{background:var(--latex-50); border-radius:8px; padding:6px 8px; min-width:0;}
+  .pd-kg span{display:block; font-size:11px; color:var(--ink-400);}
+  .pd-kg b{display:block; font-family:'JetBrains Mono',monospace; font-size:12.5px; overflow-wrap:anywhere;}
+  .pd-kp{display:grid; grid-template-columns:40px minmax(0,1fr) 58px; align-items:center; gap:8px; margin-top:5px; font-size:11.5px; color:var(--ink-600);}
+  .pd-kp .tap-bar.pd-bar{margin:0; height:8px;}
+  .pd-kp b{text-align:right; font-family:'JetBrains Mono',monospace; font-size:12px;}
+  .pd-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .pd-tags .kd-x, .pd-tags .tag-added, .pd-tags .tag-kpi{margin-left:0;}
+  .pd-kx .pd-kn{text-decoration:line-through; color:var(--ink-400);}
+  .pd-mp{font-size:13px; line-height:1.7; margin-bottom:10px;}
+  .pd-mp > span{display:block; font-size:11.5px; color:var(--ink-400);}
   .pd-sum > div{font-size:13px; line-height:1.8;}
   .pd-more{margin:8px 0 14px; font-size:13px;}
   .pd-more summary{cursor:pointer; color:var(--forest-600); font-weight:600; margin-bottom:8px;}
@@ -2380,6 +2393,26 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const pcCls = v => v == null ? '' : ' pd-' + pctColorClass(v);
     const bar = (v, cls) => `<div class="tap-bar pd-bar ${cls || pctColorClass(v)}"><div class="fill" style="width:${v == null ? 0 : Math.max(0, Math.min(100, v * 100))}%"></div></div>`;
     const card = (lbl, big, sub, cls) => `<div class="pd-card"><div class="pd-cl">${lbl}</div><div class="pd-cv${cls || ''}">${big}</div>${sub ? `<div class="pd-cs">${sub}</div>` : ''}</div>`;
+    // ตัวชี้วัดที่ยังไม่ถึงกำหนด (ปีงบ 2570+: เป้าสะสมเป็น 0 และยังไม่มีผล) — % สะสมในชีตเป็น 100% ตามสูตร แต่ไม่ใช่ผลจริง
+    const cumND = k => SCH.key === 'tp' && !(parseNum(k.cumTarget) || 0) && !(parseNum(k.actual) || 0);
+    const cumPct = k => cumND(k) ? 'ยังไม่ถึงกำหนด' : pct(k.pctCum);
+    // ป้ายของตัวชี้วัด: สถานะ (TP จาก % สะสม) · ผลเทียบเป้าทั้งปี · การปรับตามแผนปรับปรุง (เฉพาะปีปัจจุบัน; โครงการเพิ่มระหว่างปีไม่ติด "เพิ่ม")
+    const chg = window.ACP_KPI_STATUS || {};
+    const kBadges = k => {
+      const st = SCH.key === 'tp' ? (cumND(k) ? TP_NOT_DUE : tpLevel(k.pctCum)) : k.status;
+      const c0 = vfy === Number(window.LIVE_FISCAL_YEAR) ? chg[k.code] : null, c = c0 && !(p.added && c0.status === 'เพิ่ม') ? c0 : null;
+      return (st ? `<span class="badge ${statusClass(st)}">${esc(st)}</span>` : '') +
+        (k.completion ? `<span class="badge ${k.completion === 'สำเร็จ' ? 'great' : 'none'}">${esc(k.completion)}</span>` : '') +
+        (c ? `<span class="${c.status === 'ยกเลิก' ? 'kd-x' : c.status === 'เพิ่ม' ? 'tag-added' : 'tag-kpi'}">${esc(c.status)}${c.status === 'ปรับค่าเป้าหมาย' && c.oldTarget ? ` (เดิม ${esc(c.oldTarget)})` : ''}</span>` : '');
+    };
+    // การ์ดตัวชี้วัด 1 ตัว (แทนตารางกว้างที่อ่านยากบนจอแคบ)
+    const kCard = k => { const i = info(k), u = esc(i.unit || '');
+      return `<div class="pd-k${k.cancelled ? ' pd-kx' : ''}"><div class="pd-kn">${esc(i.name || k.code)}</div>` +
+        `<div class="pd-kc">${esc(k.code)}${u ? ' · ' + u : ''}</div>` +
+        (k.cancelled ? '<div class="pd-kc">ยกเลิกตามแผนปรับปรุง · ไม่นับในการคำนวณ</div>' :
+        `<div class="pd-kg"><div><span>เป้าทั้งปี</span><b>${esc(k.target || '-')}</b></div><div><span>เป้าสะสม</span><b>${esc(k.cumTarget || '-')}</b></div><div><span>ผลจริง</span><b>${esc(k.actual || '-')}</b></div></div>` +
+        `<div class="pd-kp"><span>สะสม</span>${bar(cumND(k) ? null : k.pctCum)}<b>${cumND(k) ? '-' : pct(k.pctCum)}</b></div><div class="pd-kp"><span>ทั้งปี</span>${bar(k.pctYear)}<b>${pct(k.pctYear)}</b></div>` +
+        `<div class="pd-tags">${kBadges(k)}</div>`) + `</div>`; };
     // ส่วนผลผลิต / ผลลัพธ์: ตัวชี้วัดเดียว = การ์ด ผลจริง · % เป้าสะสม · % เป้าทั้งปี (เหมือนตัวอย่าง) · หลายตัว = การ์ดรวม + รายการรายตัวชี้วัด
     const section = (no, title, list, cum, yr) => {
       if(!list.length) return '';
@@ -2387,15 +2420,15 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       if(list.length === 1){
         const k = list[0], u = info(k).unit || '';
         cards = card('ผลจริง', esc(k.actual || '-'), esc(u)) +
-          card('% เป้าสะสม', pct(k.pctCum), `${esc(k.actual || '-')} / ${esc(k.cumTarget || '-')} ${esc(u)}`, pcCls(k.pctCum)) +
+          card('% เป้าสะสม', cumPct(k), `${esc(k.actual || '-')} / ${esc(k.cumTarget || '-')} ${esc(u)}`, cumND(k) ? ' pd-nd' : pcCls(k.pctCum)) +
           card('% เป้าทั้งปี', pct(k.pctYear), `${esc(k.actual || '-')} / ${esc(k.target || '-')} ${esc(u)}`, pcCls(k.pctYear));
       }else{
         cards = card('ตัวชี้วัด', list.length + ' รายการ', 'ดูรายตัวด้านล่าง') +
           card('% เป้าสะสม (รวม)', pct(cum), 'ตามแถวรวมในแบบฟอร์ม', pcCls(cum)) +
           card('% เป้าทั้งปี (รวม)', pct(yr), 'ตามแถวรวมในแบบฟอร์ม', pcCls(yr));
-        rows = `<div class="pd-klist">${list.map(k => { const i = info(k); return `<div class="pd-k"><div class="pd-kn">${esc(i.name || k.code)}<span class="kd-code"> ${esc(k.code)}</span></div>` +
-          `<div class="pd-km">ผลจริง ${esc(k.actual || '-')} / เป้าสะสม ${esc(k.cumTarget || '-')} / ทั้งปี ${esc(k.target || '-')} ${esc(i.unit || '')} · <b>${pct(k.pctCum)}</b> สะสม · <b>${pct(k.pctYear)}</b> ทั้งปี</div>${bar(k.pctYear)}</div>`; }).join('')}</div>`;
+        rows = `<div class="pd-klist">${list.map(kCard).join('')}</div>`;
       }
+      if(list.length === 1) rows = `<div class="pd-tags">${kBadges(list[0])}</div>`;
       return `<div class="pd-sec"><h3><span class="pd-no">${no}</span> ${title}</h3><div class="pd-cards">${cards}</div>` +
         `<div class="pd-bl"><span>ความสำเร็จเทียบเป้าหมายทั้งปี</span><b>${pct(yr)}</b></div>${bar(yr)}${rows}</div>`;
     };
@@ -2431,7 +2464,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     }
     html += `<div class="pd-sec pd-sum"><h3>สรุปสถานะโครงการ</h3><div>${st ? `<span class="badge ${statusClass(st)}">${esc(st)}</span>` : ''} ${esc(issues.filter(Boolean).join(' และ'))}</div></div>`;
     // ตารางตัวชี้วัดเต็ม (ค่าทุกช่อง รวมตัวที่ยกเลิก) + แผนแม่บท
-    html += `<details class="pd-more"><summary>ตารางตัวชี้วัดทั้งหมดและแผนแม่บทที่เกี่ยวข้อง</summary>${kpiDetailHtml(p)}</details>`;
+    // ข้อมูลเพิ่มเติม: แผนแม่บทที่เกี่ยวข้อง และตัวชี้วัดที่ยกเลิก (มีเมื่อมีข้อมูลเท่านั้น)
+    const cx = (p.kpis || []).filter(k => k.cancelled), mps = p.master_plans || [];
+    if(cx.length || mps.length) html += `<div class="pd-sec"><h3>ข้อมูลเพิ่มเติม</h3>` +
+      (mps.length ? `<div class="pd-mp"><span>แผนแม่บทที่เกี่ยวข้อง</span>${mps.map(m => `<div>• ${esc(m.name)}</div>`).join('')}</div>` : '') +
+      (cx.length ? `<div class="pd-klist">${cx.map(kCard).join('')}</div>` : '') + `</div>`;
     return html;
   }
   function pdOpen(code){
