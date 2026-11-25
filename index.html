@@ -455,6 +455,22 @@ window.addEventListener('load', function(){
   .pd-risk .pd-rk-box .pd-rk-k{margin-top:5px; color:var(--ink-600);}
   .pd-risk .pd-rk-h{font-size:12px; font-weight:600; color:var(--forest-800);}
   .pd-risk .pd-rk-src{margin-top:6px; font-size:10.5px; color:var(--ink-400);}
+  .risk-th{min-width:96px; text-align:center !important;}
+  td.risk-cell{text-align:center; vertical-align:middle; white-space:nowrap;}
+  td.risk-cell .rk-badge{font-size:12px; padding:3px 10px;}
+  .rk-mini{margin-top:6px; font-size:11px; color:var(--ink-400); font-family:'IBM Plex Mono',monospace;}
+  .rk-dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:3px; vertical-align:baseline;}
+  .rk-dot.rk1{background:#2f9a55;} .rk-dot.rk2{background:#86bd4a;} .rk-dot.rk3{background:#e2bd1f;} .rk-dot.rk4{background:#ec8a2c;} .rk-dot.rk5{background:#d23a2e;}
+  .pd-risk .rk-card{border-width:1px; border-top-width:5px; text-align:center;}
+  .pd-risk .rk-card .rk-big{font-family:'Kanit',sans-serif; font-size:34px; font-weight:600; line-height:1.1; margin-top:4px;}
+  .pd-risk .rk-card .rk-lvl{font-size:13px; font-weight:600; margin-bottom:6px;}
+  .pd-risk .rk-card .rk-note{margin-top:6px; font-size:11px;}
+  .pd-risk .rk-card.rk0{background:var(--latex-50);} .pd-risk .rk-card.rk0 .rk-big, .pd-risk .rk-card.rk0 .rk-lvl{color:var(--ink-400);}
+  .pd-risk .rk-card.rk1{background:rgba(47,154,85,0.10); border-color:#2f9a55;} .pd-risk .rk-card.rk1 .rk-big, .pd-risk .rk-card.rk1 .rk-lvl{color:#21733f;}
+  .pd-risk .rk-card.rk2{background:rgba(134,189,74,0.14); border-color:#86bd4a;} .pd-risk .rk-card.rk2 .rk-big, .pd-risk .rk-card.rk2 .rk-lvl{color:#4f7d1f;}
+  .pd-risk .rk-card.rk3{background:rgba(226,189,31,0.16); border-color:#e2bd1f;} .pd-risk .rk-card.rk3 .rk-big, .pd-risk .rk-card.rk3 .rk-lvl{color:#8a6d00;}
+  .pd-risk .rk-card.rk4{background:rgba(236,138,44,0.15); border-color:#ec8a2c;} .pd-risk .rk-card.rk4 .rk-big, .pd-risk .rk-card.rk4 .rk-lvl{color:#b05a10;}
+  .pd-risk .rk-card.rk5{background:rgba(210,58,46,0.13); border-color:#d23a2e;} .pd-risk .rk-card.rk5 .rk-big, .pd-risk .rk-card.rk5 .rk-lvl{color:#a0302a;}
   @media (max-width:700px){ .pd-risk .pd-rk-flow{grid-template-columns:minmax(0,1fr);} .pd-risk .pd-rk-arrow{justify-content:center; transform:rotate(90deg);} }
   .kr-tbl{min-width:900px; table-layout:fixed;}
   .kr-tbl td:nth-child(3){white-space:nowrap;}
@@ -1420,6 +1436,7 @@ window.addEventListener('load', function(){
                 <th data-key="progress_cum" class="prog-th" title="ป้าย: สถานะโครงการ · แถบ: ผลผลิต / ผลลัพธ์ (จากเป้าหมายสะสม) และความก้าวหน้าเทียบแผนสะสม">
                   สถานะ / ความก้าวหน้า<span class="arrow">▾</span>
                 </th>
+                <th data-key="risk_score" class="nw risk-th" title="ความเสี่ยงปัจจุบัน = โอกาสเกิด (กิจกรรมสำคัญ) × ผลกระทบ (ตัวชี้วัด) · บรรทัดล่าง: ก่อนจัดการ (เล่มแผน) → คาดการณ์สิ้นปี">ความเสี่ยง<span class="arrow">▾</span></th>
               </tr>
             </thead>
             <tbody id="tblBody"></tbody>
@@ -2460,8 +2477,14 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   }
 
   function sortRows(rows){
+    const vfyS = Number(window.__viewFY || window.LIVE_FISCAL_YEAR), yeS = yeData();
+    const val = x => sortKey === 'risk_score' ? riskEval(x, vfyS, yeS).score : x[sortKey];   // ความเสี่ยงปัจจุบัน
     return rows.slice().sort((a,b)=>{
-      let av = a[sortKey], bv = b[sortKey];
+      let av = val(a), bv = val(b);
+      if(sortKey === 'risk_score'){   // กดครั้งแรก = เสี่ยงมากก่อน · ยังไม่ถึงกำหนดอยู่ท้ายเสมอ
+        if(av == null || bv == null) return (av == null) - (bv == null);
+        return (bv - av) * (sortDir === -1 ? 1 : -1);
+      }
       if(typeof av === 'string'){
         return av.localeCompare(bv, 'th') * sortDir * -1;
       }
@@ -2519,6 +2542,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
             ${hasOc ? mini('ผลลัพธ์', vOc) : ''}
             ${ye ? '' : mini('แผน', p.progress_cum, p.status_plan === TP_NOT_DUE ? 'ยังไม่ถึงกำหนด' : '')}
           </td>
+          <td class="risk-cell">${(rk => rk.score == null && rk.before == null ? '<span class="rk-badge rk0" title="ยังไม่ถึงกำหนดวัดผล">–</span>' :
+            (rk.score != null ? riskBadge(rk.score, `ปัจจุบัน · โอกาสเกิด ${rk.L} × ผลกระทบ ${rk.I}`) : '<span class="rk-badge rk0" title="ยังไม่ถึงกำหนดวัดผล">ยังไม่ถึงกำหนด</span>') +
+            `<div class="rk-mini" title="ก่อนจัดการ (เล่มแผน) → คาดการณ์สิ้นปี">${rk.before != null ? `<span class="rk-dot ${riskBand(rk.before).cls}"></span>${rk.before}` : '–'} → ${rk.fscore != null ? `<span class="rk-dot ${riskBand(rk.fscore).cls}"></span>${rk.fscore}` : '–'}</div>`)(riskEval(p, Number(window.__viewFY || window.LIVE_FISCAL_YEAR), ye))}</td>
         </tr>
       `;
     }).join('');
@@ -2643,7 +2669,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const rkE = riskEval(p, vfy, ye), rk = rkE.book;
     if(rkE.score != null || rk || rkE.notDue){
       const pctS = v => v == null ? '–' : Math.round(v * 100) + '%';
-      const lvCard = (lbl, sc, sub) => card(lbl, sc != null && riskBand(sc) ? riskBadge(sc) : '–', sub + (sc != null && riskBand(sc) ? '<br>' + riskBand(sc).note : ''));
+      // การ์ดสีความเสี่ยง: พื้นและขอบตามสีระดับ กยท. · ตัวเลขคะแนนใหญ่ + ชื่อระดับ (ผู้ใช้ขอให้เห็นชัด พ.ย. 2569)
+      const lvCard = (lbl, sc, sub) => { const b = sc != null ? riskBand(sc) : null;
+        return `<div class="pd-card rk-card ${b ? b.cls : 'rk0'}"><div class="pd-cl">${lbl}</div>` +
+          `<div class="rk-big">${b ? sc : '–'}</div><div class="rk-lvl">${b ? b.label + ' (' + b.code + ')' : 'ยังไม่มีคะแนน'}</div>` +
+          `<div class="pd-cs">${sub}${b ? '<div class="rk-note">' + b.note + '</div>' : ''}</div></div>`; };
       const arrow = '<div class="pd-rk-arrow">→</div>';
       const Ltxt = rkE.Lsrc === 'lead'
         ? `กิจกรรมสำคัญ <b>${esc(rkE.lead.name || '-')}</b>${rkE.lead.w && rkE.lead.w <= 1 ? ` (น้ำหนัก ${Math.round(rkE.lead.w * 100)}%)` : ''} · ผลสะสม ${pctS(rkE.lead.act)} / แผนสะสม ${pctS(rkE.lead.plan)} ของเป้าทั้งปี` +
