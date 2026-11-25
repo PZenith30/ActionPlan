@@ -244,6 +244,8 @@ window.addEventListener('load', function(){
   .md-body dl{display:grid; grid-template-columns:200px 1fr; gap:8px 18px; margin:0; font-size:13px; line-height:1.55;}
   .md-body dt{font-weight:600; color:var(--ink-900);}
   .md-body dd{margin:0; color:var(--ink-600);}
+  .md-steps{margin:2px 0 0; padding-left:20px;} .md-steps li + li{margin-top:4px;}
+  .md-rkb{display:grid; grid-template-columns:auto 1fr; gap:3px 10px; margin-top:2px;} .md-rkb .rk-badge{justify-self:start; align-self:start;}
   .md-cbe{list-style:none; margin:6px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:3px 16px;}
   .md-cbe b{display:inline-block; min-width:54px; font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--bark-700);}
   .md-body b{color:var(--ink-900);}
@@ -408,6 +410,47 @@ window.addEventListener('load', function(){
   .kr-head h2{margin:0;}
   .kr-head select{font:inherit; font-size:13px; padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink-900);}
   .kr-tbl-wrap{overflow-x:auto;}
+  /* ความเสี่ยงโครงการ (#risk) */
+  .rk-badge{display:inline-block; padding:1px 8px; border-radius:999px; font-size:11px; font-weight:600; white-space:nowrap;}
+  .rk-badge.rk0{background:rgba(154,148,136,0.15); color:var(--status-none);}
+  .rk-badge.rk1{background:rgba(47,154,85,0.14); color:#21733f;}
+  .rk-badge.rk2{background:rgba(134,189,74,0.18); color:#4d7a1c;}
+  .rk-badge.rk3{background:rgba(226,189,31,0.20); color:#806300;}
+  .rk-badge.rk4{background:rgba(236,138,44,0.17); color:#ad5512;}
+  .rk-badge.rk5{background:rgba(210,58,46,0.15); color:#a0302a;}
+  .rk-heat .cell.acc{box-shadow:inset 0 0 0 3px #1f6fd1;}
+  .tag-risk{display:inline-block; margin-left:4px; padding:1px 8px; border-radius:999px; font-size:10.5px; font-weight:600; background:rgba(184,58,46,0.12); color:#a0302a; white-space:nowrap; vertical-align:middle; cursor:help;}
+  .rk-two{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px;}
+  @media (max-width:1100px){ .rk-two{grid-template-columns:minmax(0,1fr);} }
+  .rk-toggle{display:flex; gap:6px;}
+  .rk-heat{display:grid; grid-template-columns:26px repeat(5, minmax(0,1fr)); gap:4px; max-width:460px;}
+  .rk-heat .ax{font-size:11px; color:var(--ink-400); display:flex; align-items:center; justify-content:center;}
+  .rk-heat .cell{aspect-ratio:1.5; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; color:#fff; border:0; font-family:inherit; cursor:default; opacity:.92;}
+  .rk-heat .cell.n0{color:rgba(255,255,255,.75); font-weight:400; font-size:12px; opacity:.45;}
+  .rk-heat .cell.has{cursor:pointer;}
+  .rk-heat .cell.has:hover, .rk-heat .cell.sel{opacity:1; outline:2px solid var(--ink-900); outline-offset:1px;}
+  .rk-axis-x{text-align:center; font-size:11.5px; color:var(--ink-600); margin-top:6px; max-width:460px; padding-left:30px;}
+  .rk-axis-y{font-size:11.5px; color:var(--ink-600); margin-bottom:4px;}
+  .rk-legend{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
+  .kr-tbl.rk-cross{min-width:0; width:100%; table-layout:auto;}
+  .kr-tbl.rk-cross thead th{white-space:normal; padding-left:6px; padding-right:6px;}
+  .kr-tbl.rk-cross td{padding-left:6px; padding-right:6px;}
+  .kr-tbl.rk-list td:nth-child(3){white-space:normal; overflow-wrap:anywhere;}
+  .rk-cross td, .rk-cross th{text-align:center;}
+  .rk-cross td:first-child, .rk-cross th:first-child{text-align:left;}
+  .rk-cross button{font:inherit; font-weight:700; border:0; background:transparent; cursor:pointer; color:var(--ink-900); padding:2px 8px; border-radius:6px;}
+  .rk-cross button:hover{background:var(--latex-50);}
+  .rk-cross td.hot{background:rgba(184,58,46,0.10);}
+  .rk-cross td.hot button{color:#a0302a;}
+  .rk-list tr{cursor:pointer;}
+  .rk-list tr:hover td{background:var(--latex-50);}
+  .rk-list .rk-fac{font-size:12px; color:var(--ink-600);}
+  .pd-risk .pd-rk-flow{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1.6fr) auto minmax(0,1fr); gap:10px; align-items:stretch;}
+  .pd-risk .pd-rk-arrow{display:flex; align-items:center; color:var(--ink-400); font-size:18px;}
+  .pd-risk .pd-rk-txt{font-size:13px; line-height:1.6; color:var(--ink-900);}
+  .pd-risk .pd-rk-k{font-size:11.5px; color:var(--ink-400); margin-top:8px;}
+  .pd-risk .pd-rk-warn{margin-top:12px; padding:8px 12px; border-radius:8px; background:rgba(184,58,46,0.08); color:#a0302a; font-size:12.5px;}
+  @media (max-width:700px){ .pd-risk .pd-rk-flow{grid-template-columns:minmax(0,1fr);} .pd-risk .pd-rk-arrow{justify-content:center; transform:rotate(90deg);} }
   .kr-tbl{min-width:900px; table-layout:fixed;}
   .kr-tbl td:nth-child(3){white-space:nowrap;}
   .kr-tbl thead th{white-space:nowrap;}
@@ -1199,6 +1242,7 @@ window.addEventListener('load', function(){
         <button class="nav-item" data-view="view-strategy"><span class="ico">🧭</span> ผลการดำเนินงานตามยุทธศาสตร์</button>
         <button class="nav-item" data-view="view-kpi"><span class="ico">🏆</span> ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</button>
         <button class="nav-item" data-view="view-annual"><span class="ico">📋</span> ความก้าวหน้าแผนปฏิบัติการประจำปี</button>
+        <button class="nav-item" data-view="view-risk"><span class="ico">⚠️</span> ความเสี่ยงโครงการ</button>
         <button class="nav-item" data-view="view-masterplan"><span class="ico">🗂️</span> ความก้าวหน้าแผนแม่บท</button>
         <button class="nav-item" data-view="view-lineorg"><span class="ico">🏢</span> ความก้าวหน้าแผนปฏิบัติการตามสายงาน</button>
         <button class="nav-item" data-view="view-dgarea"><span class="ico">🎯</span> ความก้าวหน้า PA และ MOU</button>
@@ -1335,6 +1379,14 @@ window.addEventListener('load', function(){
             <option value="kpi">ปรับตัวชี้วัด</option>
           </select>
         </label>
+        <label class="toggle-important">ความเสี่ยง
+          <select id="fRisk" class="plan-sel">
+            <option value="">ทั้งหมด</option>
+            <option value="high">เสี่ยงค่อนข้างสูงขึ้นไป</option>
+            <option value="watch">ต้องจับตา</option>
+            <option value="none">ไม่มีข้อมูลความเสี่ยง</option>
+          </select>
+        </label>
         <span class="card-preset" id="cardPreset" hidden></span>
         <span class="result-count" id="resultCount"></span>
       </div>
@@ -1421,6 +1473,34 @@ window.addEventListener('load', function(){
         <div class="kr-tbl-wrap" id="krTrend"></div>
       </div>
 
+    </section>
+
+    <!-- ความเสี่ยงโครงการ: ความเสี่ยงตอนวางแผน (เล่มแผน) เทียบกับสถานะติดตามจริง — วาดใน renderDashboard (renderRiskView) -->
+    <section id="view-risk" class="view">
+      <div class="kpi-grid" id="rkCards" style="margin-bottom:24px;"></div>
+      <div class="st-note" id="rkNote"></div>
+      <div class="rk-two">
+        <div class="panel">
+          <div class="kr-head">
+            <div><h2>แผนภาพความเสี่ยง (Risk Map)</h2>
+              <div class="panel-sub" style="margin:0;">จำนวนโครงการตามโอกาสที่จะเกิด × ผลกระทบ · กดช่องเพื่อดูรายชื่อ</div></div>
+            <div class="rk-toggle" role="group" aria-label="เลือกระดับความเสี่ยง">
+              <button type="button" class="chip active" data-rk="in">ก่อนจัดการ</button><button type="button" class="chip" data-rk="res">คงเหลือหลังจัดการ</button>
+            </div>
+          </div>
+          <div id="rkHeat"></div>
+        </div>
+        <div class="panel">
+          <h2>ระดับความเสี่ยง × สถานะการดำเนินงาน</h2>
+          <div class="panel-sub">ระดับความเสี่ยงก่อนจัดการ (ตามเล่มแผน) เทียบกับสถานะติดตามของรอบที่เลือก · กดตัวเลขเพื่อดูรายชื่อ</div>
+          <div class="kr-tbl-wrap" id="rkCross"></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:24px;">
+        <h2 id="rkListTitle">โครงการที่ต้องจับตา</h2>
+        <div class="panel-sub" id="rkListSub"></div>
+        <div class="kr-tbl-wrap" id="rkList"></div>
+      </div>
     </section>
 
     <section id="view-masterplan" class="view">
@@ -1598,6 +1678,24 @@ window.addEventListener('load', function(){
         </dl>
       </section>
       <section>
+        <h3>ความเสี่ยงโครงการ</h3>
+        <dl>
+          <dt>แหล่งข้อมูล</dt><dd>ส่วนการวิเคราะห์ความเสี่ยงของแต่ละโครงการในเล่มแผนปฏิบัติการประจำปี (รายละเอียดโครงการ แผ่น 3.2) ซึ่งหน่วยงานเจ้าของโครงการประเมินไว้ตอนจัดทำแผน · กองประเมินผลนำเข้าชีต "ความเสี่ยงโครงการ" ปีละครั้ง และนำเข้าใหม่เมื่อมีแผนฉบับปรับปรุง · โครงการที่เล่มแผนไม่มีข้อมูลความเสี่ยงจะแสดงว่า "ไม่มีข้อมูล"</dd>
+          <dt>เกณฑ์ที่ใช้</dt><dd>Risk Assessment Matrix ของ กยท. ตามแผนวิสาหกิจ 2566–2570 ฉบับทบทวนเพื่อใช้ปี 2570 (ข้อ 12.2–12.3) และคู่มือการบริหารความเสี่ยงและควบคุมภายใน ประจำปี 2569 (ใช้เป็นแนวทางจนกว่าจะมีคู่มือปี 2570)</dd>
+          <dt>ขั้นตอนการประเมิน</dt><dd><ol class="md-steps">
+            <li><b>ระบุความเสี่ยง</b>: เหตุการณ์ที่อาจทำให้โครงการไม่บรรลุเป้าหมาย (Risk Scenario), ปัจจัยเสี่ยง (สาเหตุ) และประเภท ได้แก่ ด้านกลยุทธ์ (S) · ด้านการดำเนินงาน (O) · ด้านการเงิน (F) · ด้านการปฏิบัติตามกฎเกณฑ์ (C)</li>
+            <li><b>ประเมินการควบคุมภายในที่มีอยู่</b>: 3 เกณฑ์ รวมเต็ม 9 คะแนน · ได้ 9 คะแนน = มีประสิทธิผล · ต่ำกว่า 9 = ยังไม่มีประสิทธิผล ต้องจัดทำมาตรการปรับปรุง</li>
+            <li><b>ประเมินความเสี่ยงก่อนจัดการ (Inherent Risk)</b>: โอกาสเกิด (1–5) × ผลกระทบ (1–5) = คะแนน 1–25 แล้วแบ่งระดับตามตารางด้านล่าง</li>
+            <li><b>จัดทำแผนจัดการความเสี่ยง</b>: ระดับปานกลาง (คะแนน 5) ขึ้นไปอยู่นอกขอบเขตที่องค์กรยอมรับได้ ต้องมีแผนจัดการ</li>
+            <li><b>ประเมินความเสี่ยงคงเหลือ (Residual Risk)</b>: โอกาสเกิด × ผลกระทบ ที่คาดว่าเหลืออยู่หลังทำตามแผนจัดการ · ถ้าคงเหลือยังเกินขอบเขตที่ยอมรับได้ แดชบอร์ดจะแสดงในการ์ด "ความเสี่ยงคงเหลือเกินขอบเขตที่ยอมรับได้" · โครงการที่คะแนนก่อนจัดการไม่เกิน 4 อยู่ในขอบเขตที่ยอมรับได้ตั้งแต่แรก จึงไม่ต้องประเมินคงเหลือ</li>
+          </ol></dd>
+          <dt>ระดับความเสี่ยง</dt><dd><span id="mmRiskBands"></span></dd>
+          <dt>ขอบเขตที่ยอมรับได้ (Risk Boundary)</dt><dd>คะแนนไม่เกิน 4 (ต่ำ / ค่อนข้างต่ำ) · ในแผนภาพความร้อน (Heat Map) คือช่องที่มีกรอบสีน้ำเงิน · แถว = ผลกระทบ คอลัมน์ = โอกาสเกิด</dd>
+          <dt>ต้องจับตา</dt><dd>แดชบอร์ดนำความเสี่ยงที่ประเมินไว้ตอนวางแผนมาเทียบกับผลการดำเนินงานจริงของรอบที่เลือก · <b>ต้องจับตา</b> = ความเสี่ยงก่อนจัดการระดับค่อนข้างสูงขึ้นไป (NH / H) และสถานะการดำเนินงานเป็นวิกฤต / เฝ้าระวัง / ล่าช้า (ปีงบประมาณ 2569: ต้องปรับปรุง / พอใช้) แปลว่าความเสี่ยงที่ระบุไว้อาจเกิดขึ้นแล้ว ควรติดตามแผนจัดการความเสี่ยงของโครงการนั้น</dd>
+          <dt>ข้อจำกัด</dt><dd>คะแนนความเสี่ยงเป็นค่าที่ประเมินตอนวางแผน ไม่เปลี่ยนระหว่างปี ยังไม่ใช่ผลติดตามความเสี่ยงรายเดือน (กองบริหารความเสี่ยงติดตามในระบบ ERM ของ กยท. ยังไม่ได้เชื่อมกับแดชบอร์ดนี้)</dd>
+        </dl>
+      </section>
+      <section>
         <h3>ผลสัมฤทธิ์ทั้งปี</h3>
         <dl>
           <dt>บรรลุเป้าหมายทั้งปี</dt><dd>โครงการจะนับว่า<b>สำเร็จ</b>เมื่อ<b>ทุกตัวชี้วัด</b>ของโครงการมีผลเทียบเป้าทั้งปีเป็น "สำเร็จ" — ระหว่างปี โครงการที่ยังไม่ครบแสดงเป็น "อยู่ระหว่างดำเนินการ"</dd>
@@ -1684,6 +1782,7 @@ window.addEventListener('load', function(){
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>5. ความก้าวหน้าแผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>6. ความก้าวหน้า PA และ MOU</b><small>สรุปโครงการภายใต้ PA / MOU · รายชื่อโครงการแยกกลุ่ม</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="kpi" checked><span><b>7. ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</b><small>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ของปีงบประมาณที่เลือก · ค่าเป้าหมาย ผล % เทียบเป้า และสถานะ · ความก้าวหน้าตามแผนวิสาหกิจ 5 ปี</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="risk" checked><span><b>8. ความเสี่ยงโครงการ</b><small>ความเสี่ยงตามเล่มแผน (โอกาส × ผลกระทบ) เทียบกับสถานะการดำเนินงาน · โครงการที่ต้องจับตา</small></span></label>
         </div>
       </div>
       <div class="rm-orient"><span class="pg"></span> รูปแบบหน้า: กระดาษ A4 แนวนอน (Landscape) ทั้ง PDF และ Excel</div>
@@ -2263,6 +2362,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const fSearch = document.getElementById('fSearch');
   const fImportant = document.getElementById('fImportant');
   const fPlanChange = document.getElementById('fPlanChange');
+  const fRisk = document.getElementById('fRisk');
   let activeStatus = '';
   // รอบปิดปีงบ (โครงการมีผลสิ้นปี): สถานะเหลือแค่ บรรลุ/ไม่บรรลุเป้าหมาย ทั้งป้ายในตารางและปุ่มกรอง
   const yeData = () => ACTIVE_DATA.some(p=>p.year_end_result);
@@ -2300,7 +2400,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   window.ACP_openAnnual = (preset, opt) => {
     opt = opt || {};
     fStrategy.value = ''; fOwner.value = ''; fMasterPlan.value = ''; fSearch.value = '';
-    fImportant.checked = false; fPlanChange.value = opt.plan || '';
+    fImportant.checked = false; fPlanChange.value = opt.plan || ''; if(fRisk) fRisk.value = opt.risk || '';
     activeStatus = '';
     document.querySelectorAll('#statusChips .chip').forEach((c, i) => c.classList.toggle('active', i === 0));
     cardPreset = preset || null;
@@ -2311,7 +2411,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     window.scrollTo(0, 0);
   };
 
-  [fStrategy, fOwner, fMasterPlan, fSearch, fImportant, fPlanChange].forEach(el=>{
+  [fStrategy, fOwner, fMasterPlan, fSearch, fImportant, fPlanChange, fRisk].filter(Boolean).forEach(el=>{
     el.addEventListener('input', render);
     el.addEventListener('change', render);
   });
@@ -2342,6 +2442,9 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       if(pc === 'added' && !p.added) return false;
       if(pc === 'budget' && !p.budget_changed) return false;
       if(pc === 'kpi' && !p.kpi_changes) return false;
+      const rf = fRisk ? fRisk.value : '';   // ความเสี่ยงตามเล่มแผน
+      if(rf){ const rk = riskFor(p.code, Number(window.__viewFY || window.LIVE_FISCAL_YEAR));
+        if(rf === 'none' ? rk : rf === 'high' ? !isHighRisk(rk) : !riskWatch(p, rk)) return false; }
       if(q && !(p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q))) return false;
       return true;
     });
@@ -2396,7 +2499,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         <tr class="prj-row" data-code="${p.code}" tabindex="0" title="กดเพื่อดูรายละเอียดโครงการ">
           <td class="code">${p.code}</td>
           <td class="name">
-            <div class="nm">${p.important ? '<span class="star">★</span>' : ''}${p.name}${p.added ? ` <span class="tag-added"${p.budget_rev ? ` title="ตามแผน${p.budget_rev.edition}"` : ''}>เพิ่มระหว่างปี</span>` : ''}${p.budget_changed ? ` <span class="tag-budget" title="งบตามแผน${p.budget_rev.edition}${p.budget_rev.dateText ? ' (' + p.budget_rev.dateText + ')' : ''}: เดิม ${fmtBaht(p.budget_orig)} → ${fmtBaht(p.budget)} บาท">ปรับงบ</span>` : ''}${p.kpi_changes ? ` <span class="tag-kpi" title="${String(p.kpi_changes.detail).replace(/"/g, '&quot;')}">ปรับตัวชี้วัด</span>` : ''}</div>
+            <div class="nm">${p.important ? '<span class="star">★</span>' : ''}${p.name}${p.added ? ` <span class="tag-added"${p.budget_rev ? ` title="ตามแผน${p.budget_rev.edition}"` : ''}>เพิ่มระหว่างปี</span>` : ''}${p.budget_changed ? ` <span class="tag-budget" title="งบตามแผน${p.budget_rev.edition}${p.budget_rev.dateText ? ' (' + p.budget_rev.dateText + ')' : ''}: เดิม ${fmtBaht(p.budget_orig)} → ${fmtBaht(p.budget)} บาท">ปรับงบ</span>` : ''}${p.kpi_changes ? ` <span class="tag-kpi" title="${String(p.kpi_changes.detail).replace(/"/g, '&quot;')}">ปรับตัวชี้วัด</span>` : ''}${(rk => isHighRisk(rk) ? ` <span class="tag-risk" title="ความเสี่ยงตามเล่มแผน: ${riskBand(rk.score).label} ${rk.score}${rk.factor ? ' · ' + String(rk.factor).replace(/"/g, '&quot;') : ''}">เสี่ยง${riskBand(rk.score).label}</span>` : '')(riskFor(p.code, Number(window.__viewFY || window.LIVE_FISCAL_YEAR)))}</div>
             <div class="strat">${p.strategy || ''}</div>
             <span class="prj-open">ดูรายละเอียด ›</span>
           </td>
@@ -2527,6 +2630,21 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       (planV == null ? '' : `<div class="pd-bl"><span>แผนสะสม ${pct(planV)}</span><span>ผลจริง ${pct(actV)}</span></div>${bar(planV, 'pd-plan')}${bar(actV, ph === 'pending' ? 'none' : actCls)}`) +
       `<div class="pd-bl pd-foot"><span>${p.ms_done ? 'ดำเนินการแล้ว ' + esc(p.ms_done) + ' ขั้นตอน' : PH ? PH[2] : ''}</span>${phBadge}</div>` +
       (startTxt ? `<div class="pd-start">📅 กำหนดเริ่มดำเนินงานตามแผน: <b>${esc(startTxt)}</b></div>` : '') + `</div>`;
+    // ความเสี่ยงโครงการ (เล่มแผน): ก่อนจัดการ → แผนจัดการ → คงเหลือ · ไม่มีข้อมูล = ไม่แสดงส่วนนี้
+    const rk = riskFor(p.code, vfy);
+    if(rk){
+      const lvCard = (lbl, sc, lh, im) => card(lbl, riskBand(sc) ? riskBadge(sc) : '–', (lh && im ? `โอกาส ${lh} × ผลกระทบ ${im}` : 'ไม่ได้ประเมิน') + (riskBand(sc) ? '<br>' + riskBand(sc).note : ''));
+      html += `<div class="pd-sec pd-risk"><h3><span class="pd-no">${no()}</span> ความเสี่ยงโครงการ (ตามเล่มแผน)</h3>` +
+        `<div class="pd-rk-txt">${rk.scenario ? esc(rk.scenario) : '<span style="color:var(--ink-400)">ไม่ระบุ Risk Scenario</span>'}</div>` +
+        `<div class="pd-rk-k">ปัจจัยเสี่ยง: <b>${esc(rk.factor || '-')}</b>${rk.type ? ' · ประเภท ' + esc(RISK_TYPE_LABEL[rk.type] || rk.type) : ''}${rk.control != null ? ` · การควบคุมภายใน ${rk.control}/${CONTROL_FULL} ${rk.control >= CONTROL_FULL ? '<span class="rk-badge rk1">มีประสิทธิผล</span>' : '<span class="rk-badge rk4" title="คะแนนต่ำกว่า ' + CONTROL_FULL + ' ต้องจัดทำมาตรการปรับปรุงการควบคุมภายใน">ยังไม่มีประสิทธิผล</span>'}` : ''}</div>` +
+        `<div class="pd-rk-flow" style="margin-top:12px;">${lvCard('ระดับความเสี่ยง (ก่อนจัดการ)', rk.score, rk.lh, rk.im)}<div class="pd-rk-arrow">→</div>` +
+          card('แผนจัดการความเสี่ยง', '', `<span class="pd-rk-txt">${esc(rk.plan || '-')}</span>`) + `<div class="pd-rk-arrow">→</div>` +
+          (rk.rscore == null && rk.score != null && rk.score <= RISK_BOUNDARY
+            ? card('ความเสี่ยงคงเหลือ (หลังจัดการ)', '–', 'อยู่ในขอบเขตที่องค์กรยอมรับได้ตั้งแต่ก่อนจัดการ ไม่ต้องประเมินความเสี่ยงคงเหลือ')
+            : lvCard('ความเสี่ยงคงเหลือ (หลังจัดการ)', rk.rscore, rk.rlh, rk.rim)) + `</div>` +
+        (!ye && riskWatch(p, rk) ?`<div class="pd-rk-warn">⚠️ โครงการนี้ประเมินความเสี่ยงไว้ในระดับ${riskBand(rk.score).label} และผลการดำเนินงานต่ำกว่าแผน (${esc(p.phase === 'late' ? 'ล่าช้า' : p.status)}) ความเสี่ยงที่ระบุในแผนอาจเกิดขึ้นแล้ว ควรติดตามแผนจัดการความเสี่ยง</div>` : '') +
+        `</div>`;
+    }
     // สรุปสถานะโครงการ
     const st = ye ? yeStat(p) : p.status;
     const issues = [];
@@ -2580,6 +2698,131 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     if(tr && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); pdOpen(tr.dataset.code); }
   });
 
+  // ---------- ความเสี่ยงโครงการ (#risk): ความเสี่ยงตามเล่มแผน × สถานะติดตามของรอบที่เลือก ----------
+  // ต้องจับตา = ความเสี่ยงสูงขึ้นไป (2 ระดับบนของ RISK_BANDS) และผลงานต่ำกว่าแผน (riskWatch)
+  function renderRiskView(){
+    const $r = id => document.getElementById(id);
+    if(!$r('rkCards')) return;
+    const esc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const fy = Number(window.__viewFY || window.LIVE_FISCAL_YEAR);
+    const ye = yeData();
+    const stOf = p => ye ? yeStat(p) : p.status;
+    const items = ACTIVE_DATA.map(p => ({ p, rk: riskFor(p.code, fy) }));
+    const withRk = items.filter(x => x.rk && x.rk.score != null);
+    const topBand = b => !!b && RISK_BANDS.indexOf(b) >= RISK_BANDS.length - 2;
+    const high = withRk.filter(x => isHighRisk(x.rk));
+    const resHigh = withRk.filter(x => x.rk.rscore != null && x.rk.rscore > RISK_BOUNDARY);
+    const watch = items.filter(x => !ye && riskWatch(x.p, x.rk));
+    const bandTxt = RISK_BANDS.map(b => `${b.code} ${b.label} ${b.min}–${b.max}`).join(' · ');
+    if(!withRk.length){
+      $r('rkCards').innerHTML = '';
+      $r('rkNote').innerHTML = `ยังไม่มีข้อมูลความเสี่ยงโครงการของปีงบประมาณ ${fy} — นำเข้าจากเล่มแผนปฏิบัติการด้วยเมนู "นำเข้าความเสี่ยงจากไฟล์แผนปฏิบัติการ" ใน Google Sheet แล้วส่งข้อมูลขึ้นเว็บ`;
+      ['rkHeat', 'rkCross', 'rkList', 'rkListSub'].forEach(id => { $r(id).innerHTML = ''; });
+      return;
+    }
+    // การ์ด: กดแล้วไปตารางประจำปีพร้อมตัวกรองความเสี่ยง
+    const cardHtml = (c, risk, eyebrow, value, unit, sub) => `<div class="kpi-card ${c} clickable" data-risk="${risk}" role="button" tabindex="0" title="ดูรายชื่อในหน้าความก้าวหน้าแผนปฏิบัติการประจำปี">
+      <div class="accent-bar"></div><span class="eyebrow">${eyebrow}</span>
+      <div class="value">${value}<span class="unit">${unit}</span></div><div class="sub">${sub}</div></div>`;
+    const cnt = (arr, b) => arr.filter(x => riskBand(x.rk.score) === b).length;
+    $r('rkCards').innerHTML =
+      cardHtml('c1', '', 'โครงการที่ประเมินความเสี่ยงในเล่มแผน', withRk.length, `/ ${items.length} โครงการ`, `ไม่มีข้อมูลความเสี่ยง ${items.length - withRk.length} โครงการ · การควบคุมภายในยังไม่มีประสิทธิผล (ต่ำกว่า ${CONTROL_FULL} คะแนน) ${withRk.filter(x => x.rk.control != null && x.rk.control < CONTROL_FULL).length} โครงการ`) +
+      cardHtml('c4', 'high', 'ความเสี่ยงค่อนข้างสูงขึ้นไป (ก่อนจัดการ)', high.length, 'โครงการ', RISK_BANDS.slice(-2).reverse().map(b => `${b.label} (${b.code}) ${cnt(high, b)}`).join(' · ')) +
+      cardHtml('c2', 'res', 'ความเสี่ยงคงเหลือเกินขอบเขตที่ยอมรับได้', resHigh.length, 'โครงการ', `หลังดำเนินการตามแผนจัดการ คะแนนยังเกิน ${RISK_BOUNDARY} (Risk Boundary)`) +
+      cardHtml('c3', 'watch', 'โครงการที่ต้องจับตา', ye ? '–' : watch.length, ye ? '' : 'โครงการ', ye ? 'รอบสิ้นปีงบประมาณใช้ผลบรรลุ/ไม่บรรลุเป้าหมาย' : 'ความเสี่ยงค่อนข้างสูงขึ้นไป และผลงานต่ำกว่าแผน (วิกฤต / เฝ้าระวัง / ล่าช้า)');
+    const RISK_PRESETS = {
+      '': { label: 'มีข้อมูลความเสี่ยง', test: p => { const r = riskFor(p.code, fy); return !!(r && r.score != null); } },
+      high: null, res: { label: 'ความเสี่ยงคงเหลือเกินขอบเขตที่ยอมรับได้', test: p => { const r = riskFor(p.code, fy); return !!r && r.rscore != null && r.rscore > RISK_BOUNDARY; } },
+      watch: null,
+    };
+    $r('rkCards').querySelectorAll('.kpi-card[data-risk]').forEach(c => {
+      const k = c.dataset.risk;
+      const go = () => { if(!window.ACP_openAnnual) return;
+        if(k === 'high' || k === 'watch') window.ACP_openAnnual(null, { risk: k }); else window.ACP_openAnnual(RISK_PRESETS[k]); };
+      c.addEventListener('click', go);
+      c.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+    });
+    $r('rkNote').innerHTML = `ความเสี่ยงตามเล่มแผนปฏิบัติการปีงบประมาณ ${fy} (โอกาสเกิด × ผลกระทบ = คะแนน 1–25) เทียบกับสถานะการดำเนินงานของรอบที่เลือกด้านบน · เกณฑ์ระดับตาม Risk Assessment Matrix ของ กยท.: ${bandTxt} · ขอบเขตที่องค์กรยอมรับได้ (Risk Boundary) = คะแนนไม่เกิน ${RISK_BOUNDARY}` +
+      (RISK_BANDS_PROVISIONAL ? ' <b>(เกณฑ์ชั่วคราว รอเกณฑ์ของ กยท.)</b>' : '');
+
+    // รายชื่อโครงการด้านล่าง (ค่าเริ่มต้น = ต้องจับตา) — กดแถวเพื่อเปิดหน้ารายละเอียดโครงการ
+    const rankSt = s => { const i = SCH.levels.indexOf(s); return i < 0 ? -1 : SCH.levels.length - i; };
+    function showList(title, sub, arr){
+      $r('rkListTitle').textContent = `${title} (${arr.length} โครงการ)`;
+      $r('rkListSub').textContent = sub;
+      const rows = arr.slice().sort((a, b) => ((b.rk && b.rk.score || 0) - (a.rk && a.rk.score || 0)) || (rankSt(stOf(b.p)) - rankSt(stOf(a.p))) || a.p.code.localeCompare(b.p.code));
+      $r('rkList').innerHTML = !rows.length ? '<div class="panel-sub" style="padding:8px 0;">ไม่มีโครงการในกลุ่มนี้</div>' :
+        `<table class="kr-tbl rk-list"><thead><tr><th style="width:80px">รหัส</th><th>โครงการ / หน่วยงาน</th><th>ปัจจัยเสี่ยง</th><th style="width:110px">ก่อนจัดการ</th><th style="width:110px">คงเหลือ</th><th style="width:140px">สถานะ</th></tr></thead><tbody>` +
+        rows.map(({ p, rk }) => { const st = stOf(p);
+          return `<tr data-code="${esc(p.code)}" tabindex="0"><td class="code">${esc(p.code)}</td><td><div>${esc(p.name)}</div><div class="rk-fac">${esc(p.owner)}</div></td>` +
+            `<td class="rk-fac">${esc(rk ? rk.factor : '-')}</td><td>${rk ? riskBadge(rk.score) : '–'}</td><td>${rk ? riskBadge(rk.rscore) : '–'}</td>` +
+            `<td>${st ? `<span class="badge ${statusClass(st)}">${esc(st)}</span>` : '-'}${!ye && p.phase === 'late' ? ' <span class="badge poor">ล่าช้า</span>' : ''}</td></tr>`; }).join('') + `</tbody></table>`;
+    }
+    const listEl = $r('rkList');
+    listEl.addEventListener('click', e => { const tr = e.target.closest('tr[data-code]'); if(tr) pdOpen(tr.dataset.code); });
+    listEl.addEventListener('keydown', e => { const tr = e.target.closest('tr[data-code]'); if(tr && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); pdOpen(tr.dataset.code); } });
+    const defaultList = () => (!ye && watch.length)
+      ? showList('โครงการที่ต้องจับตา', 'ความเสี่ยงค่อนข้างสูงขึ้นไปตามเล่มแผน และผลการดำเนินงานต่ำกว่าแผน — ควรติดตามว่าความเสี่ยงที่ระบุเกิดขึ้นแล้วหรือไม่ และแผนจัดการความเสี่ยงคืบหน้าเพียงใด', watch)
+      : showList('โครงการความเสี่ยงค่อนข้างสูงขึ้นไป', ye ? 'ความเสี่ยงค่อนข้างสูงขึ้นไปตามเล่มแผน พร้อมผลสิ้นปีงบประมาณ' : 'ยังไม่มีโครงการความเสี่ยงค่อนข้างสูงขึ้นไปที่ผลงานต่ำกว่าแผน', high);
+
+    // แผนภาพความเสี่ยง 5×5 แบบเดียวกับ Risk Assessment Matrix ในเล่มแผน: แถว = ผลกระทบ (5 บนสุด), คอลัมน์ = โอกาสเกิด
+    // สี = ระดับของช่อง · กรอบน้ำเงิน = ขอบเขตที่องค์กรยอมรับได้ (คะแนน ≤ RISK_BOUNDARY)
+    let mode = 'in';
+    function drawHeat(){
+      const key = x => mode === 'in' ? [x.rk.lh, x.rk.im] : [x.rk.rlh, x.rk.rim];
+      const placed = withRk.filter(x => { const [a, b] = key(x); return a >= 1 && a <= 5 && b >= 1 && b <= 5; });
+      let h = '<div class="rk-axis-y">ผลกระทบ (Impact) ↑</div><div class="rk-heat">';
+      for(let im = 5; im >= 1; im--){
+        h += `<div class="ax">${im}</div>`;
+        for(let lh = 1; lh <= 5; lh++){
+          const n = placed.filter(x => { const [a, b] = key(x); return a === lh && b === im; }).length, sc = lh * im, b = riskBand(sc);
+          h += `<button type="button" class="cell${n ? ' has' : ' n0'}${sc <= RISK_BOUNDARY ? ' acc' : ''}" data-lh="${lh}" data-im="${im}" style="background:${b ? b.color : '#ccc'}" title="${b ? b.code : ''}${sc} · โอกาสเกิด ${lh} × ผลกระทบ ${im}${b ? ' (' + b.label + ')' : ''} · ${n} โครงการ"${n ? '' : ' tabindex="-1"'}>${n || (b ? b.code : '') + sc}</button>`;
+        }
+      }
+      h += '<div></div>' + [1, 2, 3, 4, 5].map(i => `<div class="ax">${i}</div>`).join('') + '</div>';
+      h += '<div class="rk-axis-x">โอกาสเกิด (Likelihood) →</div>';
+      h += `<div class="rk-legend">${RISK_BANDS.map(b => `<span class="rk-badge ${b.cls}">${b.code} ${b.label} ${b.min}–${b.max}</span>`).join('')}</div>`;
+      const miss = withRk.length - placed.length;
+      h += `<div class="panel-sub" style="margin:10px 0 0;">ตัวเลขในช่อง = จำนวนโครงการ (ช่องจาง = ไม่มีโครงการ แสดงรหัสระดับของช่อง) · กรอบน้ำเงิน = ขอบเขตที่องค์กรยอมรับได้ (Risk Boundary)${miss ? ` · ไม่มีคะแนนโอกาส/ผลกระทบ${mode === 'res' ? 'คงเหลือ' : ''} ${miss} โครงการ` : ''}</div>`;
+      $r('rkHeat').innerHTML = h;
+      $r('rkHeat').querySelectorAll('.cell.has').forEach(c => c.addEventListener('click', () => {
+        $r('rkHeat').querySelectorAll('.cell').forEach(x => x.classList.remove('sel')); c.classList.add('sel');
+        const lh = +c.dataset.lh, im = +c.dataset.im;
+        showList(`${mode === 'in' ? 'ความเสี่ยงก่อนจัดการ' : 'ความเสี่ยงคงเหลือ'} ${riskBand(lh * im) ? riskBand(lh * im).code : ''}${lh * im} (โอกาสเกิด ${lh} × ผลกระทบ ${im})`, 'จากแผนภาพความเสี่ยง — กดแถวเพื่อดูรายละเอียดโครงการ',
+          placed.filter(x => { const [a, b] = key(x); return a === lh && b === im; }));
+      }));
+    }
+    $r('view-risk').querySelectorAll('.rk-toggle .chip').forEach(btn => btn.addEventListener('click', () => {
+      $r('view-risk').querySelectorAll('.rk-toggle .chip').forEach(b => b.classList.toggle('active', b === btn));
+      mode = btn.dataset.rk; drawHeat(); defaultList();
+    }));
+    drawHeat();
+
+    // ตารางไขว้: ระดับความเสี่ยง (ก่อนจัดการ) × สถานะการดำเนินงาน
+    const NO = 'ไม่มีข้อมูลความเสี่ยง';
+    const cols = (ye ? [YE_PASS, YE_FAIL] : SCH.levels.slice());
+    items.forEach(x => { const s = stOf(x.p) || 'ไม่มีข้อมูล'; if(!cols.includes(s)) cols.push(s); });
+    const rowsDef = RISK_BANDS.slice().reverse().map(b => ({ label: b.label, b, test: x => riskBand(x.rk && x.rk.score) === b })).concat([{ label: NO, test: x => !(x.rk && x.rk.score != null) }]);
+    const hotSt = s => ye ? s === YE_FAIL : RISK_BEHIND.includes(s);
+    let t = `<table class="kr-tbl kr-trend rk-cross"><thead><tr><th>ระดับความเสี่ยง</th>${cols.map(c => `<th>${esc(c)}</th>`).join('')}<th>รวม</th></tr></thead><tbody>`;
+    rowsDef.forEach((r, ri) => {
+      const inRow = items.filter(r.test);
+      t += `<tr><td>${r.b ? `<span class="rk-badge ${r.b.cls}">${r.label}</span>` : r.label}</td>` +
+        cols.map((c, ci) => { const n = inRow.filter(x => (stOf(x.p) || 'ไม่มีข้อมูล') === c).length;
+          return `<td${r.b && topBand(r.b) && hotSt(c) && n ? ' class="hot"' : ''}>${n ? `<button type="button" data-r="${ri}" data-c="${ci}">${n}</button>` : '<span style="color:var(--ink-400)">–</span>'}</td>`; }).join('') +
+        `<td><b>${inRow.length}</b></td></tr>`;
+    });
+    t += '</tbody></table>';
+    $r('rkCross').innerHTML = t;
+    $r('rkCross').querySelectorAll('button[data-r]').forEach(btn => btn.addEventListener('click', () => {
+      const r = rowsDef[+btn.dataset.r], c = cols[+btn.dataset.c];
+      showList(`ความเสี่ยง${r.b ? r.label : ': ' + NO} × ${c}`, 'จากตารางระดับความเสี่ยง × สถานะ — กดแถวเพื่อดูรายละเอียดโครงการ',
+        items.filter(x => r.test(x) && (stOf(x.p) || 'ไม่มีข้อมูล') === c));
+    }));
+    defaultList();
+  }
+  try{ renderRiskView(); }catch(e){ console.warn('[Dashboard] แสดงความเสี่ยงโครงการไม่สำเร็จ:', e); }
+
   render();
 
   // ---------- ส่งออกรายงาน (Excel / PDF) ----------
@@ -2615,6 +2858,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       'งบประมาณตั้งต้น (บาท)': p.budget_orig!=null ? Math.round(p.budget_orig) : '',
       'ฉบับแผนที่ใช้': p.budget_rev ? p.budget_rev.edition : '',
       'การปรับตัวชี้วัด': p.kpi_changes ? p.kpi_changes.text : '',
+      ...(rk => ({   // ความเสี่ยงตามเล่มแผน (ระดับ = โอกาส × ผลกระทบ)
+        'ความเสี่ยงก่อนจัดการ': rk && riskBand(rk.score) ? `${riskBand(rk.score).label} (${rk.score})` : '',
+        'ความเสี่ยงคงเหลือ': rk && riskBand(rk.rscore) ? `${riskBand(rk.rscore).label} (${rk.rscore})` : '',
+        'ปัจจัยเสี่ยง': rk ? rk.factor : '',
+      }))(riskFor(p.code, Number(window.__viewFY || window.LIVE_FISCAL_YEAR))),
       '% ความก้าวหน้าเทียบแผนสะสม': p.progress_cum!=null ? +(p.progress_cum*100).toFixed(1) : '',
       [SCH.key==='tp' ? 'สถานะแจ้งเตือน (รวม)' : 'สถานะโครงการ (ผลเทียบแผนสะสม)']: p.status || '',
       '% ความก้าวหน้าจากเป้าหมายสะสม': p.progress_pct_cum!=null ? +(p.progress_pct_cum*100).toFixed(1) : '',
@@ -3121,6 +3369,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     lineorg:    '5. ความก้าวหน้าแผนปฏิบัติการตามสายงาน',
     dgarea:     '6. ความก้าวหน้า PA และ MOU',
     kpi:        '7. ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ',
+    risk:       '8. ความเสี่ยงโครงการ',
   };
   const REPORT_TITLE = 'รายงานผลการดำเนินงานตามแผนปฏิบัติการ การยางแห่งประเทศไทย';
   const STATUS_ORDER = ['ดีมาก','ดี','พอใช้','ต้องปรับปรุง'];
@@ -3708,6 +3957,26 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
             `<td class="r">${esc(r.it.targetText || '-')}</td><td class="r">${plan5Fmt(r.cum)}${r.fc ? '*' : ''}${r.it.method === 'sum' && r.cum != null ? '<div class="rp-sub">(สะสม)</div>' : ''}</td><td>${pc5(r)}</td></tr>`)}));
       }
     }
+    // ---------- 8. ความเสี่ยงโครงการ (เล่มแผน × สถานะของรอบ) ----------
+    if(topics.includes('risk')){
+      const fy = per.fiscalYear, RK = riskReportData(R.P, fy, YE, hS);
+      B.push({kind:'section', title:TOPICS.risk, sub:`ความเสี่ยงตามเล่มแผนปฏิบัติการปีงบประมาณ ${fy} (โอกาส × ผลกระทบ = ระดับ 1–25) เทียบกับสถานะการดำเนินงานของรอบนี้ (ที่มา: ชีต "ความเสี่ยงโครงการ")`});
+      if(!RK.withRk.length) B.push({kind:'html', html:`<div class="rp-note">ยังไม่มีข้อมูลความเสี่ยงโครงการของปีงบประมาณ ${fy}</div>`});
+      else{
+        B.push({kind:'html', html:`<div class="rp-kpis">${kpiCard('c1','ประเมินความเสี่ยงในเล่มแผน', RK.withRk.length, `/ ${R.P.length} โครงการ`, `ไม่มีข้อมูล ${R.P.length - RK.withRk.length} โครงการ`)}
+          ${kpiCard('c4','ความเสี่ยงค่อนข้างสูงขึ้นไป (ก่อนจัดการ)', RK.high.length, 'โครงการ', RISK_BANDS.slice(-2).reverse().map(b => `${b.label} ${RK.high.filter(x => riskBand(x.rk.score) === b).length}`).join(' · '))}
+          ${kpiCard('c2','ความเสี่ยงคงเหลือเกินขอบเขตที่ยอมรับได้', RK.resHigh.length, 'โครงการ', `หลังดำเนินการตามแผนจัดการ คะแนนยังเกิน ${RISK_BOUNDARY}`)}
+          ${kpiCard('c3','โครงการที่ต้องจับตา', YE ? '–' : RK.watch.length, YE ? '' : 'โครงการ', 'ความเสี่ยงค่อนข้างสูงขึ้นไป และผลงานต่ำกว่าแผน')}</div>
+          <div class="rp-foot-note">เกณฑ์ระดับตาม Risk Assessment Matrix ของ กยท.: ${RISK_BANDS.map(b => `${b.code} ${b.label} ${b.min}–${b.max}`).join(' · ')} · ขอบเขตที่องค์กรยอมรับได้ (Risk Boundary) = คะแนนไม่เกิน ${RISK_BOUNDARY}</div>`});
+        B.push({kind:'table', title:'ระดับความเสี่ยง (ก่อนจัดการ) × ' + T(sch().labels.status, 'ผลสิ้นปี'),
+          cols:[['ระดับความเสี่ยง',16]].concat(RK.cols.map(c => [c, Math.max(8, 70 / RK.cols.length), 'c'])).concat([['รวม',8,'c']]),
+          rows:RK.cross.map(r => `<tr><td>${esc(r.label)}</td>${r.counts.map(n => `<td class="c">${n || '–'}</td>`).join('')}<td class="c"><b>${r.total}</b></td></tr>`)});
+        const lst = RK.watch.length ? RK.watch : RK.high;
+        B.push({kind:'table', title:(RK.watch.length ? 'โครงการที่ต้องจับตา' : 'โครงการความเสี่ยงค่อนข้างสูงขึ้นไป') +` (${lst.length} โครงการ)`,
+          cols:[['รหัสโครงการ',9],['ชื่อโครงการ / หน่วยงาน',30],['ปัจจัยเสี่ยง',27],['ก่อนจัดการ',9,'c'],['คงเหลือ',9,'c'],[T(sch().labels.status,'ผลสิ้นปี'),10,'c']],
+          rows:lst.map(({p, rk}) => `<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}<div class="rp-sub">${esc(p.owner)}</div></td><td>${esc(rk.factor || '-')}</td><td class="c">${riskBand(rk.score) ? riskBand(rk.score).label + ' ' + rk.score : '-'}</td><td class="c">${riskBand(rk.rscore) ? riskBand(rk.rscore).label + ' ' + rk.rscore : '-'}</td><td class="c">${pill(hS(p))}</td></tr>`)});
+      }
+    }
     return B;
   }
 
@@ -4285,6 +4554,24 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         ]), rows5, {title:`แผนวิสาหกิจ 5 ปี (พ.ศ. ${D5.P.startYear} – ${D5.P.endYear}): เป้า/ผลรายปี ผลปัจจุบัน และ % เทียบเป้าหมาย ณ สิ้นปี ${D5.P.endYear}`, filter:true});
       }
     }
+    if(topics.includes('risk')){
+      const fy = per.fiscalYear, RK = riskReportData(R.P, fy, YE, hS);
+      const {ws, row:r0} = newSheet('ความเสี่ยง', [12,46,20,40,16,16,40,20,16,12], TOPICS.risk);
+      const rows = R.P.map(p => ({ p, rk: riskFor(p.code, fy) })).sort((a, b) => ((b.rk && b.rk.score || 0) - (a.rk && a.rk.score || 0)) || a.p.code.localeCompare(b.p.code));
+      const lv = s => riskBand(s) ? `${riskBand(s).label} (${s})` : '';
+      table(ws, r0, [
+        {h:'รหัสโครงการ', get:x => x.p.code},
+        {h:'ชื่อโครงการ', get:x => (x.p.important ? '★ ' : '') + x.p.name},
+        {h:'หน่วยงาน', get:x => x.p.owner},
+        {h:'ปัจจัยเสี่ยง', get:x => x.rk ? x.rk.factor : ''},
+        {h:'ความเสี่ยงก่อนจัดการ', get:x => x.rk ? lv(x.rk.score) : ''},
+        {h:'ความเสี่ยงคงเหลือ', get:x => x.rk ? lv(x.rk.rscore) : ''},
+        {h:'แผนจัดการความเสี่ยง', get:x => x.rk ? x.rk.plan : ''},
+        {h:'การควบคุมภายใน (เต็ม ' + CONTROL_FULL + ')', get:x => x.rk && x.rk.control != null ? `${x.rk.control} ${x.rk.control >= CONTROL_FULL ? 'มีประสิทธิผล' : 'ยังไม่มีประสิทธิผล'}` : ''},
+        {h:T(sch().labels.status, 'ผลสิ้นปี'), get:x => hS(x.p), status:true},
+        {h:'ต้องจับตา', get:x => !YE && riskWatch(x.p, x.rk) ? '✓' : '', align:'center'},
+      ], rows, {title:`ความเสี่ยงโครงการตามเล่มแผน ปีงบประมาณ ${fy} (${RK.withRk.length} จาก ${R.P.length} โครงการมีข้อมูล) · เกณฑ์ระดับ: ${RISK_BANDS.map(b => `${b.label} ${b.min}–${b.max}`).join(' · ')}${RISK_BANDS_PROVISIONAL ? ' (ชั่วคราว)' : ''}`, filter:true});
+    }
 
     const buf = await wb.xlsx.writeBuffer();
     const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
@@ -4562,6 +4849,7 @@ const SHEET_SPECS = {
   kpiResult: { names:['ผลตัวชี้วัดที่สำคัญ','ผลตัวชี้วัดองค์กรและรายปี'], required:['KPI_Org_Code'], optional:true },
   plan5:     { names:['เป้าหมาย 5 ปี','เป้าหมาย5ปี'],                  required:['ลำดับในแผน'], optional:true },
   budgetRev: { names:['งบประมาณแผนปรับปรุง'],                 required:['PRJ_Code'], optional:true },
+  risk:      { names:['ความเสี่ยงโครงการ'],                  required:['PRJ_Code'], optional:true },
 };
 
 // ---------- ผลสิ้นปีงบประมาณ ----------
@@ -5438,6 +5726,83 @@ function renderPlan5(stName){
       ผลปัจจุบัน: ตัวชี้วัดแบบ "สะสม" = รวมผลทุกปี, แบบ "ค่าล่าสุด" = ผลของปีล่าสุดที่มีผล · * = ปีที่ยังไม่มีผลจริงใช้ค่าคาดการณ์แทน</div>`;
 }
 
+// ---------- ความเสี่ยงโครงการ (ชีต "ความเสี่ยงโครงการ" นำเข้าจากเล่มแผนด้วยเมนู Apps Script) ----------
+// 1 แถว = โครงการ × ปีงบ: Risk Scenario, ปัจจัยเสี่ยง, ประเภท, คะแนนควบคุมภายใน, โอกาส × ผลกระทบ = ระดับ, แผนจัดการ, ระดับคงเหลือ
+// คีย์ "FY|code" (รหัสโครงการใช้ซ้ำข้ามปี) · ความเสี่ยงตอนวางแผน เทียบกับสถานะติดตามจริงในหน้า #risk และหน้ารายละเอียดโครงการ
+// RISK_BANDS: คะแนน (โอกาสเกิด × ผลกระทบ 1–25) → ระดับ ตาม Risk Assessment Matrix ของ กยท.
+// (แผนวิสาหกิจ 2566–2570 ฉบับทบทวนเพื่อใช้ปี 2570 ข้อ 12.2–12.3 ภาพที่ 52 หน้า 211–213): L 1–2 · NL 3–4 · M 5–9 · NH 10–16 · H 20–25
+// RISK_BOUNDARY: ขอบเขตที่องค์กรยอมรับได้ (Risk Boundary) = คะแนนไม่เกิน 4 (L และ NL) · เกินกว่านี้ต้องมีแผนจัดการความเสี่ยง
+// ความหมายของแต่ละระดับ (note) และเกณฑ์การควบคุมภายใน: คู่มือการบริหารความเสี่ยงและควบคุมภายใน ประจำปี 2569 (ฉบับร่าง) หน้า 31 และ 37
+const RISK_BANDS = [
+  { min: 1,  max: 2,  label: 'ต่ำ',          code: 'L',  cls: 'rk1', color: '#2f9a55', note: 'สำคัญน้อย อยู่ในระดับที่ยอมรับได้' },
+  { min: 3,  max: 4,  label: 'ค่อนข้างต่ำ',  code: 'NL', cls: 'rk2', color: '#86bd4a', note: 'สำคัญน้อย ยอมรับได้ แต่ต้องติดตามอย่างสม่ำเสมอ' },
+  { min: 5,  max: 9,  label: 'ปานกลาง',     code: 'M',  cls: 'rk3', color: '#e2bd1f', note: 'ยอมรับไม่ได้ ต้องติดตามการปฏิบัติตามมาตรการจัดการความเสี่ยงอย่างเคร่งครัด' },
+  { min: 10, max: 16, label: 'ค่อนข้างสูง',  code: 'NH', cls: 'rk4', color: '#ec8a2c', note: 'สำคัญสูง ยอมรับไม่ได้ ต้องได้รับการจัดการในลำดับถัดมา' },
+  { min: 20, max: 25, label: 'สูง',          code: 'H',  cls: 'rk5', color: '#d23a2e', note: 'สำคัญสูงมาก ยอมรับไม่ได้ ต้องได้รับการจัดการทันที' },   // คะแนน 17–19 เกิดไม่ได้ (โอกาส × ผลกระทบ)
+];
+const RISK_BOUNDARY = 4;
+// คะแนนประเมินประสิทธิผลการควบคุมภายใน 3 ด้าน (ผลงานเทียบเป้าหมาย / กระบวนการควบคุม / การติดตามรายงาน) รวม 9 = มีประสิทธิผล · ต่ำกว่า 9 = ต้องจัดทำมาตรการปรับปรุง
+const CONTROL_FULL = 9;
+const RISK_BANDS_PROVISIONAL = false;
+const RISK_TYPE_LABEL = { S: 'ด้านกลยุทธ์ (S)', O: 'ด้านการดำเนินงาน (O)', F: 'ด้านการเงิน (F)', C: 'ด้านการปฏิบัติตามกฎเกณฑ์ (C)' };
+window.ACP_RISK = {};
+function buildProjectRisks(rows){
+  const out = {};
+  if(!rows || !rows.length) return out;
+  const fields = (rows.__fields || Object.keys(rows[0])).map(f => String(f).replace(/\s+/g, ' ').trim());
+  const raw = rows.__raw || rows.map(o => fields.map(f => o[f]));
+  const idx = re => fields.findIndex(f => re.test(f));
+  const C = { fy: idx(/^Fiscal_Year|^ปีงบ/i), prj: idx(/^PRJ_Code/i), scen: idx(/Scenario/i), factor: idx(/^ปัจจัยเสี่ยง/), type: idx(/^ประเภท/),
+              ctrl: idx(/ควบคุมภายใน/), lh: idx(/^โอกาส$/), im: idx(/^ผลกระทบ$/), lv: idx(/^ระดับความเสี่ยง$/), plan: idx(/^แผนจัดการ/),
+              rlh: idx(/^โอกาสคงเหลือ/), rim: idx(/^ผลกระทบคงเหลือ/), rlv: idx(/^ระดับคงเหลือ/) };
+  const txt = v => String(v ?? '').replace(/\s+/g, ' ').trim();
+  const n = v => { const x = parseNum(v); return x == null || x === 0 ? null : x; };
+  raw.forEach(r => {
+    const at = c => c >= 0 ? r[c] : '';
+    const code = normCode(at(C.prj)), fy = parseInt(txt(at(C.fy)).replace(/[^0-9]/g, ''), 10);
+    if(!code || isNaN(fy)) return;
+    const lh = n(at(C.lh)), im = n(at(C.im)), rlh = n(at(C.rlh)), rim = n(at(C.rim));
+    out[fy + '|' + code] = {
+      scenario: txt(at(C.scen)), factor: txt(at(C.factor)), type: txt(at(C.type)).toUpperCase(), control: n(at(C.ctrl)),
+      lh, im, score: n(at(C.lv)) ?? (lh && im ? lh * im : null), plan: txt(at(C.plan)),
+      rlh, rim, rscore: n(at(C.rlv)) ?? (rlh && rim ? rlh * rim : null),
+    };
+  });
+  return out;
+}
+document.addEventListener('DOMContentLoaded', () => { const el = document.getElementById('mmRiskBands');
+  if(el) el.innerHTML = '<span class="md-rkb">' + RISK_BANDS.map(b => `<span class="rk-badge ${b.cls}">${b.code} ${b.label} ${b.min}–${b.max}</span><span>${b.note}</span>`).join('') + '</span>' + (RISK_BANDS_PROVISIONAL ? ' (เกณฑ์ชั่วคราว รอเกณฑ์ของ กยท.)' : ''); });
+function riskFor(code, fy){ return (window.ACP_RISK || {})[fy + '|' + code] || null; }
+function riskBand(score){ return score == null ? null : (RISK_BANDS.find(b => score >= b.min && score <= b.max) || (score > RISK_BANDS[RISK_BANDS.length - 1].max ? RISK_BANDS[RISK_BANDS.length - 1] : null)); }
+// ความเสี่ยงสูง = ระดับก่อนจัดการอยู่ใน 2 ระดับบนของ RISK_BANDS
+function isHighRisk(r){ const b = r && riskBand(r.score); return !!b && RISK_BANDS.indexOf(b) >= RISK_BANDS.length - 2; }
+// ต้องจับตา = ความเสี่ยงสูงขึ้นไป และผลงานต่ำกว่าแผน (วิกฤต / เฝ้าระวัง / ล่าช้า · ปี 2569: ต้องปรับปรุง / พอใช้)
+const RISK_BEHIND = ['วิกฤต', 'เฝ้าระวัง', 'ต้องปรับปรุง', 'พอใช้'];
+function riskWatch(p, rk){ return isHighRisk(rk) && (RISK_BEHIND.includes(p.status) || p.phase === 'late'); }
+// ข้อมูลหัวข้อรายงาน "8. ความเสี่ยงโครงการ": stFn = สถานะหลักของรอบ (รายงานส่ง hS)
+function riskReportData(P, fy, ye, stFn){
+  const items = P.map(p => ({ p, rk: riskFor(p.code, fy) }));
+  const withRk = items.filter(x => x.rk && x.rk.score != null);
+  const top = b => !!b && RISK_BANDS.indexOf(b) >= RISK_BANDS.length - 2;
+  const high = withRk.filter(x => isHighRisk(x.rk)).sort((a, b) => b.rk.score - a.rk.score);
+  const resHigh = withRk.filter(x => x.rk.rscore != null && x.rk.rscore > RISK_BOUNDARY);
+  const watch = ye ? [] : high.filter(x => riskWatch(x.p, x.rk));
+  const st = p => stFn(p) || 'ไม่มีข้อมูล';
+  const cols = [];
+  items.forEach(x => { if(!cols.includes(st(x.p))) cols.push(st(x.p)); });
+  const order = ['ปกติ', 'เฝ้าระวัง', 'วิกฤต', 'ดีมาก', 'ดี', 'พอใช้', 'ต้องปรับปรุง', 'บรรลุเป้าหมาย', 'ไม่บรรลุเป้าหมาย'];
+  cols.sort((a, b) => ((order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99)));
+  const rowDefs = RISK_BANDS.slice().reverse().map(b => ({ label: b.label, test: x => riskBand(x.rk && x.rk.score) === b }))
+    .concat([{ label: 'ไม่มีข้อมูลความเสี่ยง', test: x => !(x.rk && x.rk.score != null) }]);
+  const cross = rowDefs.map(r => { const inRow = items.filter(r.test);
+    return { label: r.label, counts: cols.map(c => inRow.filter(x => st(x.p) === c).length), total: inRow.length }; });
+  return { items, withRk, high, resHigh, watch, cols, cross };
+}
+function riskBadge(score, extra){
+  const b = riskBand(score);
+  return b ? `<span class="rk-badge ${b.cls}" title="${b.code}${score} · ${b.note}${extra ? ' · ' + extra : ''}">${b.label} ${score}</span>` : '<span class="rk-badge rk0">–</span>';
+}
+
 // ---------- งบประมาณตามแผนฉบับปรับปรุง (ชีต "งบประมาณแผนปรับปรุง") ----------
 // 1 แถว = โครงการ × ฉบับแผน: งบของโครงการตามเล่มแผนฉบับนั้น (ไม่ใช่ส่วนที่เพิ่ม) — ผู้ใช้กำหนด พ.ย. 2569
 // งบปัจจุบัน = ฉบับล่าสุดที่อนุมัติแล้ว ณ วันที่ของข้อมูล (ไม่มีแถว = งบตั้งต้นในชีต "โครงการ"/"ผลการดำเนินงาน")
@@ -5827,6 +6192,7 @@ async function loadAndRender(){
     console.log('[Dashboard] จำนวนโครงการหลังประมวลผล:', records.length);
     // งบประมาณตามแผนฉบับปรับปรุง (ฉบับล่าสุด) — ฐานของงบรวมและ % เบิกจ่าย
     try{ window.ACP_BUDGET_REV = buildBudgetRevisions(await fetchSheetBySpec('budgetRev')); }catch(bErr){ console.warn('[Dashboard] อ่านงบประมาณแผนปรับปรุงไม่สำเร็จ:', bErr); }
+    try{ window.ACP_RISK = buildProjectRisks(await fetchSheetBySpec('risk')); }catch(rErr){ console.warn('[Dashboard] อ่านความเสี่ยงโครงการไม่สำเร็จ:', rErr); }
     applyBudgetRevisions(records, window.LIVE_FISCAL_YEAR, null);
     applyKpiChanges(records);
 
