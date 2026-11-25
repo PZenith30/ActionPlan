@@ -454,6 +454,8 @@ window.addEventListener('load', function(){
   .pd-risk .pd-rk-box{margin-top:14px; padding:10px 14px; border:1px solid var(--latex-200); border-radius:10px; background:var(--latex-50, rgba(0,0,0,0.015));}
   .pd-risk .pd-rk-box .pd-rk-k{margin-top:5px; color:var(--ink-600);}
   .pd-risk .pd-rk-h{font-size:12px; font-weight:600; color:var(--forest-800);}
+  .pd-kwhy{margin-top:10px; padding:8px 12px; border-radius:8px; background:var(--latex-50); border:1px dashed var(--latex-200); font-size:12.5px; color:var(--ink-600); line-height:1.7;}
+  .pd-kwhy b{color:var(--ink-900);} .pd-kwhy .badge{vertical-align:middle;} .pd-kwhy-rule{font-size:11px; color:var(--ink-400);}
   .pd-risk .pd-rk-src{margin-top:6px; font-size:10.5px; color:var(--ink-400);}
   .risk-th{min-width:96px; text-align:center !important;}
   td.risk-cell{text-align:center; vertical-align:middle; white-space:nowrap;}
@@ -2622,14 +2624,18 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     // การ์ดตัวชี้วัด: ค่าเป้าหมาย · ผลจริง · % เป้าสะสม · % เป้าทั้งปี — ยังไม่ถึงรอบวัดผล (เป้าสะสมและผลเป็น 0) = "–" / N/A ไม่ใช่ 0% สีแดง
     // โครงการที่ยังไม่เริ่ม (รอตามแผน / รอเริ่มดำเนินการ) แสดงค่าเป็นสีกลาง และติดป้ายระยะของโครงการแทนระดับ วิกฤต
     const waitPh = p.phase === 'wait' || p.phase === 'pending';
+    const fmtN = s => { const x = parseNum(s); return x == null ? esc(s || '-') : x.toLocaleString('en-US', { maximumFractionDigits: 2 }); };
     const kBlock = k => { const i = info(k), u = i.unit || '', nd = cumND(k) || p.phase === 'wait';
       const cls = v => nd || waitPh ? ' pd-nd' : pcCls(v);
       return `<div class="pd-kblock"><div class="pd-kname">${esc(i.name || k.code)}<div class="pd-kc">${esc(k.code)}${u ? ' · ' + esc(u) : ''}</div></div>` +
-        `<div class="pd-cards pd-cards4">${card('ค่าเป้าหมาย (ทั้งปี)', esc(k.target || '-'), `${esc(u)}${k.cumTarget ? ' · เป้าสะสม ' + esc(k.cumTarget) : ''}`)}` +
-        card('ผลจริง', nd ? '–' : esc(k.actual || '-'), nd ? 'ยังไม่ถึงกำหนด' : waitPh ? 'ยังไม่เริ่มดำเนินงาน' : esc(u), nd || waitPh ? ' pd-nd' : '') +
-        card('% เป้าสะสม', nd ? 'N/A' : pct(k.pctCum), nd ? 'ยังไม่ประเมิน' : `${esc(k.actual || '-')} / ${esc(k.cumTarget || '-')}`, cls(k.pctCum)) +
-        card('% เป้าทั้งปี', nd ? 'N/A' : pct(k.pctYear), nd ? 'ยังไม่ประเมิน' : `${esc(k.actual || '-')} / ${esc(k.target || '-')}`, cls(k.pctYear)) + `</div>` +
-        (nd ? '' : `<div class="pd-bl"><span>ความสำเร็จเทียบเป้าหมายทั้งปี</span><b>${pct(k.pctYear)}</b></div>${bar(k.pctYear, waitPh ? 'none' : '')}`) +
+        // แยกเป้าหมายสะสม (ที่ควรทำได้ถึงเดือนรายงาน) เป็นการ์ดของตัวเอง + ประโยคอธิบายที่มาของสถานะ (ผู้ใช้ขอ พ.ย. 2569)
+        `<div class="pd-cards pd-cards4">${card('เป้าหมายทั้งปี', fmtN(k.target), esc(u))}` +
+        card('เป้าหมายสะสม (ถึงเดือนนี้)', nd ? '–' : fmtN(k.cumTarget), nd ? 'ยังไม่ถึงกำหนดวัดผล' : 'ที่ควรทำได้ตามแผน · ' + esc(u), nd ? ' pd-nd' : '') +
+        card('ผลจริงสะสม', nd ? '–' : fmtN(k.actual), nd ? 'ยังไม่ถึงกำหนด' : waitPh ? 'ยังไม่เริ่มดำเนินงาน' : 'ที่ทำได้จริง · ' + esc(u), nd || waitPh ? ' pd-nd' : '') +
+        card('% เทียบเป้าสะสม', nd ? 'N/A' : pct(k.pctCum), nd ? 'ยังไม่ประเมิน' : `ผลจริง ÷ เป้าหมายสะสม`, cls(k.pctCum)) + `</div>` +
+        (nd || waitPh || k.pctCum == null ? '' : `<div class="pd-kwhy">ถึงเดือนนี้ควรได้ <b>${fmtN(k.cumTarget)}</b> ${esc(u)} ทำได้จริง <b>${fmtN(k.actual)}</b> ${esc(u)} = <b>${pct(k.pctCum)}</b> ของเป้าหมายสะสม` +
+          (SCH.key === 'tp' && tpLevel(k.pctCum) ? ` → <span class="badge ${statusClass(tpLevel(k.pctCum))}">${tpLevel(k.pctCum)}</span> <span class="pd-kwhy-rule">(เกณฑ์: ≥ 90% ปกติ · 70–&lt;90% เฝ้าระวัง · &lt; 70% วิกฤต)</span>` : '') + `</div>`) +
+        (nd ? '' : `<div class="pd-bl"><span>ความสำเร็จเทียบเป้าหมายทั้งปี (${fmtN(k.actual)} / ${fmtN(k.target)} ${esc(u)})</span><b>${pct(k.pctYear)}</b></div>${bar(k.pctYear, waitPh ? 'none' : '')}`) +
         `<div class="pd-tags">${waitPh ? `<span class="badge ${statusClass(p.status)}">${esc(p.status)}</span>` + (k.completion ? `<span class="badge none">${esc(k.completion)}</span>` : '') : kBadges(k)}</div></div>`; };
     const section = (no, title, list, cum, yr, totalLbl) => {
       if(!list.length) return '';
