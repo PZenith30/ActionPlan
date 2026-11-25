@@ -451,6 +451,10 @@ window.addEventListener('load', function(){
   .pd-risk .pd-rk-txt{font-size:13px; line-height:1.6; color:var(--ink-900);}
   .pd-risk .pd-rk-k{font-size:11.5px; color:var(--ink-400); margin-top:8px;}
   .pd-risk .pd-rk-warn{margin-top:12px; padding:8px 12px; border-radius:8px; background:rgba(184,58,46,0.08); color:#a0302a; font-size:12.5px;}
+  .pd-risk .pd-rk-box{margin-top:14px; padding:10px 14px; border:1px solid var(--latex-200); border-radius:10px; background:var(--latex-50, rgba(0,0,0,0.015));}
+  .pd-risk .pd-rk-box .pd-rk-k{margin-top:5px; color:var(--ink-600);}
+  .pd-risk .pd-rk-h{font-size:12px; font-weight:600; color:var(--forest-800);}
+  .pd-risk .pd-rk-src{margin-top:6px; font-size:10.5px; color:var(--ink-400);}
   @media (max-width:700px){ .pd-risk .pd-rk-flow{grid-template-columns:minmax(0,1fr);} .pd-risk .pd-rk-arrow{justify-content:center; transform:rotate(90deg);} }
   .kr-tbl{min-width:900px; table-layout:fixed;}
   .kr-tbl td:nth-child(3){white-space:nowrap;}
@@ -2647,21 +2651,24 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         : rkE.Lsrc === 'plan' ? `ยังไม่มีข้อมูลกิจกรรมสำคัญจากแบบฟอร์ม ใช้ความก้าวหน้าเทียบแผนสะสมของโครงการ <b>${pctS(rkE.Lr)}</b>` : 'ยังไม่ถึงกำหนดตามแผน';
       const Itxt = `ผลผลิต <b>${pctS(rkE.Iout)}</b> · ผลลัพธ์ <b>${pctS(rkE.Ioc)}</b> ของเป้าหมายสะสม (ใช้ด้านที่แย่กว่า)`;
       const sc5 = (v, nd) => v == null ? '–' : v + (nd ? '*' : '');
+      // ที่มาแยกชัด (ผู้ใช้ขอ พ.ย. 2569 เพื่อตรวจสอบย้อนกลับได้): ก่อนจัดการ = เล่มแผน · ปัจจุบัน/คาดการณ์ = กิจกรรมสำคัญ × ตัวชี้วัด
+      const srcTag = t => `<div class="pd-rk-src">ที่มา: ${t}</div>`;
       html += `<div class="pd-sec pd-risk"><h3><span class="pd-no">${no()}</span> ความเสี่ยงโครงการ</h3>` +
-        `<div class="pd-rk-k">โอกาสเกิด <b>L = ${sc5(rkE.L, rkE.Lnd)}</b> · ${Ltxt}</div>` +
-        `<div class="pd-rk-k" style="margin-top:4px;">ผลกระทบ <b>I = ${sc5(rkE.I, rkE.Ind)}</b> · ${Itxt}</div>` +
-        `<div class="pd-rk-flow" style="margin-top:12px;">` +
-          lvCard('ก่อนจัดการ (เล่มแผน)', rkE.before, rk && rk.lh && rk.im ? `โอกาส ${rk.lh} × ผลกระทบ ${rk.im}` : 'ไม่มีคะแนนในเล่มแผน') + arrow +
-          lvCard('ปัจจุบัน', rkE.score, rkE.score != null ? `L${sc5(rkE.L, rkE.Lnd)} × I${sc5(rkE.I, rkE.Ind)}` : 'ยังไม่ถึงกำหนดวัดผล') + arrow +
-          lvCard(ye ? 'สิ้นปีงบประมาณ' : 'หลังจัดการ (คาดการณ์สิ้นปี)', rkE.fscore, rkE.fscore != null ? `L${rkE.Lf} × I${rkE.If}${ye ? '' : ' · ถ้าเดือนที่เหลือทำได้ตามแผน'}` : '–') + `</div>` +
-        (rkE.Lnd || rkE.Ind ? '<div class="pd-rk-k" style="margin-top:6px; color:var(--ink-400);">* ยังไม่ถึงรอบวัดผลด้านนี้ นับเป็น 1</div>' : '') +
+        `<div class="pd-rk-flow">` +
+          lvCard('ก่อนจัดการ', rkE.before, (rk && rk.lh && rk.im ? `โอกาส ${rk.lh} × ผลกระทบ ${rk.im}` : 'ไม่มีคะแนนในเล่มแผน') + srcTag('เล่มแผนปฏิบัติการ')) + arrow +
+          lvCard('ปัจจุบัน', rkE.score, (rkE.score != null ? `L${sc5(rkE.L, rkE.Lnd)} × I${sc5(rkE.I, rkE.Ind)}` : 'ยังไม่ถึงกำหนดวัดผล') + srcTag('กิจกรรมสำคัญ × ตัวชี้วัด')) + arrow +
+          lvCard(ye ? 'สิ้นปีงบประมาณ' : 'หลังจัดการ (คาดการณ์สิ้นปี)', rkE.fscore, (rkE.fscore != null ? `L${rkE.Lf} × I${rkE.If}${ye ? '' : ' · ถ้าเดือนที่เหลือทำได้ตามแผน'}` : '–') + srcTag('กิจกรรมสำคัญ × ตัวชี้วัด')) + `</div>` +
         (riskWatch(p, rkE) ? `<div class="pd-rk-warn">⚠️ ${isHighRisk(rkE) ? `ความเสี่ยงปัจจุบันอยู่ในระดับ${riskBand(rkE.score).label}` : `คาดการณ์สิ้นปียังเกินขอบเขตที่ยอมรับได้ (${riskBand(rkE.fscore).label} ${rkE.fscore})`} ควรเร่งกิจกรรมสำคัญ และติดตามแผนจัดการความเสี่ยงของโครงการ</div>` : '') +
-        (rk ? `<details class="pd-more" style="margin-top:12px;"><summary>ความเสี่ยงที่ระบุไว้ในเล่มแผน</summary>` +
-          `<div class="pd-rk-txt" style="margin-top:8px;">${rk.scenario ? esc(rk.scenario) : '<span style="color:var(--ink-400)">ไม่ระบุ Risk Scenario</span>'}</div>` +
-          `<div class="pd-rk-k">ปัจจัยเสี่ยง: <b>${esc(rk.factor || '-')}</b>${rk.type ? ' · ประเภท ' + esc(RISK_TYPE_LABEL[rk.type] || rk.type) : ''}${rk.control != null ? ` · การควบคุมภายใน ${rk.control}/${CONTROL_FULL} ${rk.control >= CONTROL_FULL ? '<span class="rk-badge rk1">มีประสิทธิผล</span>' : '<span class="rk-badge rk4" title="คะแนนต่ำกว่า ' + CONTROL_FULL + ' ต้องจัดทำมาตรการปรับปรุงการควบคุมภายใน">ยังไม่มีประสิทธิผล</span>'}` : ''}</div>` +
-          `<div class="pd-rk-k" style="margin-top:6px;">แผนจัดการความเสี่ยง: <span class="pd-rk-txt">${esc(rk.plan || '-')}</span></div>` +
-          `<div class="pd-rk-k" style="margin-top:6px;">ความเสี่ยงคงเหลือที่คาดไว้ในเล่มแผน: ${rk.rscore != null ? riskBadge(rk.rscore) + ` (โอกาส ${rk.rlh} × ผลกระทบ ${rk.rim})` : rk.score != null && rk.score <= RISK_BOUNDARY ? 'อยู่ในขอบเขตที่ยอมรับได้ตั้งแต่ก่อนจัดการ' : '–'}</div>` +
-          `</details>` : '') +
+        `<div class="pd-rk-box"><div class="pd-rk-h">ตามเล่มแผนปฏิบัติการ</div>` +
+          (rk ? `<div class="pd-rk-k">ความเสี่ยง: <span class="pd-rk-txt">${rk.scenario ? esc(rk.scenario) : '<span style="color:var(--ink-400)">ไม่ระบุ Risk Scenario</span>'}</span></div>` +
+            `<div class="pd-rk-k">ปัจจัยเสี่ยง: <b>${esc(rk.factor || '-')}</b>${rk.type ? ' · ประเภท ' + esc(RISK_TYPE_LABEL[rk.type] || rk.type) : ''}${rk.control != null ? ` · การควบคุมภายใน ${rk.control}/${CONTROL_FULL} ${rk.control >= CONTROL_FULL ? '<span class="rk-badge rk1">มีประสิทธิผล</span>' : '<span class="rk-badge rk4" title="คะแนนต่ำกว่า ' + CONTROL_FULL + ' ต้องจัดทำมาตรการปรับปรุงการควบคุมภายใน">ยังไม่มีประสิทธิผล</span>'}` : ''}</div>` +
+            `<div class="pd-rk-k">แผนจัดการความเสี่ยง: <span class="pd-rk-txt">${esc(rk.plan || '-')}</span></div>` +
+            `<div class="pd-rk-k">ความเสี่ยงคงเหลือที่คาดไว้ในเล่มแผน: ${rk.rscore != null ? riskBadge(rk.rscore) + ` (โอกาส ${rk.rlh} × ผลกระทบ ${rk.rim})` : rk.score != null && rk.score <= RISK_BOUNDARY ? 'อยู่ในขอบเขตที่ยอมรับได้ตั้งแต่ก่อนจัดการ' : '–'}</div>`
+          : '<div class="pd-rk-k" style="color:var(--ink-400);">เล่มแผนไม่มีข้อมูลความเสี่ยงของโครงการนี้</div>') + `</div>` +
+        `<div class="pd-rk-box"><div class="pd-rk-h">วิธีคิดสีปัจจุบันและคาดการณ์สิ้นปี (กิจกรรมสำคัญ × ตัวชี้วัด)</div>` +
+          `<div class="pd-rk-k">โอกาสเกิด <b>L = ${sc5(rkE.L, rkE.Lnd)}</b> · ${Ltxt}</div>` +
+          `<div class="pd-rk-k">ผลกระทบ <b>I = ${sc5(rkE.I, rkE.Ind)}</b> · ${Itxt}</div>` +
+          (rkE.Lnd || rkE.Ind ? '<div class="pd-rk-k" style="color:var(--ink-400);">* ยังไม่ถึงรอบวัดผลด้านนี้ นับเป็น 1</div>' : '') + `</div>` +
         `</div>`;
     }
     // สรุปสถานะโครงการ
