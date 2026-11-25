@@ -69,7 +69,7 @@ Loader behaviours worth knowing:
     - Loader `buildProjectRisks()` → `window.ACP_RISK`, read with `riskFor(code, fy)` (= `ev.book`, shown as reference in the project detail).
     - FY2570 book: 111 of 121 projects. 10 have no risk at all; 7 have an identical 1×2 score with no scenario; 040107 has 3×3 with no plan.
   - **Sources:** `RISK_BANDS` follow กยท.'s Risk Assessment Matrix (แผนวิสาหกิจ 2566–2570 ฉบับทบทวนเพื่อใช้ปี 2570, ข้อ 12.2–12.3, pages 211–213): L 1–2 · NL 3–4 · M 5–9 · NH 10–16 · H 20–25. `RISK_BOUNDARY` = 4. Band notes and `CONTROL_FULL` = 9 come from คู่มือการบริหารความเสี่ยงและควบคุมภายใน 2569 (ฉบับร่าง) pages 31 and 37. Monthly ERM data from กองบริหารความเสี่ยง (RM-D / RM-U) is a possible later source.
-  - **UI:** `view-risk` (`#risk`, `renderRiskView()` inside `renderDashboard`, so it follows the header period).
+  - **UI:** `view-risk` (`#risk`, `renderRiskView()` inside `renderDashboard`, so it follows the header period). Its nav button and report topic 8 are hidden for now (`hidden` + `.nav-item[hidden]` / `.rm-check[hidden]`, the risk checkbox unticked and skipped by select-all via `topicBoxes()`; user request Nov 2026); the page still opens via `#risk`, and risk stays visible in the annual table and project detail.
     - 4 cards (→ `ACP_openAnnual(null, {risk})` with `#fRisk` = watch/high/fc/any/none).
     - 5×5 heat map with a ก่อนจัดการ / ปัจจุบัน / คาดการณ์สิ้นปี toggle; rows = impact, blue frame = boundary.
     - Level-count table for the 3 stages.
