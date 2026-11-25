@@ -306,6 +306,7 @@ window.addEventListener('load', function(){
   }
   .kpi-card .value .unit{font-size:15px; font-weight:500; color:var(--ink-600); margin-inline-start:4px;}
   .kpi-card .sub{margin-top:8px; font-size:12.8px; color:var(--ink-600);}
+  .kpi-card .sub .sub-note{margin-top:4px; font-size:12px; color:#3d7ea6;}
   .kpi-card .accent-bar{position:absolute; left:0; top:0; bottom:0; width:4px;}
   .kpi-card.c1 .accent-bar{background:var(--forest-700);}
   .kpi-card.c2 .accent-bar{background:var(--amber-500);}
@@ -1924,6 +1925,8 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
   const nPoorImportant = poorList.filter(p=>p.important).length;   // โครงการสำคัญที่อยู่ในกลุ่มนี้ (ไม่ใช่ทั้งแผน)
   const nGreat = YE_MODE ? PROJECTS.filter(p=>hStat(p)===YE_PASS).length : PROJECTS.filter(p=>SCH.good.includes(p.status)).length;
   const nWatch = PROJECTS.filter(p=>SCH.watch.includes(p.status)).length;   // Trigger Point: เฝ้าระวัง
+  // ยังไม่ถึงระยะเวลาดำเนินการ (รอตามแผน) / ถึงกำหนดแต่ยังไม่เริ่ม — ไม่มีการ์ดของตัวเอง จึงบอกไว้ใต้การ์ดปกติให้ผลรวมครบ (ผู้ใช้ขอ พ.ย. 2569)
+  const nWaitPh = PROJECTS.filter(p=>p.status === TP_WAIT).length, nPendPh = PROJECTS.filter(p=>p.status === TP_PENDING).length;
 
   const nAdded = PROJECTS.filter(p => p.added).length;   // โครงการเพิ่มระหว่างปี (สถานะโครงการ "เพิ่ม/ปกติ")
   const nBudChanged = PROJECTS.filter(p => p.budget_changed).length;   // ปรับงบตามแผนฉบับปรับปรุง
@@ -1963,7 +1966,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       <div class="accent-bar"></div>
       <span class="eyebrow">${goodLabel}</span>
       <div class="value">${nGreat}<span class="unit">/ ${nProjects} โครงการ</span></div>
-      <div class="sub">${((nGreat/nProjects)*100).toFixed(0)}% ของโครงการทั้งหมด${(!YE_MODE && SCH.key==='tp') ? ` · เฝ้าระวัง ${nWatch} โครงการ` : ''}</div>
+      <div class="sub">${((nGreat/nProjects)*100).toFixed(0)}% ของโครงการทั้งหมด${(!YE_MODE && SCH.key==='tp') ? ` · เฝ้าระวัง ${nWatch} โครงการ` : ''}${(!YE_MODE && (nWaitPh || nPendPh)) ? `<div class="sub-note" title="ยังไม่ถึงกำหนดเริ่มตามแผน และยังไม่มีตัวชี้วัดถึงรอบวัดผล">ยังไม่ถึงระยะเวลาดำเนินการ ${nWaitPh} โครงการ${nPendPh ? ` · รอเริ่มดำเนินการ ${nPendPh} โครงการ` : ''}</div>` : ''}</div>
     </div>
     <div class="kpi-card c4${cardAttr('c4')}">
       <div class="accent-bar"></div>
