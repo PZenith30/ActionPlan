@@ -633,6 +633,9 @@ window.addEventListener('load', function(){
   .pd-cs{font-size:11.5px; color:var(--ink-400); overflow-wrap:anywhere;}
   .pd-cv{overflow-wrap:anywhere;}
   .pd-dialog{overflow-x:hidden;}
+  /* ปุ่ม × ติดมุมขวาบนตลอดเวลาเลื่อน (ลูกโดยตรงของกล่องที่เลื่อน จึง sticky ได้ทั้งหน้าต่าง) */
+  .pd-dialog .pd-x{position:sticky; top:12px; float:right; margin:14px 14px -48px 0; z-index:6; box-shadow:0 2px 8px rgba(0,0,0,0.18); background:#fff; border:1px solid var(--latex-200);}
+  .pd-dialog .rm-head{padding-right:64px;}
   .pd-bl{display:flex; justify-content:space-between; gap:8px; margin:12px 0 4px; font-size:12px; color:var(--ink-600);}
   .tap-bar.pd-bar{height:10px; width:auto; margin:4px 0 0;}
   .tap-bar.pd-plan .fill{background-color:#6b7a86;}
@@ -1436,7 +1439,7 @@ window.addEventListener('load', function(){
                 <th data-key="progress_cum" class="prog-th" title="ป้าย: สถานะโครงการ · แถบ: ผลผลิต / ผลลัพธ์ (จากเป้าหมายสะสม) และความก้าวหน้าเทียบแผนสะสม">
                   สถานะ / ความก้าวหน้า<span class="arrow">▾</span>
                 </th>
-                <th data-key="risk_score" class="nw risk-th" title="ความเสี่ยงปัจจุบัน = โอกาสเกิด (กิจกรรมสำคัญ) × ผลกระทบ (ตัวชี้วัด) · บรรทัดล่าง: ก่อนจัดการ (เล่มแผน) → คาดการณ์สิ้นปี">ความเสี่ยง<span class="arrow">▾</span></th>
+                <th data-key="risk_score" class="nw risk-th" title="ป้ายสี = ความเสี่ยงปัจจุบัน (โอกาสเกิดจากกิจกรรมสำคัญ × ผลกระทบจากตัวชี้วัด) · บรรทัดล่าง: ก่อนจัดการ (เล่มแผน) → คาดการณ์สิ้นปี">ความเสี่ยงปัจจุบัน<span class="arrow">▾</span></th>
               </tr>
             </thead>
             <tbody id="tblBody"></tbody>
@@ -1755,13 +1758,13 @@ window.addEventListener('load', function(){
 
 <div id="prjModal" class="rm-backdrop" hidden>
   <div class="rm-dialog pd-dialog" role="dialog" aria-modal="true" aria-labelledby="pdTitle">
+    <button type="button" class="rm-x pd-x" id="pdClose" aria-label="ปิด">×</button>
     <div class="rm-head">
       <div>
         <div class="pd-kicker">ติดตามผลการดำเนินงานรายโครงการ</div>
         <h2 id="pdTitle"></h2>
         <p id="pdSub"></p>
       </div>
-      <button type="button" class="rm-x" id="pdClose" aria-label="ปิด">×</button>
     </div>
     <div class="rm-body" id="pdBody"></div>
   </div>
@@ -2544,7 +2547,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           </td>
           <td class="risk-cell">${(rk => rk.score == null && rk.before == null ? '<span class="rk-badge rk0" title="ยังไม่ถึงกำหนดวัดผล">–</span>' :
             (rk.score != null ? riskBadge(rk.score, `ปัจจุบัน · โอกาสเกิด ${rk.L} × ผลกระทบ ${rk.I}`) : '<span class="rk-badge rk0" title="ยังไม่ถึงกำหนดวัดผล">ยังไม่ถึงกำหนด</span>') +
-            `<div class="rk-mini" title="ก่อนจัดการ (เล่มแผน) → คาดการณ์สิ้นปี">${rk.before != null ? `<span class="rk-dot ${riskBand(rk.before).cls}"></span>${rk.before}` : '–'} → ${rk.fscore != null ? `<span class="rk-dot ${riskBand(rk.fscore).cls}"></span>${rk.fscore}` : '–'}</div>`)(riskEval(p, Number(window.__viewFY || window.LIVE_FISCAL_YEAR), ye))}</td>
+            `<div class="rk-mini" title="ก่อนจัดการ (เล่มแผน) → คาดการณ์สิ้นปี">ก่อน ${rk.before != null ? `<span class="rk-dot ${riskBand(rk.before).cls}"></span>${rk.before}` : '–'} → สิ้นปี ${rk.fscore != null ? `<span class="rk-dot ${riskBand(rk.fscore).cls}"></span>${rk.fscore}` : '–'}</div>`)(riskEval(p, Number(window.__viewFY || window.LIVE_FISCAL_YEAR), ye))}</td>
         </tr>
       `;
     }).join('');
@@ -2658,7 +2661,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const PH = { wait: ['รอตามแผน', 'wait', 'ยังไม่ถึงกำหนดเริ่มดำเนินงาน'], pending: ['รอเริ่มดำเนินการ', 'pend', 'ถึงกำหนดเริ่มแล้ว แต่ยังไม่เริ่มดำเนินงาน'],
                  late: ['ล่าช้า', 'poor', 'เลยกำหนดเริ่มแล้ว แต่ยังไม่ดำเนินการ'] }[ph];
     const phBadge = PH ? `<span class="badge ${PH[1]}">${PH[0]}</span>` :
-      (varPts == null ? '' : `<span class="badge ${varPts < -0.05 ? (actCls === 'great' ? 'fair' : statusClass(lvl) || 'poor') : 'great'}">${varPts < -0.05 ? `ช้ากว่าแผน ${Math.abs(varPts)} จุดร้อยละ` : varPts > 0.05 ? `เร็วกว่าแผน ${varPts} จุดร้อยละ` : 'เป็นไปตามแผน'}</span>`);
+      (varPts == null ? '' : `<span class="badge ${varPts < -0.05 ? (actCls === 'great' ? 'fair' : statusClass(lvl) || 'poor') : 'great'}">${varPts < -0.05 ? `ช้ากว่าแผน ${Math.abs(varPts)}%` : varPts > 0.05 ? `เร็วกว่าแผน ${varPts}%` : 'เป็นไปตามแผน'}</span>`);
     html += `<div class="pd-sec"><h3><span class="pd-no">${no()}</span> MILESTONE – ความก้าวหน้าเทียบแผน</h3>` +
       `<div class="pd-cards pd-cards2">${card('ความก้าวหน้าตามแผน (แผนสะสม)', planV == null ? '–' : pct(planV), planV == null ? 'ยังไม่ถึงกำหนดตามแผน' : 'งานที่ควรเสร็จตามแผน ณ เดือนนี้')}` +
         card('ความก้าวหน้าจริง (เทียบแผนสะสม)', actV == null ? '–' : pct(actV), actV == null ? 'ยังไม่ถึงกำหนดตามแผน' : 'ผลสะสม ÷ แผนสะสม (ตามแบบฟอร์มหน่วยงาน)', actV == null || ph === 'pending' ? ' pd-nd' : ' pd-' + actCls) + `</div>` +
