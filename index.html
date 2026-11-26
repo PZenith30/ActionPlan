@@ -5412,7 +5412,11 @@ function buildHistoryDataset(historyRows, projectRecords){
     if(!skipKpi && pctYear!=null) (oc ? agg.yearOc : agg.yearVals).push(pctYear);
 
     const progressCum = parseNum(row[11]); // L
-    if(agg.progressCum==null && progressCum!=null) agg.progressCum = progressCum;
+    if(agg.progressCum==null && progressCum!=null){
+      agg.progressCum = progressCum;
+      // สถานะจากแถวเดียวกับที่ให้ % เทียบแผนสะสม (เหมือนข้อมูลล่าสุด) เพราะสูตร O ในชีตย้อนหลังให้ "ต้องปรับปรุง" กับแถวที่ L ว่าง
+      agg.progressCumStatus = String(row[14]||"").trim() || null;
+    }
 
     const kpiStatus = String(row[13]||'').trim(); // N = สถานะโครงการ (ร้อยละความก้าวหน้า จากเป้าหมายสะสม)
     if(!skipKpi && kpiStatus) agg.kpiStatuses.push(kpiStatus);
@@ -5420,7 +5424,7 @@ function buildHistoryDataset(historyRows, projectRecords){
     if(!skipKpi && comp) agg.completions.push(comp);
 
     const statusOverall = String(row[14]||'').trim(); // O = สถานะโครงการ (ผลเทียบแผนสะสม)
-    if(!skipKpi && statusOverall) agg.statuses.push(statusOverall);
+    if(!skipKpi && statusOverall && progressCum!=null) agg.statuses.push(statusOverall);
 
     if(agg.budget==null){ const v = parseNum(row[16]); if(v!=null) agg.budget = v; } // Q
     if(agg.disbursed==null){ const v = parseNum(row[18]); if(v!=null) agg.disbursed = v; } // S
@@ -5446,7 +5450,7 @@ function buildHistoryDataset(historyRows, projectRecords){
         disburse_pct: agg.budget > 0 ? (agg.disbursed || 0) / agg.budget : agg.disbursePct,   // เบิกจ่าย ÷ งบประมาณ (บาท) เหมือนข้อมูลล่าสุด
         kpis: agg.kpiList || [],
         progress_cum: agg.progressCum,
-        status: worstStatus(agg.statuses) || 'ไม่มีข้อมูล',
+        status: agg.progressCumStatus || worstStatus(agg.statuses) || 'ไม่มีข้อมูล',
         progress_pct_cum: pc.main,   // หลายตัวชี้วัด = ค่าเฉลี่ยของตัวชี้วัด Output
         progress_year: py.main,
         progress_pct_cum_oc: pc.oc,
