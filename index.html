@@ -5245,11 +5245,17 @@ function buildMpTree(projects, masterPlans){
         n.st = [...new Set([...n.st, ...k.st])].sort();
       });
     }
-    // ลำดับที่แสดงแทนรหัส: ยุทธศาสตร์ที่ n (ในแผนนั้น) · กลยุทธ์ที่ n (นับต่อเนื่องทั้งแผน ตามลำดับในชีต)
+    // ลำดับที่แสดงแทนรหัส: ยุทธศาสตร์ที่ n (ในแผนนั้น) · กลยุทธ์ที่ n.m (m นับใหม่ในแต่ละยุทธศาสตร์ ตามลำดับในชีต)
+    // กลยุทธ์ที่ไม่อยู่ใต้ยุทธศาสตร์แผนแม่บทที่มีรหัส: กลยุทธ์ที่ n นับต่อกันในแผน
     if(g.mode === 'mps'){
       let ns = 0, nl = 0;
-      top.forEach(k => { if(k.kind === 'mpst' && k.code) k.no = 'ยุทธศาสตร์ที่ ' + (++ns); });
-      top.forEach(k => (k.kids || [k]).forEach(c => { if(c.kind === 'mps') c.no = 'กลยุทธ์ที่ ' + (++nl); }));
+      top.forEach(k => {
+        if(k.kind === 'mpst' && k.code){
+          k.no = 'ยุทธศาสตร์ที่ ' + (++ns);
+          let m = 0;
+          k.kids.forEach(c => { if(c.kind === 'mps') c.no = 'กลยุทธ์ที่ ' + ns + '.' + (++m); });
+        } else (k.kids || [k]).forEach(c => { if(c.kind === 'mps') c.no = 'กลยุทธ์ที่ ' + (++nl); });
+      });
     }
     const leaves = [];
     top.forEach(k => (k.kids ? k.kids.map(c => ({ parent: k, k: c })) : [{ parent: null, k }]).forEach(x => leaves.push(x)));
