@@ -733,7 +733,7 @@ window.addEventListener('load', function(){
   .mpt-s{background:#fbfaf5;}
   .mpt-sub{padding:2px 10px 10px 28px; display:flex; flex-direction:column; gap:6px;}
   .mpt-lv{display:block; font-size:10.5px; font-weight:600; letter-spacing:.03em; color:var(--ink-400);}
-  .mpt-kc{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-400); white-space:nowrap;}
+  .mpt-kc{font-size:12px; color:var(--ink-400); white-space:nowrap;}
   .mpt-kn{min-width:0; font-size:13px;} .mpt-kn b{font-weight:600; color:var(--ink-900);}
   .mpt-warn{color:#b3462f; font-style:normal; font-size:11.5px;}
   .mpt-al{display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:4px; font-size:11.5px; color:var(--ink-400);}
@@ -3212,13 +3212,13 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       // ยุทธศาสตร์แผนแม่บท: ชั้นบน แสดงยุทธศาสตร์องค์กรที่สอดคล้อง แล้วซ้อนกลยุทธ์แผนแม่บทไว้ข้างใน
       if(k.kind === 'mpst'){
         const al = alignHtml(k, true);
-        return `<details class="mpt-k mpt-s"><summary><span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
+        return `<details class="mpt-k mpt-s"><summary><span class="mpt-kc">${mpNo(k) ? esc(mpNo(k)) : '–'}</span>` +
           `<span class="mpt-kn"><span class="mpt-lv">ยุทธศาสตร์แผนแม่บท</span><b>${esc(k.name || k.code)}</b>${al ? `<span class="mpt-al">สอดคล้อง ${al}</span>` : ''}</span>` +
           `<span class="mpt-n">กลยุทธ์ ${k.kids.length}${n ? ` · ${n} โครงการ` : ''}</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span></summary>` +
           `<div class="mpt-sub">${k.kids.map(kidHtml).join('')}</div></details>`;
       }
       const al = k.kind === 'none' ? '' : alignHtml(k, k.kind === 'si');
-      const head = `<span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
+      const head = `<span class="mpt-kc">${mpNo(k) ? esc(mpNo(k)) : '–'}</span>` +
         `<span class="mpt-kn"><b>${esc(k.name || k.code)}</b>${k.unknown ? ' <i class="mpt-warn">(ไม่พบรหัสนี้ในชีตกลยุทธ์แผนแม่บท)</i>' : ''}` +
         (al ? `<span class="mpt-al">${k.kind === 'si' ? '' : 'สอดคล้อง '}${al}${k.derived ? ' <i>(จากโครงการ)</i>' : ''}</span>` : '') + `</span>` +
         `<span class="mpt-n">${n ? n + ' โครงการ' : ''}</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span>`;
@@ -4037,7 +4037,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       // ระดับรายละเอียดที่เลือกในหน้าต่างรายงาน: 1 = แผนแม่บท · 2 = ถึงกลยุทธ์แผนแม่บท · 3 = ถึงโครงการ
       const lv = R.mpLevel || 3, tree = R.mpTree || [];
       const kidLbl = g => g.mode === 'mps' ? (g.nStrat ? 'ยุทธศาสตร์ / กลยุทธ์แผนแม่บท' : 'กลยุทธ์แผนแม่บท') : 'กลยุทธ์องค์กร';
-      const kidName = k => `${k.code ? `<span class="mono">${esc(k.code)}</span> ` : ''}${esc(k.name || k.code)}`;
+      const kidName = k => `${k.no ? esc(k.no) + ' ' : k.code ? `<span class="mono">${esc(k.code)}</span> ` : ''}${esc(k.name || k.code)}`;
       const alignCell = k => k.kind === 'none' ? '-' : esc((k.kind === 'si' || k.kind === 'mpst') ? mpAlign(k).map(mpStFull).join(' · ') : mpAlignText(k)) + (k.derived ? ' <span class="rp-sub">(จากโครงการ)</span>' : '');
       const kidRow = (k, sub) => `<tr><td${sub ? ' style="padding-left:16px"' : ''}>${k.kind === 'mpst' ? `<span class="rp-sub">ยุทธศาสตร์แผนแม่บท</span><br><b>${kidName(k)}</b>` : kidName(k)}</td><td class="rp-small">${alignCell(k)}</td><td class="r">${k.n || ''}</td><td class="r">${k.n ? fmtBaht(k.budget) : ''}</td><td class="r">${k.n ? fmtPct(k.rate) : ''}</td><td>${k.n ? bar(k.avgProgress) : ''}</td></tr>`;   // ไม่มีโครงการรองรับ: แสดงแค่ชื่อกลยุทธ์ ช่องอื่นว่าง
       if(lv >= 2 && tree.length){
@@ -4050,7 +4050,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           cols:[[kidLbl(g),33],[g.mode === 'si' ? 'ยุทธศาสตร์' : 'ยุทธศาสตร์ / กลยุทธ์องค์กรที่สอดคล้อง',29],['โครงการ',7,'r'],['งบประมาณ (บาท)',11,'r'],['% เบิกจ่าย',7,'r'],[headLabels(YE).avg,13]],
           rows:g.kids.flatMap(k=> [kidRow(k, false), ...(k.kids || []).map(c=> kidRow(c, true))])}));
       }
-      const nm = k => `${k.code ? k.code + ' ' : ''}${k.name || k.code}`;
+      const nm = k => `${mpNo(k) ? mpNo(k) + ' ' : ''}${k.name || k.code}`;
       if(lv >= 3) tree.forEach(g=> g.leaves.filter(x=>x.k.n).forEach(({parent, k})=> B.push({kind:'table',
         title:`${g.name} › ${parent ? nm(parent) + ' › ' : ''}${nm(k)} (${k.n} โครงการ)`,
         cols:[['รหัสโครงการ',11],['ชื่อโครงการ',40],['หน่วยงาน',13],['งบประมาณ (บาท)',12,'r'],[T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'),13,'c'],[T(sch().labels.status,'ผลสิ้นปี'),11,'c']],
@@ -4618,7 +4618,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       // ระดับรายละเอียด: 1 = แผนแม่บท · 2 = ถึงกลยุทธ์แผนแม่บท · 3 = ถึงโครงการ
       const lv = R.mpLevel || 3, tree = R.mpTree || [];
       const alignTxt = k => k.kind === 'none' ? '' : ((k.kind === 'si' || k.kind === 'mpst') ? mpAlign(k).map(mpStFull).join(' · ') : mpAlignText(k)) + (k.derived ? ' (จากโครงการ)' : '');
-      const nm = k => k ? (k.code ? k.code + ' ' : '') + (k.name || '') : '';
+      const nm = k => k ? (mpNo(k) ? mpNo(k) + ' ' : '') + (k.name || '') : '';
       if(lv >= 2 && tree.length){
         const M = R.mpMatrix;
         if(M && M.rows.length) row = table(ws, row, [
@@ -4632,7 +4632,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           {h:'แผนแม่บท', get:x=>x.g.name},
           {h:'ระดับ', get:x=> x.k.kind === 'mpst' ? 'ยุทธศาสตร์แผนแม่บท' : x.k.kind === 'si' ? 'กลยุทธ์องค์กร' : 'กลยุทธ์แผนแม่บท'},
           {h:'ยุทธศาสตร์แผนแม่บท', get:x=> x.k.kind === 'mpst' ? nm(x.k) : nm(x.parent)},
-          {h:'รหัส', get:x=>x.k.code || '-'},
+          {h:'ลำดับ', get:x=>mpNo(x.k) || '-'},
           {h:'กลยุทธ์', get:x=>x.k.name || x.k.code},
           {h:'ยุทธศาสตร์ / กลยุทธ์องค์กรที่สอดคล้อง', get:x=>alignTxt(x.k)},
           {h:'จำนวนโครงการ', get:x=>x.k.n, fmt:'0'},
@@ -5245,12 +5245,20 @@ function buildMpTree(projects, masterPlans){
         n.st = [...new Set([...n.st, ...k.st])].sort();
       });
     }
+    // ลำดับที่แสดงแทนรหัส: ยุทธศาสตร์ที่ n (ในแผนนั้น) · กลยุทธ์ที่ n (นับต่อเนื่องทั้งแผน ตามลำดับในชีต)
+    if(g.mode === 'mps'){
+      let ns = 0, nl = 0;
+      top.forEach(k => { if(k.kind === 'mpst' && k.code) k.no = 'ยุทธศาสตร์ที่ ' + (++ns); });
+      top.forEach(k => (k.kids || [k]).forEach(c => { if(c.kind === 'mps') c.no = 'กลยุทธ์ที่ ' + (++nl); }));
+    }
     const leaves = [];
     top.forEach(k => (k.kids ? k.kids.map(c => ({ parent: k, k: c })) : [{ parent: null, k }]).forEach(x => leaves.push(x)));
     return Object.assign(g, { kids: top, leaves, nStrat: top.filter(k => k.kind === 'mpst').length,
       nLeaf: leaves.filter(x => x.k.kind !== 'none').length });
   });
 }
+// ป้ายลำดับแทนรหัส MPST/MPS: ยุทธศาสตร์ที่ n / กลยุทธ์ที่ n (กลยุทธ์องค์กรในโหมด si ใช้รหัส SI)
+function mpNo(k){ return k ? (k.no || k.code || '') : ''; }
 // ชื่อระดับของแผนแม่บท (หัวคอลัมน์ / ป้ายนับ)
 function mpLevelText(g){
   if(g.mode !== 'mps') return `กลยุทธ์องค์กร ${g.nLeaf}`;
