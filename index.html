@@ -708,8 +708,8 @@ window.addEventListener('load', function(){
 
   /* ตารางสรุปความก้าวหน้าแผนแม่บท: คอลัมน์ตัวเลขกระชับ ชื่อแผนแม่บทใช้พื้นที่ที่เหลือ */
   .mp-sum{width:100%; table-layout:fixed; font-size:13px;}
-  .mp-sum col.c-n{width:120px;} .mp-sum col.c-budget{width:180px;} .mp-sum col.c-rate{width:110px;} .mp-sum col.c-prog{width:34%;}
-  .mp-sum th, .mp-sum td{padding:10px 16px;}
+  .mp-sum col.c-n{width:100px;} .mp-sum col.c-budget{width:150px;} .mp-sum col.c-rate{width:90px;} .mp-sum col.c-prog{width:28%;}
+  .mp-sum > thead > tr > th, .mp-sum > tbody > tr > td{padding:10px 16px;}
   .mp-sum th.r, .mp-sum td.r{text-align:right;}
   .mp-sum td.r{font-family:'JetBrains Mono',monospace; white-space:nowrap;}
   .mp-sum td.nm{font-weight:500; color:var(--ink-900);}
@@ -821,6 +821,14 @@ window.addEventListener('load', function(){
   }
   .mp-sum tr.mp-row{cursor:pointer;}
   .mp-sum tr.mp-row:hover{background:var(--latex-50);}
+  .mp-sum tr.mp-row:focus-visible{outline:2px solid var(--forest-700); outline-offset:-2px;}
+  .mp-sum tr.mp-row.open{background:var(--latex-50);}
+  .mp-sum tr.mp-row.open > td{border-bottom-color:transparent;}
+  .mp-caret{display:inline-block; width:14px; color:var(--ink-400); font-size:11px; transition:transform .15s;}
+  .mp-sum tr.mp-row.open .mp-caret{transform:rotate(90deg);}
+  .mp-meta{display:block; margin:2px 0 0 14px; font-size:11.5px; font-weight:400; color:var(--ink-400);}
+  .mp-sum tr.mp-sub > td{padding:4px 12px 14px 22px; background:var(--latex-50);}
+  .mp-sum tr.mp-sub .mpt-body{padding:0;}
   @media (max-width:900px){
     .panel table.mp-sum{min-width:780px;}
     .mp-sum col.c-n{width:88px;} .mp-sum col.c-budget{width:140px;} .mp-sum col.c-rate{width:84px;} .mp-sum col.c-prog{width:30%;}
@@ -1589,7 +1597,7 @@ window.addEventListener('load', function(){
 
       <div class="panel" style="margin-bottom:24px;">
         <h2>สรุปความก้าวหน้าแผนแม่บท</h2>
-        <div class="panel-sub">ภาพรวมความก้าวหน้าโครงการ จัดกลุ่มตามแผนแม่บทที่เชื่อมโยง (ที่มา: ชีต "เชื่อมโยงโครงการ") &middot; คลิกแถวเพื่อดูรายละเอียดโครงการ</div>
+        <div class="panel-sub">ภาพรวมความก้าวหน้าโครงการ จัดกลุ่มตามแผนแม่บทที่เชื่อมโยง (ที่มา: ชีต "เชื่อมโยงโครงการ" และ "กลยุทธ์แผนแม่บท") &middot; กดแถวแผนแม่บทเพื่อเปิดดูยุทธศาสตร์ → กลยุทธ์แผนแม่บท → โครงการ</div>
         <div style="overflow-x:auto; margin-top:14px;">
           <table class="mp-sum">
             <colgroup>
@@ -1607,43 +1615,17 @@ window.addEventListener('load', function(){
             <tbody id="mpSummaryBody"></tbody>
           </table>
         </div>
-      </div>
-
-      <div class="panel" id="mpTreePanel" style="margin-bottom:24px;" hidden>
-        <h2>การเชื่อมโยงแผนแม่บทกับยุทธศาสตร์และกลยุทธ์</h2>
-        <div class="panel-sub" id="mpTreeSub">ถ่ายทอดจากแผนวิสาหกิจ (ยุทธศาสตร์ / กลยุทธ์องค์กร) สู่แผนแม่บท (ยุทธศาสตร์ → กลยุทธ์แผนแม่บท) และติดตามผ่านโครงการในแผนปฏิบัติการ &middot; กดชื่อแผนแม่บท ยุทธศาสตร์ หรือกลยุทธ์เพื่อเปิดดู</div>
-        <details class="mpx" id="mpMatrixBox">
+        <details class="mpx" id="mpMatrixBox" hidden>
           <summary>ตารางไขว้ แผนแม่บท × ยุทธศาสตร์องค์กร (จำนวนโครงการ)</summary>
           <div class="mpx-wrap"><table class="mpx-tbl" id="mpMatrix"></table></div>
           <div class="mpx-note">นับตามยุทธศาสตร์ของโครงการในชีต "เชื่อมโยงโครงการ" · โครงการที่ตอบหลายยุทธศาสตร์นับในทุกช่องที่ตอบ</div>
         </details>
-        <div id="mpTree" class="mpt-list"></div>
       </div>
 
       <div class="panel" id="mpCrossLinkPanel" style="margin-bottom:24px; display:none;">
         <h2>🔗 โครงการที่เชื่อมโยงหลายแผนแม่บท</h2>
         <div class="panel-sub">โครงการ 1 โครงการ สามารถตอบสนองแผนแม่บทได้มากกว่า 1 แผน &middot; <span id="mpCrossLinkCount"></span></div>
         <div id="mpCrossLinkList" class="mp-crosslink-list"></div>
-      </div>
-
-      <div class="table-panel" id="mpDrilldownPanel" style="display:none;">
-        <div style="padding:18px 22px 0;">
-          <h2 style="margin:0 0 4px; font-family:'Kanit',sans-serif; font-size:16px;" id="mpDrilldownTitle">รายละเอียดโครงการ</h2>
-          <div class="panel-sub" id="mpDrilldownSub"></div>
-        </div>
-        <div style="overflow-x:auto; max-height:520px; overflow-y:auto; margin-top:10px;">
-          <table>
-            <thead>
-              <tr>
-                <th class="nw">รหัสโครงการ</th><th>ชื่อโครงการ</th><th class="nw" style="width:110px;">หน่วยงาน</th>
-                <th class="nw" style="text-align:right">งบประมาณ (บาท)</th>
-                <th style="text-align:center">% ความก้าวหน้า<br>เทียบแผนสะสม</th>
-                <th style="text-align:center">สถานะ</th>
-              </tr>
-            </thead>
-            <tbody id="mpDrilldownBody"></tbody>
-          </table>
-        </div>
       </div>
 
     </section>
@@ -3205,109 +3187,86 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     // หัวคอลัมน์ตามโหมด (รอบสิ้นปี = ร้อยละจากเป้าหมายทั้งปี / ผลสิ้นปี)
     const mpHead = mpBody.closest('table').querySelectorAll('thead th');
     if(mpHead[4]) mpHead[4].innerHTML = thBreak(HL.avg);
-    const mpDrillHead = document.querySelectorAll('#mpDrilldownPanel thead th');
-    if(mpDrillHead[4]) mpDrillHead[4].innerHTML = thBreak(HL.pct);
-    if(mpDrillHead[5]) mpDrillHead[5].textContent = HL.status;
     if(YE_MODE){
       const sub = mpBody.closest('.panel').querySelector('.panel-sub');
-      if(sub) sub.textContent = 'ผลสิ้นปีงบประมาณ ' + window.__yearEndFY + ' — ความก้าวหน้าเฉลี่ยจากเป้าหมายทั้งปีของโครงการ จัดกลุ่มตามแผนแม่บทที่เชื่อมโยง';
+      if(sub) sub.textContent = 'ผลสิ้นปีงบประมาณ ' + window.__yearEndFY + ' — ความก้าวหน้าเฉลี่ยจากเป้าหมายทั้งปีของโครงการ จัดกลุ่มตามแผนแม่บทที่เชื่อมโยง · กดแถวแผนแม่บทเพื่อเปิดดูยุทธศาสตร์ → กลยุทธ์แผนแม่บท → โครงการ';
     }
+
+    {
+    // ---- ตารางเดียว: แถวแผนแม่บท กดเปิดแถวย่อย ยุทธศาสตร์แผนแม่บท → กลยุทธ์แผนแม่บท → โครงการ + ตารางไขว้แผนแม่บท × ยุทธศาสตร์ ----
+    const mpTreeList = buildMpTree(PROJECTS, MASTER_PLANS);
+    const mpTreeBy = {}; mpTreeList.forEach(t => { mpTreeBy[t.code] = t; });
+    const esc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const avg = ps => ps.length ? ps.reduce((a,p)=>a+(hProg(p)||0),0)/ps.length : null;
+    const bar = v => `<div class="tap-inline"><div class="tap-bar ${pctColorClass(v)}"><div class="fill" style="width:${v==null?0:Math.max(0,Math.min(100,v*100))}%"></div></div><span class="v">${v==null?'-':(v*100).toFixed(1)+'%'}</span></div>`;
+    const alignHtml = (k, stOnly) => mpAlign(k).map(a =>
+      `<span class="mpt-st" title="${esc(a.name)}">${esc(a.label)}</span>` +
+      (stOnly ? '' : a.sis.map(s => `<span class="mpt-si" title="${esc(s.name)}">${esc(s.code)}${s.name ? ' ' + esc(s.name) : ''}</span>`).join(''))).join('');
+    const prjTable = ps => `<div class="mpt-tw"><table class="mpt-prj"><thead><tr><th class="nw">รหัสโครงการ</th><th>ชื่อโครงการ</th><th class="nw">หน่วยงาน</th><th class="nw r">งบประมาณ (บาท)</th><th>${thBreak(HL.pct)}</th><th class="c">${esc(HL.status)}</th></tr></thead><tbody>` +
+      ps.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p => { const pr = hProg(p), st = hStat(p);
+        return `<tr class="mpt-p" data-code="${esc(p.code)}" tabindex="0" title="ดูรายละเอียดโครงการ"><td class="code">${esc(p.code)}</td><td class="name"><div class="nm">${p.important?'<span class="star">★</span>':''}${esc(p.name)}</div></td><td class="owner">${esc(p.owner)}</td><td class="num">${fmtBaht(p.budget)}</td><td>${tapBarHtml(pr, pctColorClass(pr))}</td><td class="c"><span class="badge ${statusClass(st)}">${esc(st)}</span></td></tr>`; }).join('') +
+      `</tbody></table></div>`;
+    const kidHtml = k => {
+      const n = k.projects.length;
+      // ยุทธศาสตร์แผนแม่บท: ชั้นบน แสดงยุทธศาสตร์องค์กรที่สอดคล้อง แล้วซ้อนกลยุทธ์แผนแม่บทไว้ข้างใน
+      if(k.kind === 'mpst'){
+        const al = alignHtml(k, true);
+        return `<details class="mpt-k mpt-s"><summary><span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
+          `<span class="mpt-kn"><span class="mpt-lv">ยุทธศาสตร์แผนแม่บท</span><b>${esc(k.name || k.code)}</b>${al ? `<span class="mpt-al">สอดคล้อง ${al}</span>` : ''}</span>` +
+          `<span class="mpt-n">กลยุทธ์ ${k.kids.length} · ${n} โครงการ</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span></summary>` +
+          `<div class="mpt-sub">${k.kids.map(kidHtml).join('')}</div></details>`;
+      }
+      const al = k.kind === 'none' ? '' : alignHtml(k, k.kind === 'si');
+      const head = `<span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
+        `<span class="mpt-kn"><b>${esc(k.name || k.code)}</b>${k.unknown ? ' <i class="mpt-warn">(ไม่พบรหัสนี้ในชีตกลยุทธ์แผนแม่บท)</i>' : ''}` +
+        (al ? `<span class="mpt-al">${k.kind === 'si' ? '' : 'สอดคล้อง '}${al}${k.derived ? ' <i>(จากโครงการ)</i>' : ''}</span>` : '') + `</span>` +
+        `<span class="mpt-n">${n ? n + ' โครงการ' : 'ยังไม่มีโครงการ'}</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span>`;
+      return n ? `<details class="mpt-k"><summary>${head}</summary>${prjTable(k.projects)}</details>` : `<div class="mpt-k empty">${head}</div>`;
+    };
+    // เนื้อหาแถวย่อย: แผนแม่บทที่มีลำดับชั้นใช้ต้นไม้ ไม่มี (เช่น "ไม่เกี่ยวข้องกับแผนแม่บท" หรือข้อมูลย้อนหลังที่ยังไม่เชื่อม) แสดงรายชื่อโครงการ
+    const subHtml = (g, t) => (t && t.kids.length)
+      ? (t.mode === 'si' ? '<div class="mpt-note">ยังไม่มีกลยุทธ์ของแผนแม่บทนี้ในชีต "กลยุทธ์แผนแม่บท" จึงแสดงตามกลยุทธ์องค์กรของโครงการแทน</div>' : '') + t.kids.map(kidHtml).join('')
+      : prjTable(g.projects);
     mpBody.innerHTML = groupList.map(g=>{
       const n = g.projects.length;
       const totalBudget = g.projects.reduce((a,p)=>a+(p.budget||0),0);
       const totalDisbursed = g.projects.reduce((a,p)=>a+(p.disbursed||0),0);
       const disburseRate = totalBudget>0 ? totalDisbursed/totalBudget : null;
-      const avgProgress = n ? g.projects.reduce((a,p)=>a+(hProg(p)||0),0)/n : null;
+      const avgProgress = avg(g.projects);
+      const t = mpTreeBy[g.code];
+      const meta = t && t.kids.length ? mpLevelText(t) : '';
       return `
-        <tr class="mp-row" data-mp="${g.code}">
-          <td class="nm">${g.cbe ? `<span class="cbe-tag" title="หมวด SE-AM: ${g.cbe.abbr}${g.cbe.name ? ' · ' + g.cbe.name : ''}">${g.cbe.abbr}</span>` : ''}${g.name}</td>
+        <tr class="mp-row" data-mp="${esc(g.code)}" tabindex="0" aria-expanded="false" title="กดเพื่อเปิด/ปิดรายละเอียด">
+          <td class="nm"><span class="mp-caret" aria-hidden="true">▸</span>${g.cbe ? `<span class="cbe-tag" title="หมวด SE-AM: ${g.cbe.abbr}${g.cbe.name ? ' · ' + g.cbe.name : ''}">${g.cbe.abbr}</span>` : ''}${g.name}${meta ? `<span class="mp-meta">${esc(meta)}</span>` : ''}</td>
           <td class="r">${n}</td>
           <td class="r">${fmtBaht(totalBudget)}</td>
           <td class="r">${fmtPct(disburseRate)}</td>
-          <td><div class="tap-inline"><div class="tap-bar ${pctColorClass(avgProgress)}"><div class="fill" style="width:${avgProgress==null?0:Math.max(0,Math.min(100,avgProgress*100))}%"></div></div><span class="v">${avgProgress==null?'-':(avgProgress*100).toFixed(1)+'%'}</span></div></td>
+          <td>${bar(avgProgress)}</td>
         </tr>
+        <tr class="mp-sub" hidden><td colspan="5"><div class="mpt-body">${subHtml(g, t)}</div></td></tr>
       `;
     }).join('');
-
-    mpBody.querySelectorAll('tr.mp-row').forEach(tr=>{
-      tr.addEventListener('mouseenter', ()=> tr.style.background = 'var(--latex-50)');
-      tr.addEventListener('mouseleave', ()=> tr.style.background = '');
-      tr.addEventListener('click', ()=>{
-        const g = groups[tr.dataset.mp];
-        const panel = document.getElementById('mpDrilldownPanel');
-        document.getElementById('mpDrilldownTitle').textContent = g.name;
-        document.getElementById('mpDrilldownSub').textContent = `พบ ${g.projects.length} โครงการที่เชื่อมโยงกับแผนแม่บทนี้`;
-        const body = document.getElementById('mpDrilldownBody');
-        body.innerHTML = g.projects.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p=>{
-          const st = hStat(p), pr = hProg(p);
-          return `
-            <tr>
-              <td class="code">${p.code}</td>
-              <td class="name"><div class="nm">${p.important?'<span class="star">★</span>':''}${p.name}</div><div class="strat">${p.strategy||''}</div></td>
-              <td class="owner">${p.owner}</td>
-              <td class="num">${fmtBaht(p.budget)}</td>
-              <td>${tapBarHtml(pr, pctColorClass(pr))}</td>
-              <td style="text-align:center"><span class="badge ${statusClass(st)}">${st}</span></td>
-            </tr>
-          `;
-        }).join('');
-        panel.style.display = '';
-        panel.scrollIntoView({behavior:'smooth', block:'nearest'});
-      });
-    });
-
-    // ---- แผนแม่บท → กลยุทธ์แผนแม่บท → โครงการ (พับไว้ กดเปิด) + ตารางไขว้แผนแม่บท × ยุทธศาสตร์ ----
-    (function renderMpTree(){
-      const panel = document.getElementById('mpTreePanel');
-      if(!panel) return;
-      const tree = buildMpTree(PROJECTS, MASTER_PLANS);
-      panel.hidden = !tree.length;
-      if(!tree.length) return;
-      const esc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-      const avg = ps => ps.length ? ps.reduce((a,p)=>a+(hProg(p)||0),0)/ps.length : null;
-      const bar = v => `<div class="tap-inline"><div class="tap-bar ${pctColorClass(v)}"><div class="fill" style="width:${v==null?0:Math.max(0,Math.min(100,v*100))}%"></div></div><span class="v">${v==null?'-':(v*100).toFixed(1)+'%'}</span></div>`;
-      const alignHtml = (k, stOnly) => mpAlign(k).map(a =>
-        `<span class="mpt-st" title="${esc(a.name)}">${esc(a.label)}</span>` +
-        (stOnly ? '' : a.sis.map(s => `<span class="mpt-si" title="${esc(s.name)}">${esc(s.code)}${s.name ? ' ' + esc(s.name) : ''}</span>`).join(''))).join('');
-      const prjTable = ps => `<div class="mpt-tw"><table class="mpt-prj"><thead><tr><th class="nw">รหัสโครงการ</th><th>ชื่อโครงการ</th><th class="nw">หน่วยงาน</th><th class="nw r">งบประมาณ (บาท)</th><th>${thBreak(HL.pct)}</th><th class="c">${esc(HL.status)}</th></tr></thead><tbody>` +
-        ps.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p => { const pr = hProg(p), st = hStat(p);
-          return `<tr class="mpt-p" data-code="${esc(p.code)}" tabindex="0" title="ดูรายละเอียดโครงการ"><td class="code">${esc(p.code)}</td><td class="name"><div class="nm">${p.important?'<span class="star">★</span>':''}${esc(p.name)}</div></td><td class="owner">${esc(p.owner)}</td><td class="num">${fmtBaht(p.budget)}</td><td>${tapBarHtml(pr, pctColorClass(pr))}</td><td class="c"><span class="badge ${statusClass(st)}">${esc(st)}</span></td></tr>`; }).join('') +
-        `</tbody></table></div>`;
-      const kidHtml = k => {
-        const n = k.projects.length;
-        // ยุทธศาสตร์แผนแม่บท: ชั้นบน แสดงยุทธศาสตร์องค์กรที่สอดคล้อง แล้วซ้อนกลยุทธ์แผนแม่บทไว้ข้างใน
-        if(k.kind === 'mpst'){
-          const al = alignHtml(k, true);
-          return `<details class="mpt-k mpt-s"><summary><span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
-            `<span class="mpt-kn"><span class="mpt-lv">ยุทธศาสตร์แผนแม่บท</span><b>${esc(k.name || k.code)}</b>${al ? `<span class="mpt-al">สอดคล้อง ${al}</span>` : ''}</span>` +
-            `<span class="mpt-n">กลยุทธ์ ${k.kids.length} · ${n} โครงการ</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span></summary>` +
-            `<div class="mpt-sub">${k.kids.map(kidHtml).join('')}</div></details>`;
-        }
-        const al = k.kind === 'none' ? '' : alignHtml(k, k.kind === 'si');
-        const head = `<span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
-          `<span class="mpt-kn"><b>${esc(k.name || k.code)}</b>${k.unknown ? ' <i class="mpt-warn">(ไม่พบรหัสนี้ในชีตกลยุทธ์แผนแม่บท)</i>' : ''}` +
-          (al ? `<span class="mpt-al">${k.kind === 'si' ? '' : 'สอดคล้อง '}${al}${k.derived ? ' <i>(จากโครงการ)</i>' : ''}</span>` : '') + `</span>` +
-          `<span class="mpt-n">${n ? n + ' โครงการ' : 'ยังไม่มีโครงการ'}</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span>`;
-        return n ? `<details class="mpt-k"><summary>${head}</summary>${prjTable(k.projects)}</details>` : `<div class="mpt-k empty">${head}</div>`;
-      };
-      document.getElementById('mpTree').innerHTML = tree.map(g => {
-        const n = g.projects.length;
-        return `<details class="mpt"><summary>` +
-          `<span class="mpt-nm">${g.cbe ? `<span class="cbe-tag" title="หมวด SE-AM: ${esc(g.cbe.abbr)}${g.cbe.name ? ' · ' + esc(g.cbe.name) : ''}">${esc(g.cbe.abbr)}</span>` : ''}${esc(g.name)}</span>` +
-          `<span class="mpt-meta">${mpLevelText(g)} · ${n} โครงการ</span><span class="mpt-b">${n ? bar(avg(g.projects)) : ''}</span></summary>` +
-          `<div class="mpt-body">${g.mode === 'si' ? '<div class="mpt-note">ยังไม่มีกลยุทธ์ของแผนแม่บทนี้ในชีต "กลยุทธ์แผนแม่บท" จึงแสดงตามกลยุทธ์องค์กรของโครงการแทน</div>' : ''}${g.kids.map(kidHtml).join('')}</div></details>`;
-      }).join('');
-      // ตารางไขว้
-      const M = mpStMatrix(tree);
-      const mBox = document.getElementById('mpMatrixBox');
-      mBox.hidden = !M.rows.length;
-      document.getElementById('mpMatrix').innerHTML = `<thead><tr><th>แผนแม่บท</th>${M.st.map(s => `<th class="c" title="${esc(s.name)}">${esc(s.label)}</th>`).join('')}<th class="c">รวมโครงการ</th></tr></thead><tbody>` +
-        M.rows.map(r => `<tr><td>${esc(r.g.name)}</td>${r.cells.map(c => `<td class="c${c ? ' on' : ''}">${c || '–'}</td>`).join('')}<td class="c tot">${r.total}</td></tr>`).join('') + `</tbody>`;
-      const treeEl = document.getElementById('mpTree');
-      // onclick (ไม่ใช่ addEventListener) ให้ใช้ pdOpen ของรอบข้อมูลล่าสุดเสมอ เมื่อ renderDashboard ถูกเรียกซ้ำ
-      treeEl.onclick = e => { const tr = e.target.closest('tr.mpt-p'); if(tr) pdOpen(tr.dataset.code); };
-      treeEl.onkeydown = e => { const tr = e.target.closest('tr.mpt-p'); if(tr && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); pdOpen(tr.dataset.code); } };
-    })();
+    const toggleMp = tr => {
+      const sub = tr.nextElementSibling, open = sub.hidden;
+      sub.hidden = !open; tr.classList.toggle('open', open); tr.setAttribute('aria-expanded', String(open));
+    };
+    // onclick (ไม่ใช่ addEventListener) ให้ใช้ pdOpen ของรอบข้อมูลล่าสุดเสมอ เมื่อ renderDashboard ถูกเรียกซ้ำ
+    mpBody.onclick = e => {
+      const p = e.target.closest('tr.mpt-p'); if(p){ pdOpen(p.dataset.code); return; }
+      const tr = e.target.closest('tr.mp-row'); if(tr) toggleMp(tr);
+    };
+    mpBody.onkeydown = e => {
+      if(e.key !== 'Enter' && e.key !== ' ') return;
+      const p = e.target.closest('tr.mpt-p');
+      if(p){ e.preventDefault(); pdOpen(p.dataset.code); return; }
+      if(e.target.matches('tr.mp-row')){ e.preventDefault(); toggleMp(e.target); }
+    };
+    // ตารางไขว้
+    const M = mpStMatrix(mpTreeList);
+    document.getElementById('mpMatrixBox').hidden = !M.rows.length;
+    document.getElementById('mpMatrix').innerHTML = `<thead><tr><th>แผนแม่บท</th>${M.st.map(s => `<th class="c" title="${esc(s.name)}">${esc(s.label)}</th>`).join('')}<th class="c">รวมโครงการ</th></tr></thead><tbody>` +
+      M.rows.map(r => `<tr><td>${esc(r.g.name)}</td>${r.cells.map(c => `<td class="c${c ? ' on' : ''}">${c || '–'}</td>`).join('')}<td class="c tot">${r.total}</td></tr>`).join('') + `</tbody>`;
+    }
   })();
 
   // ---------- มุมมอง: ผลการดำเนินงานตาม PA/MOU (ส่วนงานภายใต้รองผวก.) ----------
