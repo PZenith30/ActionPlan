@@ -3214,14 +3214,14 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         const al = alignHtml(k, true);
         return `<details class="mpt-k mpt-s"><summary><span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
           `<span class="mpt-kn"><span class="mpt-lv">ยุทธศาสตร์แผนแม่บท</span><b>${esc(k.name || k.code)}</b>${al ? `<span class="mpt-al">สอดคล้อง ${al}</span>` : ''}</span>` +
-          `<span class="mpt-n">กลยุทธ์ ${k.kids.length} · ${n} โครงการ</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span></summary>` +
+          `<span class="mpt-n">กลยุทธ์ ${k.kids.length}${n ? ` · ${n} โครงการ` : ''}</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span></summary>` +
           `<div class="mpt-sub">${k.kids.map(kidHtml).join('')}</div></details>`;
       }
       const al = k.kind === 'none' ? '' : alignHtml(k, k.kind === 'si');
       const head = `<span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
         `<span class="mpt-kn"><b>${esc(k.name || k.code)}</b>${k.unknown ? ' <i class="mpt-warn">(ไม่พบรหัสนี้ในชีตกลยุทธ์แผนแม่บท)</i>' : ''}` +
         (al ? `<span class="mpt-al">${k.kind === 'si' ? '' : 'สอดคล้อง '}${al}${k.derived ? ' <i>(จากโครงการ)</i>' : ''}</span>` : '') + `</span>` +
-        `<span class="mpt-n">${n ? n + ' โครงการ' : 'ยังไม่มีโครงการ'}</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span>`;
+        `<span class="mpt-n">${n ? n + ' โครงการ' : ''}</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span>`;
       return n ? `<details class="mpt-k"><summary>${head}</summary>${prjTable(k.projects)}</details>` : `<div class="mpt-k empty">${head}</div>`;
     };
     // เนื้อหาแถวย่อย: แผนแม่บทที่มีลำดับชั้นใช้ต้นไม้ ไม่มี (เช่น "ไม่เกี่ยวข้องกับแผนแม่บท" หรือข้อมูลย้อนหลังที่ยังไม่เชื่อม) แสดงรายชื่อโครงการ
@@ -4039,7 +4039,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       const kidLbl = g => g.mode === 'mps' ? (g.nStrat ? 'ยุทธศาสตร์ / กลยุทธ์แผนแม่บท' : 'กลยุทธ์แผนแม่บท') : 'กลยุทธ์องค์กร';
       const kidName = k => `${k.code ? `<span class="mono">${esc(k.code)}</span> ` : ''}${esc(k.name || k.code)}`;
       const alignCell = k => k.kind === 'none' ? '-' : esc((k.kind === 'si' || k.kind === 'mpst') ? mpAlign(k).map(mpStFull).join(' · ') : mpAlignText(k)) + (k.derived ? ' <span class="rp-sub">(จากโครงการ)</span>' : '');
-      const kidRow = (k, sub) => `<tr><td${sub ? ' style="padding-left:16px"' : ''}>${k.kind === 'mpst' ? `<span class="rp-sub">ยุทธศาสตร์แผนแม่บท</span><br><b>${kidName(k)}</b>` : kidName(k)}</td><td class="rp-small">${alignCell(k)}</td><td class="r">${k.n}</td><td class="r">${k.n ? fmtBaht(k.budget) : '-'}</td><td class="r">${k.n ? fmtPct(k.rate) : '-'}</td><td>${k.n ? bar(k.avgProgress) : '<span class="rp-sub">ยังไม่มีโครงการ</span>'}</td></tr>`;
+      const kidRow = (k, sub) => `<tr><td${sub ? ' style="padding-left:16px"' : ''}>${k.kind === 'mpst' ? `<span class="rp-sub">ยุทธศาสตร์แผนแม่บท</span><br><b>${kidName(k)}</b>` : kidName(k)}</td><td class="rp-small">${alignCell(k)}</td><td class="r">${k.n || ''}</td><td class="r">${k.n ? fmtBaht(k.budget) : ''}</td><td class="r">${k.n ? fmtPct(k.rate) : ''}</td><td>${k.n ? bar(k.avgProgress) : ''}</td></tr>`;   // ไม่มีโครงการรองรับ: แสดงแค่ชื่อกลยุทธ์ ช่องอื่นว่าง
       if(lv >= 2 && tree.length){
         const M = R.mpMatrix;
         if(M && M.rows.length) B.push({kind:'table', title:'แผนแม่บท × ยุทธศาสตร์องค์กร (จำนวนโครงการ)',
