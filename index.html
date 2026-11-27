@@ -713,6 +713,51 @@ window.addEventListener('load', function(){
   .mp-sum th.r, .mp-sum td.r{text-align:right;}
   .mp-sum td.r{font-family:'JetBrains Mono',monospace; white-space:nowrap;}
   .mp-sum td.nm{font-weight:500; color:var(--ink-900);}
+  /* แผนแม่บท → กลยุทธ์แผนแม่บท → โครงการ (พับไว้ กดเปิด) */
+  .mpt-list{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
+  .mpt{border:1px solid var(--latex-200); border-radius:10px; background:#fff;}
+  .mpt > summary, .mpt-k > summary, .mpt-k.empty{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(150px,26%); align-items:center; gap:6px 14px; padding:10px 14px; cursor:pointer; list-style:none;}
+  .mpt > summary::-webkit-details-marker, .mpt-k > summary::-webkit-details-marker, .mpx > summary::-webkit-details-marker{display:none;}
+  .mpt > summary::before, .mpt-k > summary::before, .mpx > summary::before{content:"▸"; color:var(--ink-400); margin-right:6px; display:inline-block; transition:transform .15s;}
+  .mpt[open] > summary::before, .mpt-k[open] > summary::before, .mpx[open] > summary::before{transform:rotate(90deg);}
+  .mpt > summary{grid-template-columns:auto minmax(0,1fr) auto minmax(150px,26%);}
+  .mpt > summary:hover, .mpt-k > summary:hover{background:var(--latex-50);}
+  .mpt > summary:focus-visible, .mpt-k > summary:focus-visible, .mpx > summary:focus-visible, tr.mpt-p:focus-visible{outline:2px solid var(--forest-700); outline-offset:-2px;}
+  .mpt-nm{font-weight:600; color:var(--ink-900); min-width:0;}
+  .mpt-meta, .mpt-n{font-size:12px; color:var(--ink-400); white-space:nowrap;}
+  .mpt-body{padding:2px 12px 12px 30px; display:flex; flex-direction:column; gap:6px;}
+  .mpt-note{font-size:12px; color:var(--bark-700); background:var(--latex-50); border-radius:8px; padding:6px 10px;}
+  .mpt-k{border:1px solid var(--latex-200); border-radius:8px; background:#fff;}
+  .mpt-k > summary, .mpt-k.empty{grid-template-columns:auto auto minmax(0,1fr) auto minmax(140px,24%); padding:8px 12px;}
+  .mpt-k.empty{cursor:default; opacity:.75; grid-template-columns:auto minmax(0,1fr) auto minmax(140px,24%); padding-left:28px;}
+  .mpt-s{background:#fbfaf5;}
+  .mpt-sub{padding:2px 10px 10px 28px; display:flex; flex-direction:column; gap:6px;}
+  .mpt-lv{display:block; font-size:10.5px; font-weight:600; letter-spacing:.03em; color:var(--ink-400);}
+  .mpt-kc{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-400); white-space:nowrap;}
+  .mpt-kn{min-width:0; font-size:13px;} .mpt-kn b{font-weight:600; color:var(--ink-900);}
+  .mpt-warn{color:#b3462f; font-style:normal; font-size:11.5px;}
+  .mpt-al{display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:4px; font-size:11.5px; color:var(--ink-400);}
+  .mpt-al i{font-style:normal;}
+  .mpt-st, .mpt-si{display:inline-block; padding:1px 8px; border-radius:999px; font-size:11px; line-height:1.6;}
+  .mpt-st{background:#e3efe7; color:#1f5a3a; font-weight:600;}
+  .mpt-si{background:var(--latex-50); color:var(--bark-700); border:1px solid var(--latex-200); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .mpt-tw{overflow-x:auto; padding:0 10px 10px;}
+  .mpt-prj{width:100%; font-size:12.5px; min-width:640px;}
+  .mpt-prj th{font-size:11.5px;} .mpt-prj th.r{text-align:right;} .mpt-prj th.c, .mpt-prj td.c{text-align:center;}
+  tr.mpt-p{cursor:pointer;} tr.mpt-p:hover{background:var(--latex-50);}
+  .mpx{margin-top:12px; border:1px dashed var(--latex-200); border-radius:10px; padding:2px 12px;}
+  .mpx > summary{cursor:pointer; padding:8px 0; font-size:13px; font-weight:600; color:var(--forest-800); list-style:none;}
+  .mpx-wrap{overflow-x:auto;}
+  .mpx-tbl{width:100%; font-size:12.5px; min-width:560px;}
+  .mpx-tbl th, .mpx-tbl td{padding:7px 10px;} .mpx-tbl .c{text-align:center; font-family:'JetBrains Mono',monospace;}
+  .mpx-tbl td.c{color:var(--ink-400);} .mpx-tbl td.on{color:var(--ink-900); font-weight:600; background:#eef5f0;} .mpx-tbl td.tot{color:var(--ink-900); font-weight:600;}
+  .mpx-note{font-size:11.5px; color:var(--ink-400); padding:6px 0 10px;}
+  @media (max-width:700px){
+    .mpt > summary, .mpt-k > summary{grid-template-columns:auto minmax(0,1fr); row-gap:2px;}
+    .mpt > summary > *, .mpt-k > summary > *{grid-column:2;}
+    .mpt-k.empty{grid-template-columns:minmax(0,1fr);}
+    .mpt-body{padding-left:12px;} .mpt-sub{padding-left:10px;}
+  }
   /* หมวด SE-AM ของแผนแม่บท (CBE_Code ในชีตแผนแม่บท) */
   .cbe-tag{display:inline-block; min-width:34px; margin-right:8px; padding:2px 7px; border-radius:6px; font-size:10.5px; font-weight:600; letter-spacing:.02em; text-align:center; vertical-align:1px; font-family:"JetBrains Mono",monospace; background:var(--latex-200); color:var(--bark-700);}
   /* ความเชื่อมโยงยุทธศาสตร์ (view-strategy) */
@@ -1032,6 +1077,10 @@ window.addEventListener('load', function(){
   .rm-check small{display:block; color:var(--ink-400); font-size:12px; margin-top:1px;}
   .rm-check.all{border:none; padding:2px 0 4px; font-weight:600; color:var(--forest-800);}
   .rm-check.all:hover{background:none;}
+  .rm-level{display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; margin:-4px 0 0 38px; padding:6px 10px; font-size:12.5px; color:var(--ink-400); background:var(--latex-50); border-radius:8px;}
+  .rm-level[hidden]{display:none !important;}
+  .rm-level label{display:inline-flex; align-items:center; gap:5px; color:var(--ink-900); cursor:pointer;}
+  .rm-level input{accent-color:var(--forest-700); margin:0;}
   .rm-orient{display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--ink-600); margin:4px 0 10px;}
   .rm-orient .pg{width:30px; height:21px; border:2px solid var(--forest-700); border-radius:3px; flex-shrink:0;}
   .rm-foot{display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:14px 26px 22px; border-top:1px solid var(--latex-200);}
@@ -1560,6 +1609,17 @@ window.addEventListener('load', function(){
         </div>
       </div>
 
+      <div class="panel" id="mpTreePanel" style="margin-bottom:24px;" hidden>
+        <h2>การเชื่อมโยงแผนแม่บทกับยุทธศาสตร์และกลยุทธ์</h2>
+        <div class="panel-sub" id="mpTreeSub">ถ่ายทอดจากแผนวิสาหกิจ (ยุทธศาสตร์ / กลยุทธ์องค์กร) สู่แผนแม่บท (ยุทธศาสตร์ → กลยุทธ์แผนแม่บท) และติดตามผ่านโครงการในแผนปฏิบัติการ &middot; กดชื่อแผนแม่บท ยุทธศาสตร์ หรือกลยุทธ์เพื่อเปิดดู</div>
+        <details class="mpx" id="mpMatrixBox">
+          <summary>ตารางไขว้ แผนแม่บท × ยุทธศาสตร์องค์กร (จำนวนโครงการ)</summary>
+          <div class="mpx-wrap"><table class="mpx-tbl" id="mpMatrix"></table></div>
+          <div class="mpx-note">นับตามยุทธศาสตร์ของโครงการในชีต "เชื่อมโยงโครงการ" · โครงการที่ตอบหลายยุทธศาสตร์นับในทุกช่องที่ตอบ</div>
+        </details>
+        <div id="mpTree" class="mpt-list"></div>
+      </div>
+
       <div class="panel" id="mpCrossLinkPanel" style="margin-bottom:24px; display:none;">
         <h2>🔗 โครงการที่เชื่อมโยงหลายแผนแม่บท</h2>
         <div class="panel-sub">โครงการ 1 โครงการ สามารถตอบสนองแผนแม่บทได้มากกว่า 1 แผน &middot; <span id="mpCrossLinkCount"></span></div>
@@ -1740,7 +1800,8 @@ window.addEventListener('load', function(){
         <h3>งบประมาณและการจัดกลุ่ม</h3>
         <dl>
           <dt>ร้อยละการเบิกจ่าย</dt><dd>เบิกจ่ายสะสม ÷ กรอบงบประมาณ</dd>
-          <dt>แผนแม่บท</dt><dd>จากชีตเชื่อมโยงโครงการ</dd>
+          <dt>แผนแม่บท</dt><dd>จากชีตเชื่อมโยงโครงการ (โครงการที่ไม่มีในชีตนี้ใช้รหัสแผนแม่บทในชีตโครงการ)</dd>
+          <dt>ยุทธศาสตร์และกลยุทธ์แผนแม่บท</dt><dd>แผนแม่บทแต่ละแผนมียุทธศาสตร์และกลยุทธ์ของตัวเอง ที่ถ่ายทอดจากยุทธศาสตร์และกลยุทธ์ของแผนวิสาหกิจ แล้วรวบรวมติดตามผ่านโครงการในแผนปฏิบัติการ · ข้อมูลจากชีตกลยุทธ์แผนแม่บท (1 แถว = 1 กลยุทธ์แผนแม่บท พร้อมยุทธศาสตร์แผนแม่บทที่อยู่เหนือ และยุทธศาสตร์ / กลยุทธ์องค์กรที่สอดคล้อง) · โครงการตอบกลยุทธ์ใดดูจากคอลัมน์ MPS_Code ในชีตเชื่อมโยงโครงการ · แผนแม่บทที่ยังไม่มีข้อมูลกลยุทธ์ แสดงตามกลยุทธ์องค์กรของโครงการแทน · ความก้าวหน้าเป็นค่าเฉลี่ยของโครงการ ยังไม่ใช่ผลตัวชี้วัดของแผนแม่บท</dd>
           <dt>สายงานและส่วนงาน</dt><dd>จากชีตส่วนงานภายใต้ผู้บริหาร จับคู่กับหน่วยงานเจ้าของโครงการ</dd>
           <dt>ผลการดำเนินงานตามยุทธศาสตร์</dt><dd>ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี จากชีตเชื่อมโยงตัวชี้วัด · โครงการเชื่อมกับตัวชี้วัดรายปีผ่านตัวชี้วัดโครงการ (KPI_Year_Code) — ความก้าวหน้าของแต่ละตัวชี้วัดคือค่าเฉลี่ยของโครงการที่ตอบตัวชี้วัดนั้น ไม่ใช่ผลจริงของตัวชี้วัด และโครงการที่ตอบหลายตัวชี้วัดถูกนับในทุกตัว</dd>
           <dt>หมวด SE-AM ของแผนแม่บท</dt><dd>ป้ายหน้าชื่อแผนแม่บทระบุด้านตามเกณฑ์การประเมินผลการดำเนินงานรัฐวิสาหกิจ (Core Business Enablers)
@@ -1810,7 +1871,13 @@ window.addEventListener('load', function(){
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dashboard" checked><span><b>1. ภาพรวมแดชบอร์ด</b><small>KPI · กราฟงบประมาณ/การเบิกจ่าย · สถานะโครงการ · สรุปรายยุทธศาสตร์ · โครงการที่บรรลุเป้าหมาย</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="strategy" checked><span><b>2. ผลการดำเนินงานตามยุทธศาสตร์</b><small>ยุทธศาสตร์ → ตัวชี้วัดองค์กร → กลยุทธ์/ตัวชี้วัดรายปี → โครงการ · สรุปรายตัวชี้วัด · รายชื่อโครงการที่ตอบแต่ละตัวชี้วัด</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="annual" checked><span><b>3. ความก้าวหน้าแผนปฏิบัติการประจำปี</b><small>ตารางรายโครงการครบทุกคอลัมน์ ความก้าวหน้า และสถานะ</small></span></label>
-          <label class="rm-check"><input type="checkbox" name="rmTopic" value="masterplan" checked><span><b>4. ความก้าวหน้าแผนแม่บท</b><small>สรุปรายแผนแม่บท · กราฟ · โครงการที่เชื่อมโยงหลายแผน · รายละเอียดรายแผน</small></span></label>
+          <label class="rm-check"><input type="checkbox" name="rmTopic" value="masterplan" checked><span><b>4. ความก้าวหน้าแผนแม่บท</b><small>สรุปรายแผนแม่บท · กราฟ · โครงการที่เชื่อมโยงหลายแผน · กลยุทธ์แผนแม่บทและยุทธศาสตร์ที่สอดคล้อง · รายละเอียดรายแผน</small></span></label>
+          <div class="rm-level" id="rmMpLevelBox" role="radiogroup" aria-label="ระดับรายละเอียดของหัวข้อ 4">
+            <span>ระดับรายละเอียด:</span>
+            <label><input type="radio" name="rmMpLevel" id="rmMpLevel1" value="1"> แผนแม่บท</label>
+            <label><input type="radio" name="rmMpLevel" id="rmMpLevel2" value="2"> ถึงกลยุทธ์แผนแม่บท</label>
+            <label><input type="radio" name="rmMpLevel" id="rmMpLevel3" value="3" checked> ถึงโครงการ</label>
+          </div>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="lineorg" checked><span><b>5. ความก้าวหน้าแผนปฏิบัติการตามสายงาน</b><small>สรุปรายสายงานผู้บริหาร · สรุปรายส่วนงานภายใต้แต่ละสายงาน · โครงการแยกตามส่วนงาน</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="dgarea" checked><span><b>6. ความก้าวหน้า PA และ MOU</b><small>สรุปโครงการภายใต้ PA / MOU · รายชื่อโครงการแยกกลุ่ม</small></span></label>
           <label class="rm-check"><input type="checkbox" name="rmTopic" value="kpi" checked><span><b>7. ผลการดำเนินงานตามตัวชี้วัดที่สำคัญ</b><small>ผลตัวชี้วัดองค์กรและตัวชี้วัดระดับยุทธศาสตร์ของปีงบประมาณที่เลือก · ค่าเป้าหมาย ผล % เทียบเป้า และสถานะ · ความก้าวหน้าตามแผนวิสาหกิจ 5 ปี</small></span></label>
@@ -2288,7 +2355,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       ms_plan: p.ms_plan ?? null, ms_actual: p.ms_actual ?? null, ms_done: p.ms_done || '', ms_start: p.ms_start ?? null, lead: p.lead || null,
       important: false,
       added: ADDED_CODES.has(p.code),
-      master_plans: [],
+      master_plans: [], mp_links: [],
       master_plans_label: 'ไม่มีข้อมูล',
       dg_area: '',
       dg_area_label: 'ไม่มีข้อมูล',
@@ -3188,6 +3255,59 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         panel.scrollIntoView({behavior:'smooth', block:'nearest'});
       });
     });
+
+    // ---- แผนแม่บท → กลยุทธ์แผนแม่บท → โครงการ (พับไว้ กดเปิด) + ตารางไขว้แผนแม่บท × ยุทธศาสตร์ ----
+    (function renderMpTree(){
+      const panel = document.getElementById('mpTreePanel');
+      if(!panel) return;
+      const tree = buildMpTree(PROJECTS, MASTER_PLANS);
+      panel.hidden = !tree.length;
+      if(!tree.length) return;
+      const esc = s => String(s ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const avg = ps => ps.length ? ps.reduce((a,p)=>a+(hProg(p)||0),0)/ps.length : null;
+      const bar = v => `<div class="tap-inline"><div class="tap-bar ${pctColorClass(v)}"><div class="fill" style="width:${v==null?0:Math.max(0,Math.min(100,v*100))}%"></div></div><span class="v">${v==null?'-':(v*100).toFixed(1)+'%'}</span></div>`;
+      const alignHtml = (k, stOnly) => mpAlign(k).map(a =>
+        `<span class="mpt-st" title="${esc(a.name)}">${esc(a.label)}</span>` +
+        (stOnly ? '' : a.sis.map(s => `<span class="mpt-si" title="${esc(s.name)}">${esc(s.code)}${s.name ? ' ' + esc(s.name) : ''}</span>`).join(''))).join('');
+      const prjTable = ps => `<div class="mpt-tw"><table class="mpt-prj"><thead><tr><th class="nw">รหัสโครงการ</th><th>ชื่อโครงการ</th><th class="nw">หน่วยงาน</th><th class="nw r">งบประมาณ (บาท)</th><th>${thBreak(HL.pct)}</th><th class="c">${esc(HL.status)}</th></tr></thead><tbody>` +
+        ps.slice().sort((a,b)=>a.code.localeCompare(b.code,'th')).map(p => { const pr = hProg(p), st = hStat(p);
+          return `<tr class="mpt-p" data-code="${esc(p.code)}" tabindex="0" title="ดูรายละเอียดโครงการ"><td class="code">${esc(p.code)}</td><td class="name"><div class="nm">${p.important?'<span class="star">★</span>':''}${esc(p.name)}</div></td><td class="owner">${esc(p.owner)}</td><td class="num">${fmtBaht(p.budget)}</td><td>${tapBarHtml(pr, pctColorClass(pr))}</td><td class="c"><span class="badge ${statusClass(st)}">${esc(st)}</span></td></tr>`; }).join('') +
+        `</tbody></table></div>`;
+      const kidHtml = k => {
+        const n = k.projects.length;
+        // ยุทธศาสตร์แผนแม่บท: ชั้นบน แสดงยุทธศาสตร์องค์กรที่สอดคล้อง แล้วซ้อนกลยุทธ์แผนแม่บทไว้ข้างใน
+        if(k.kind === 'mpst'){
+          const al = alignHtml(k, true);
+          return `<details class="mpt-k mpt-s"><summary><span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
+            `<span class="mpt-kn"><span class="mpt-lv">ยุทธศาสตร์แผนแม่บท</span><b>${esc(k.name || k.code)}</b>${al ? `<span class="mpt-al">สอดคล้อง ${al}</span>` : ''}</span>` +
+            `<span class="mpt-n">กลยุทธ์ ${k.kids.length} · ${n} โครงการ</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span></summary>` +
+            `<div class="mpt-sub">${k.kids.map(kidHtml).join('')}</div></details>`;
+        }
+        const al = k.kind === 'none' ? '' : alignHtml(k, k.kind === 'si');
+        const head = `<span class="mpt-kc">${k.code ? esc(k.code) : '–'}</span>` +
+          `<span class="mpt-kn"><b>${esc(k.name || k.code)}</b>${k.unknown ? ' <i class="mpt-warn">(ไม่พบรหัสนี้ในชีตกลยุทธ์แผนแม่บท)</i>' : ''}` +
+          (al ? `<span class="mpt-al">${k.kind === 'si' ? '' : 'สอดคล้อง '}${al}${k.derived ? ' <i>(จากโครงการ)</i>' : ''}</span>` : '') + `</span>` +
+          `<span class="mpt-n">${n ? n + ' โครงการ' : 'ยังไม่มีโครงการ'}</span><span class="mpt-b">${n ? bar(avg(k.projects)) : ''}</span>`;
+        return n ? `<details class="mpt-k"><summary>${head}</summary>${prjTable(k.projects)}</details>` : `<div class="mpt-k empty">${head}</div>`;
+      };
+      document.getElementById('mpTree').innerHTML = tree.map(g => {
+        const n = g.projects.length;
+        return `<details class="mpt"><summary>` +
+          `<span class="mpt-nm">${g.cbe ? `<span class="cbe-tag" title="หมวด SE-AM: ${esc(g.cbe.abbr)}${g.cbe.name ? ' · ' + esc(g.cbe.name) : ''}">${esc(g.cbe.abbr)}</span>` : ''}${esc(g.name)}</span>` +
+          `<span class="mpt-meta">${mpLevelText(g)} · ${n} โครงการ</span><span class="mpt-b">${n ? bar(avg(g.projects)) : ''}</span></summary>` +
+          `<div class="mpt-body">${g.mode === 'si' ? '<div class="mpt-note">ยังไม่มีกลยุทธ์ของแผนแม่บทนี้ในชีต "กลยุทธ์แผนแม่บท" จึงแสดงตามกลยุทธ์องค์กรของโครงการแทน</div>' : ''}${g.kids.map(kidHtml).join('')}</div></details>`;
+      }).join('');
+      // ตารางไขว้
+      const M = mpStMatrix(tree);
+      const mBox = document.getElementById('mpMatrixBox');
+      mBox.hidden = !M.rows.length;
+      document.getElementById('mpMatrix').innerHTML = `<thead><tr><th>แผนแม่บท</th>${M.st.map(s => `<th class="c" title="${esc(s.name)}">${esc(s.label)}</th>`).join('')}<th class="c">รวมโครงการ</th></tr></thead><tbody>` +
+        M.rows.map(r => `<tr><td>${esc(r.g.name)}</td>${r.cells.map(c => `<td class="c${c ? ' on' : ''}">${c || '–'}</td>`).join('')}<td class="c tot">${r.total}</td></tr>`).join('') + `</tbody>`;
+      const treeEl = document.getElementById('mpTree');
+      // onclick (ไม่ใช่ addEventListener) ให้ใช้ pdOpen ของรอบข้อมูลล่าสุดเสมอ เมื่อ renderDashboard ถูกเรียกซ้ำ
+      treeEl.onclick = e => { const tr = e.target.closest('tr.mpt-p'); if(tr) pdOpen(tr.dataset.code); };
+      treeEl.onkeydown = e => { const tr = e.target.closest('tr.mpt-p'); if(tr && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); pdOpen(tr.dataset.code); } };
+    })();
   })();
 
   // ---------- มุมมอง: ผลการดำเนินงานตาม PA/MOU (ส่วนงานภายใต้รองผวก.) ----------
@@ -3547,7 +3667,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         completion: h.completion || 'อยู่ระหว่างดำเนินการ',
         important: !!L.important,
         added: !!L.added,
-        master_plans: L.master_plans || [],
+        master_plans: L.master_plans || [], mp_links: L.mp_links || [],
         master_plans_label: L.master_plans_label || 'ไม่เกี่ยวข้องกับแผนแม่บท',
         dg_area_label: (m => m[ownerUnitKey(y.owner || h.owner || L.owner || '', m)])(execFor(per.fiscalYear).ownerToExec) || L.dg_area_label || 'ไม่ระบุ',   // สายงานตามปีงบของรอบนั้น
         is_pa: !!L.is_pa, is_mou: !!L.is_mou,
@@ -3609,6 +3729,11 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const byMasterPlan = [...Object.values(mp), mpNone].filter(g=>g.projects.length).map(aggGroup);
     byMasterPlan.forEach(g=> g.projects.sort(byCode));
     const crossLinked = P.filter(p=>(p.master_plans||[]).length>1).sort(byCode);
+    // แผนแม่บท → กลยุทธ์แผนแม่บท → โครงการ (buildMpTree อยู่ในสคริปต์ส่วนโหลดข้อมูล)
+    const mpTree = buildMpTree(P, CTX.MASTER_PLANS);
+    const aggKid = k=>{ aggGroup(k); k.projects.sort(byCode); (k.kids || []).forEach(aggKid); };
+    mpTree.forEach(g=>{ aggGroup(g); g.projects.sort(byCode); g.kids.forEach(aggKid); });
+    const mpMatrix = mpStMatrix(mpTree);
 
     const DG_ORDER = DG_ORDER_GLOBAL;
     const dg = {};
@@ -3631,7 +3756,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     ].filter(g=>g.projects.length).map(aggGroup);
 
     return {
-      P: P.slice().sort(byCode), all, statusCounts, byStrategy, byMasterPlan, crossLinked, byDg, paMou: pm, paMouGroups,
+      P: P.slice().sort(byCode), all, statusCounts, byStrategy, byMasterPlan, crossLinked, mpTree, mpMatrix, byDg, paMou: pm, paMouGroups,
       hasOutcome: P.some(p=>p.progress_year_oc!=null),   // มีคอลัมน์ Outcome ใน Excel เฉพาะเมื่อมีตัวชี้วัด Outcome (ปีงบ 2570+)
       done: P.filter(p=>p.completion==='สำเร็จ').sort(byCode),
       nImportant: P.filter(p=>p.important).length,
@@ -3949,9 +4074,32 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
       if(R.crossLinked.length) B.push({kind:'table', title:`โครงการที่เชื่อมโยงหลายแผนแม่บท (${R.crossLinked.length} โครงการ)`,
         cols:[['รหัสโครงการ',11],['ชื่อโครงการ',38],['หน่วยงาน',13],['แผนแม่บทที่เชื่อมโยง',38]],
         rows:R.crossLinked.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td>${p.master_plans.map(m=>`<span class="rp-tag">${esc(m.name)}</span>`).join(' ')}</td></tr>`)});
-      R.byMasterPlan.forEach(g=> B.push({kind:'table', title:`${g.name} (${g.n} โครงการ)`,
+      // ระดับรายละเอียดที่เลือกในหน้าต่างรายงาน: 1 = แผนแม่บท · 2 = ถึงกลยุทธ์แผนแม่บท · 3 = ถึงโครงการ
+      const lv = R.mpLevel || 3, tree = R.mpTree || [];
+      const kidLbl = g => g.mode === 'mps' ? (g.nStrat ? 'ยุทธศาสตร์ / กลยุทธ์แผนแม่บท' : 'กลยุทธ์แผนแม่บท') : 'กลยุทธ์องค์กร';
+      const kidName = k => `${k.code ? `<span class="mono">${esc(k.code)}</span> ` : ''}${esc(k.name || k.code)}`;
+      const alignCell = k => k.kind === 'none' ? '-' : esc((k.kind === 'si' || k.kind === 'mpst') ? mpAlign(k).map(a => a.label).join(' · ') : mpAlignText(k)) + (k.derived ? ' <span class="rp-sub">(จากโครงการ)</span>' : '');
+      const kidRow = (k, sub) => `<tr><td${sub ? ' style="padding-left:16px"' : ''}>${k.kind === 'mpst' ? `<span class="rp-sub">ยุทธศาสตร์แผนแม่บท</span><br><b>${kidName(k)}</b>` : kidName(k)}</td><td class="rp-small">${alignCell(k)}</td><td class="r">${k.n}</td><td class="r">${k.n ? fmtBaht(k.budget) : '-'}</td><td class="r">${k.n ? fmtPct(k.rate) : '-'}</td><td>${k.n ? bar(k.avgProgress) : '<span class="rp-sub">ยังไม่มีโครงการ</span>'}</td></tr>`;
+      if(lv >= 2 && tree.length){
+        const M = R.mpMatrix;
+        if(M && M.rows.length) B.push({kind:'table', title:'แผนแม่บท × ยุทธศาสตร์องค์กร (จำนวนโครงการ)',
+          cols:[['แผนแม่บท',30], ...M.st.map(s=>[s.label, Math.max(8, Math.floor(56 / Math.max(1, M.st.length))), 'c']), ['รวมโครงการ',12,'c']],
+          rows:M.rows.map(r=>`<tr><td>${esc(r.g.name)}</td>${r.cells.map(c=>`<td class="c">${c || '-'}</td>`).join('')}<td class="c"><b>${r.total}</b></td></tr>`)});
+        tree.forEach(g=> B.push({kind:'table',
+          title:`${g.name} (${mpLevelText(g)} · ${g.n} โครงการ)${g.mode === 'si' ? ' — ยังไม่มีกลยุทธ์แผนแม่บทในชีต แสดงตามกลยุทธ์องค์กรของโครงการ' : ''}`,
+          cols:[[kidLbl(g),33],[g.mode === 'si' ? 'ยุทธศาสตร์' : 'ยุทธศาสตร์ / กลยุทธ์องค์กรที่สอดคล้อง',29],['โครงการ',7,'r'],['งบประมาณ (บาท)',11,'r'],['% เบิกจ่าย',7,'r'],[headLabels(YE).avg,13]],
+          rows:g.kids.flatMap(k=> [kidRow(k, false), ...(k.kids || []).map(c=> kidRow(c, true))])}));
+      }
+      const nm = k => `${k.code ? k.code + ' ' : ''}${k.name || k.code}`;
+      if(lv >= 3) tree.forEach(g=> g.leaves.filter(x=>x.k.n).forEach(({parent, k})=> B.push({kind:'table',
+        title:`${g.name} › ${parent ? nm(parent) + ' › ' : ''}${nm(k)} (${k.n} โครงการ)`,
         cols:[['รหัสโครงการ',11],['ชื่อโครงการ',40],['หน่วยงาน',13],['งบประมาณ (บาท)',12,'r'],[T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'),13,'c'],[T(sch().labels.status,'ผลสิ้นปี'),11,'c']],
-        rows:g.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)}));
+        rows:k.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)})));
+      // โครงการที่ไม่เกี่ยวข้องกับแผนแม่บท (ไม่อยู่ในลำดับชั้นข้างบน)
+      const none = R.byMasterPlan.find(g=>g.code==='__none__');
+      if(lv >= 3 && none) B.push({kind:'table', title:`${none.name} (${none.n} โครงการ)`,
+        cols:[['รหัสโครงการ',11],['ชื่อโครงการ',40],['หน่วยงาน',13],['งบประมาณ (บาท)',12,'r'],[T('% เทียบแผนสะสม','% จากเป้าหมายทั้งปี'),13,'c'],[T(sch().labels.status,'ผลสิ้นปี'),11,'c']],
+        rows:none.projects.map(p=>`<tr><td class="mono">${esc(p.code)}</td><td>${nameCell(p)}</td><td>${esc(p.owner)}</td><td class="r">${fmtBaht(p.budget)}</td><td>${bar(hP(p))}</td><td class="c">${pill(hS(p))}</td></tr>`)});
     }
 
     // ---------- 5. แผนปฏิบัติการตามสายงาน: สายงาน -> ส่วนงาน -> โครงการ (ตรงกับหน้าเว็บ) ----------
@@ -4148,6 +4296,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     const R = computeReport(P);
     window.ACP_EXEC_UNITS = exSaved;
     R.yearEnd = YE;                     // รอบสุดท้ายของปีที่ปิดแล้ว → ป้าย "บรรลุ / ไม่บรรลุเป้าหมาย"
+    R.mpLevel = Number((document.querySelector('input[name="rmMpLevel"]:checked') || {value:3}).value) || 3;   // หัวข้อ 4: ระดับรายละเอียด
     R.yearBands = yearPctBandCounts(P);
     R.L_DONE = R.yearEnd ? 'บรรลุเป้าหมาย' : 'สำเร็จ';
     R.L_REST = R.yearEnd ? 'ไม่บรรลุเป้าหมาย' : 'อยู่ระหว่างดำเนินการ';
@@ -4494,7 +4643,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     }
 
     if(topics.includes('masterplan')){
-      const {ws, row:r0} = newSheet('แผนแม่บท', [42,14,46,16,16,14,13,14,12,15], TOPICS.masterplan);
+      const {ws, row:r0} = newSheet('แผนแม่บท', [42,30,40,14,46,16,16,14,13,14,12,15], TOPICS.masterplan);
       let row = table(ws, r0, grpCols('แผนแม่บท'), R.byMasterPlan, {title:'สรุปความก้าวหน้าแผนแม่บท'});
       if(charts.mp){ row = sectionTitle(ws, row, 'กราฟความก้าวหน้าเฉลี่ยตามแผนแม่บท'); row = image(ws, row, 0, charts.mp, 0.9); }
       if(R.crossLinked.length){
@@ -4506,10 +4655,41 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
           {h:'จำนวนแผน', get:p=>p.master_plans.length, fmt:'0'},
         ], R.crossLinked, {title:`โครงการที่เชื่อมโยงหลายแผนแม่บท (${R.crossLinked.length} โครงการ)`});
       }
+      // ระดับรายละเอียด: 1 = แผนแม่บท · 2 = ถึงกลยุทธ์แผนแม่บท · 3 = ถึงโครงการ
+      const lv = R.mpLevel || 3, tree = R.mpTree || [];
+      const alignTxt = k => k.kind === 'none' ? '' : ((k.kind === 'si' || k.kind === 'mpst') ? mpAlign(k).map(a => a.label).join(' · ') : mpAlignText(k)) + (k.derived ? ' (จากโครงการ)' : '');
+      const nm = k => k ? (k.code ? k.code + ' ' : '') + (k.name || '') : '';
+      if(lv >= 2 && tree.length){
+        const M = R.mpMatrix;
+        if(M && M.rows.length) row = table(ws, row, [
+          {h:'แผนแม่บท', get:r=>r.g.name},
+          ...M.st.map((s, i)=>({h:s.label, get:r=>r.cells[i], fmt:'0', align:'center'})),
+          {h:'รวมโครงการ', get:r=>r.total, fmt:'0', align:'center'},
+        ], M.rows, {title:'แผนแม่บท × ยุทธศาสตร์องค์กร (จำนวนโครงการ)'});
+        const kids = [];
+        tree.forEach(g=> g.kids.forEach(k=>{ kids.push({g, k}); (k.kids || []).forEach(c=> kids.push({g, k:c, parent:k})); }));
+        row = table(ws, row, [
+          {h:'แผนแม่บท', get:x=>x.g.name},
+          {h:'ระดับ', get:x=> x.k.kind === 'mpst' ? 'ยุทธศาสตร์แผนแม่บท' : x.k.kind === 'si' ? 'กลยุทธ์องค์กร' : 'กลยุทธ์แผนแม่บท'},
+          {h:'ยุทธศาสตร์แผนแม่บท', get:x=> x.k.kind === 'mpst' ? nm(x.k) : nm(x.parent)},
+          {h:'รหัส', get:x=>x.k.code || '-'},
+          {h:'กลยุทธ์', get:x=>x.k.name || x.k.code},
+          {h:'ยุทธศาสตร์ / กลยุทธ์องค์กรที่สอดคล้อง', get:x=>alignTxt(x.k)},
+          {h:'จำนวนโครงการ', get:x=>x.k.n, fmt:'0'},
+          {h:'งบประมาณ (บาท)', get:x=>x.k.budget, fmt:F_BAHT},
+          {h:'% เบิกจ่าย', get:x=>x.k.rate, fmt:F_PCT},
+          {h:headLabels(YE).avg, get:x=>x.k.avgProgress, fmt:F_PCT},
+        ], kids, {title:'การเชื่อมโยงแผนแม่บท → กลยุทธ์แผนแม่บท → ยุทธศาสตร์ / กลยุทธ์องค์กร'});
+      }
+      if(lv >= 3){
       const detail = [];
-      R.byMasterPlan.forEach(g=> g.projects.forEach(p=> detail.push({g, p})));
+      tree.forEach(g=> g.leaves.forEach(({parent, k})=> k.projects.forEach(p=> detail.push({g, k, p, parent}))));
+      (R.byMasterPlan.find(g=>g.code==='__none__') || {projects:[]}).projects.forEach(p=> detail.push({g:{name:'ไม่เกี่ยวข้องกับแผนแม่บท'}, k:null, p}));
       table(ws, row, [
         {h:'แผนแม่บท', get:x=>x.g.name},
+        {h:'ยุทธศาสตร์แผนแม่บท', get:x=>nm(x.parent)},
+        {h:'กลยุทธ์แผนแม่บท / กลยุทธ์องค์กร', get:x=>nm(x.k)},
+        {h:'ยุทธศาสตร์ / กลยุทธ์องค์กรที่สอดคล้อง', get:x=>x.k ? alignTxt(x.k) : ''},
         {h:'รหัสโครงการ', get:x=>x.p.code},
         {h:'ชื่อโครงการ', get:x=>(x.p.important?'★ ':'')+x.p.name},
         {h:'หน่วยงาน', get:x=>x.p.owner},
@@ -4520,6 +4700,7 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
         {h:'% เป้าหมายทั้งปี', get:x=>num(x.p.progress_year), fmt:F_PCT},
         ...(R.hasOutcome ? [{h:'% ผลลัพธ์ เป้าหมายทั้งปี', get:x=>num(x.p.progress_year_oc), fmt:F_PCT}] : []),
       ], detail, {title:'รายละเอียดโครงการแยกตามแผนแม่บท'});
+      }
     }
 
     // ---------- 5. แผนปฏิบัติการตามสายงาน ----------
@@ -4757,13 +4938,19 @@ function renderDashboard(PROJECTS, STRATEGIES, ORG_KPIS, HISTORY_PERIODS, MASTER
     document.getElementById('rmYear').addEventListener('change', fillMonths);
     document.getElementById('rmMonth').addEventListener('change', updateHint);
     const all = document.getElementById('rmAll');
-    const topicBoxes = ()=> Array.from(document.querySelectorAll('input[name="rmTopic"]')).filter(x=> !x.closest('[hidden]'));   // hidden topics are not ticked by select-all
-    all.addEventListener('change', ()=> topicBoxes().forEach(x=> x.checked = all.checked));
+    // hidden topics are not ticked by select-all (เช็กเฉพาะป้ายหัวข้อที่ซ่อน — ตอนผูก event หน้าต่างรายงานยังซ่อนอยู่ทั้งหน้าต่าง)
+    const topicBoxes = ()=> Array.from(document.querySelectorAll('input[name="rmTopic"]')).filter(x=> !x.closest('.rm-check[hidden]'));
+    // ตัวเลือกระดับรายละเอียดของหัวข้อ 4 แสดงเฉพาะเมื่อเลือกหัวข้อนั้น
+    const mpBox = document.querySelector('input[name="rmTopic"][value="masterplan"]'), mpLevelBox = document.getElementById('rmMpLevelBox');
+    const syncMpLevel = ()=>{ if(mpBox && mpLevelBox) mpLevelBox.hidden = !mpBox.checked; };
+    all.addEventListener('change', ()=>{ topicBoxes().forEach(x=> x.checked = all.checked); syncMpLevel(); });
     topicBoxes().forEach(x=> x.addEventListener('change', ()=>{
       const n = topicBoxes().filter(y=>y.checked).length;
       all.checked = n === topicBoxes().length;
       all.indeterminate = n>0 && n<topicBoxes().length;
+      syncMpLevel();
     }));
+    syncMpLevel();
     const pdfBtn = document.getElementById('rmPdf'), xlsBtn = document.getElementById('rmExcel'), prBtn = document.getElementById('rmPrint');
     pdfBtn.addEventListener('click', ()=> run(exportPdf, pdfBtn));
     xlsBtn.addEventListener('click', ()=> run(exportExcel, xlsBtn));
@@ -4914,7 +5101,8 @@ const SHEET_SPECS = {
   kpi:       { names:['ตัวชี้วัดโครงการ'],                  required:['KPI_PRJ_Code','ชื่อตัวชี้วัดโครงการ'], optional:true },
   orgKpi:    { names:['ตัวชี้วัดองค์กร'],                   required:['KPI_Org_Code'], optional:true },
   mp:        { names:['แผนแม่บท'],                          required:['MP_Code','ชื่อแผนแม่บท'], optional:true },
-  link:      { names:['เชื่อมโยงโครงการ'],                  required:['PRJ_Code','MP_Code'], optional:true },
+  link:      { names:['เชื่อมโยงโครงการ'],                  required:['PRJ_Code','MP_Code'], optional:true },   // MPS_Code (ไม่บังคับ) = กลยุทธ์แผนแม่บทที่โครงการตอบ
+  mpStrategy:{ names:['กลยุทธ์แผนแม่บท'],                   required:['MPS_Code'], optional:true },   // กลยุทธ์ของแผนแม่บทเอง + ยุทธศาสตร์/กลยุทธ์องค์กรที่สอดคล้อง
   exec:      { names:['ส่วนงานภายใต้ผู้บริหาร','ส่วนงานภายใต้รองผวก.'], required:[], optional:true, check: f => f.length>=2 && f.slice(1).some(x=>/ผวก|ผู้ว่าการ/.test(x)) },
   yearEnd:   { names:['ผลสิ้นปีงบประมาณ'],                  required:['Fiscal_Year','PRJ_Code','ผลสิ้นปี'], optional:true },
   // ความเชื่อมโยงยุทธศาสตร์ (เมนู "ความเชื่อมโยงยุทธศาสตร์") — ถ้ายังไม่ได้ส่งชีตเหล่านี้ขึ้นเว็บ จะแสดงเป็นรหัสแทนชื่อ
@@ -5007,6 +5195,115 @@ function buildStrategyLinks(o){
     if(!y.org && y.st && (orgBySt[y.st]||[]).length === 1) y.org = orgBySt[y.st][0];
   });
   return { stName, org, si, year, prj, prjOrg, hasNames: !!(o.yearKpiRows||[]).length };
+}
+
+// ---------- แผนแม่บท → กลยุทธ์แผนแม่บท → โครงการ (ผู้ใช้ขอ พ.ย. 2569) ----------
+// ชีต "กลยุทธ์แผนแม่บท": MP_Code · MPS_Code · ชื่อกลยุทธ์แผนแม่บท · Strategy_Code · SI_Code
+//   = กลยุทธ์ของแผนแม่บทเอง และยุทธศาสตร์ / กลยุทธ์องค์กร (SI) ที่สอดคล้อง (ใส่ได้หลายรหัส คั่นด้วย , หรือเว้นวรรค)
+// โครงการตอบกลยุทธ์แผนแม่บทผ่านคอลัมน์ MPS_Code ในชีต "เชื่อมโยงโครงการ"
+const splitCodes = v => String(v || '').split(/[\s,;]+/).map(s => s.trim()).filter(s => s && !isNonCode(s));
+// แผนแม่บทมียุทธศาสตร์และกลยุทธ์ของตัวเอง ถ่ายทอดจากแผนวิสาหกิจ: 1 แถว = 1 กลยุทธ์แผนแม่บท พร้อมยุทธศาสตร์แผนแม่บทที่อยู่เหนือ
+//   MPST_Code + ยุทธศาสตร์แผนแม่บท (ไม่บังคับ) → ยุทธศาสตร์แผนแม่บท · Strategy_Code = ยุทธศาสตร์องค์กรที่สอดคล้อง · SI_Code = กลยุทธ์องค์กรที่สอดคล้อง
+function buildMpStrategies(rows){
+  const out = {};
+  const f = (rows && rows.__fields) || Object.keys((rows && rows[0]) || {});
+  const fName = f.find(h => /กลยุทธ์/.test(h) && !/_Code/i.test(h)) || f.find(h => /ชื่อ/.test(h) && !/_Code|ยุทธศาสตร์/i.test(h));
+  const fStCode = f.find(h => /^MPST_Code$/i.test(h));
+  const fStName = f.find(h => /ยุทธศาสตร์แผนแม่บท/.test(h) && !/_Code/i.test(h));
+  (rows || []).forEach((r, i) => {
+    const code = String(r['MPS_Code'] || '').trim();
+    if(isNonCode(code)) return;
+    const stc = fStCode ? String(r[fStCode] || '').trim() : '', stn = fStName ? String(r[fStName] || '').trim() : '';
+    out[code] = { code, mp: String(r['MP_Code'] || '').trim(), name: fName ? String(r[fName] || '').trim() : '',
+      mpst: (stc && !isNonCode(stc)) || stn ? { code: isNonCode(stc) ? '' : stc, name: stn || stc } : null,
+      st: splitCodes(r['Strategy_Code']), si: splitCodes(r['SI_Code']), order: i };
+  });
+  return out;
+}
+// ยุทธศาสตร์ → กลยุทธ์องค์กร ของกลุ่ม (ใช้แสดง "สอดคล้อง") — [{st, label, name, sis:[{code, name}]}]
+function mpAlign(k){
+  const L = window.ACP_LINKS || {}, stName = L.stName || {}, siMap = L.si || {};
+  const by = {};
+  const S = c => by[c] || (by[c] = { st: c, label: (stName[c] && stName[c].label) || c || 'ไม่ระบุยุทธศาสตร์', name: (stName[c] && stName[c].name) || '', sis: [] });
+  (k.st || []).forEach(S);
+  (k.si || []).forEach(c => { const s = S((siMap[c] && siMap[c].st) || (k.st || [])[0] || ''); if(!s.sis.some(x => x.code === c)) s.sis.push({ code: c, name: (siMap[c] && siMap[c].name) || '' }); });
+  return Object.values(by).sort((a, b) => String(a.st).localeCompare(String(b.st)));
+}
+function mpAlignText(k){
+  return mpAlign(k).map(a => a.label + (a.sis.length ? ': ' + a.sis.map(s => s.code + (s.name ? ' ' + s.name : '')).join('; ') : '')).join(' · ');
+}
+// จัดกลุ่มโครงการของรอบที่เลือก: แผนแม่บท → กลยุทธ์แผนแม่บท → โครงการ (คืนรายการโครงการ ผู้เรียกสรุปค่าเอง)
+// แผนแม่บทที่ยังไม่มีกลยุทธ์ในชีต (และไม่มีโครงการระบุ MPS_Code) แบ่งตามกลยุทธ์องค์กร (SI) ของโครงการแทน (mode 'si')
+function buildMpTree(projects, masterPlans){
+  const MPS = window.ACP_MPS || {}, L = window.ACP_LINKS || {}, siMap = L.si || {};
+  const siSt = c => (siMap[c] && siMap[c].st) || '';
+  const groups = {}, order = [];
+  const G = (code, name, cbe) => groups[code] || (order.push(code), groups[code] = { code, name: name || code, cbe: cbe || null, projects: [], kids: {}, mode: 'si' });
+  (masterPlans || []).forEach(m => G(m.code, m.name, m.cbe));
+  Object.values(MPS).forEach(s => { if(s.mp) G(s.mp).mode = 'mps'; });
+  (projects || []).forEach(p => (p.mp_links || []).forEach(l => {
+    const g = G(l.mp);
+    if(!g.projects.includes(p)) g.projects.push(p);
+    if(l.mps) g.mode = 'mps';
+  }));
+  const kid = (g, key, init) => g.kids[key] || (g.kids[key] = Object.assign(init(), { projects: [], _st: new Set(), _si: new Set() }));
+  const mpsKid = (g, c) => kid(g, 'mps:' + c, () => { const s = MPS[c]; return { kind: 'mps', code: c, name: s ? s.name : '', st: s ? s.st.slice() : [], si: s ? s.si.slice() : [], order: s ? s.order : 1e6, unknown: !s }; });
+  Object.values(MPS).forEach(s => { if(s.mp && groups[s.mp]) mpsKid(groups[s.mp], s.code); });
+  (projects || []).forEach(p => (p.mp_links || []).forEach(l => {
+    const g = groups[l.mp];
+    let k;
+    if(g.mode === 'mps') k = l.mps ? mpsKid(g, l.mps) : kid(g, 'none', () => ({ kind: 'none', code: '', name: 'ยังไม่ระบุกลยุทธ์แผนแม่บท', st: [], si: [], order: 2e6 }));
+    else k = kid(g, 'si:' + l.si, () => ({ kind: 'si', code: l.si, name: l.si ? ((siMap[l.si] && siMap[l.si].name) || l.si) : 'ไม่ระบุกลยุทธ์องค์กร', st: [], si: l.si ? [l.si] : [], order: l.si ? 0 : 2e6 }));
+    if(!k.projects.includes(p)) k.projects.push(p);
+    const st = l.st || siSt(l.si);
+    if(st) k._st.add(st);
+    if(l.si) k._si.add(l.si);
+  }));
+  return order.map(c => groups[c]).filter(g => g.projects.length || Object.keys(g.kids).length).map(g => {
+    const kids = Object.values(g.kids).map(k => {
+      // กลยุทธ์แผนแม่บทที่ชีตไม่ได้ระบุความสอดคล้อง → ใช้ยุทธศาสตร์/กลยุทธ์องค์กรของโครงการที่ตอบกลยุทธ์นั้น
+      if(k.kind === 'mps' && !k.st.length && !k.si.length && k._st.size){ k.st = [...k._st]; k.si = [...k._si]; k.derived = true; }
+      if(!k.st.length) k.st = [...new Set([...k._st, ...k.si.map(siSt).filter(Boolean)])];
+      delete k._st; delete k._si;
+      return k;
+    }).sort((a, b) => (a.order - b.order) || String(a.code).localeCompare(String(b.code)));
+    // ยุทธศาสตร์แผนแม่บท (ถ้าชีตระบุ): รวมกลยุทธ์แผนแม่บทเป็นชั้นบน (kind 'mpst', มี kids) — ความสอดคล้อง = ยุทธศาสตร์องค์กรของกลยุทธ์ในชั้นนั้น
+    let top = kids;
+    if(g.mode === 'mps' && kids.some(k => k.kind === 'mps' && MPS[k.code] && MPS[k.code].mpst)){
+      const by = {};
+      top = [];
+      kids.forEach(k => {
+        if(k.kind !== 'mps'){ top.push(k); return; }
+        const s = (MPS[k.code] && MPS[k.code].mpst) || { code: '', name: 'ไม่ระบุยุทธศาสตร์แผนแม่บท' };
+        const key = s.code || s.name;
+        let n = by[key];
+        if(!n){ n = by[key] = { kind: 'mpst', code: s.code, name: s.name, kids: [], projects: [], st: [], si: [], order: k.order }; top.push(n); }
+        n.kids.push(k);
+        k.projects.forEach(p => { if(!n.projects.includes(p)) n.projects.push(p); });
+        n.st = [...new Set([...n.st, ...k.st])].sort();
+      });
+    }
+    const leaves = [];
+    top.forEach(k => (k.kids ? k.kids.map(c => ({ parent: k, k: c })) : [{ parent: null, k }]).forEach(x => leaves.push(x)));
+    return Object.assign(g, { kids: top, leaves, nStrat: top.filter(k => k.kind === 'mpst').length,
+      nLeaf: leaves.filter(x => x.k.kind !== 'none').length });
+  });
+}
+// ชื่อระดับของแผนแม่บท (หัวคอลัมน์ / ป้ายนับ)
+function mpLevelText(g){
+  if(g.mode !== 'mps') return `กลยุทธ์องค์กร ${g.nLeaf}`;
+  return (g.nStrat ? `ยุทธศาสตร์แผนแม่บท ${g.nStrat} · ` : '') + `กลยุทธ์แผนแม่บท ${g.nLeaf}`;
+}
+// ตารางไขว้ แผนแม่บท × ยุทธศาสตร์องค์กร: จำนวนโครงการ (ยุทธศาสตร์ตามแถวเชื่อมโยงของโครงการ)
+function mpStMatrix(tree){
+  const L = window.ACP_LINKS || {}, stName = L.stName || {}, siMap = L.si || {};
+  const stOf = l => l.st || (siMap[l.si] && siMap[l.si].st) || '';
+  const codes = new Set(Object.keys(stName));
+  tree.forEach(g => g.projects.forEach(p => (p.mp_links || []).forEach(l => { if(l.mp === g.code && stOf(l)) codes.add(stOf(l)); })));
+  const st = [...codes].sort().map(c => ({ code: c, label: (stName[c] && stName[c].label) || c, name: (stName[c] && stName[c].name) || '' }));
+  const rows = tree.filter(g => g.projects.length).map(g => ({ g, total: g.projects.length,
+    cells: st.map(s => g.projects.filter(p => (p.mp_links || []).some(l => l.mp === g.code && stOf(l) === s.code)).length) }));
+  return { st, rows };
 }
 // แบ่งโครงการ (ของรอบที่เลือก) ตามลำดับชั้น — คืนเฉพาะรายการโครงการ ผู้เรียกคำนวณสรุปเอง (ให้ตรงกับโหมดสิ้นปี/เกณฑ์สถานะของหน้านั้น)
 // โครงการที่ตอบหลายตัวชี้วัดรายปี นับในทุกตัวชี้วัดนั้น (เหมือนแผนแม่บท) แต่ระดับยุทธศาสตร์/ตัวชี้วัดองค์กรนับครั้งเดียว
@@ -6304,8 +6601,8 @@ async function loadAndRender(){
       fetchSheetBySpec('link'),
     ]);
     const execRows = await fetchSheetBySpec('exec');
-    let [initiativeRows, yearKpiRows, kpiLinkRows, cbeRows] = await Promise.all(
-      ['initiative','yearKpi','kpiLink','cbe'].map(fetchSheetBySpec));
+    let [initiativeRows, yearKpiRows, kpiLinkRows, cbeRows, mpsRows] = await Promise.all(
+      ['initiative','yearKpi','kpiLink','cbe','mpStrategy'].map(fetchSheetBySpec));
     // ผลสิ้นปีของทุกปีที่ปิดแล้ว (ไม่กรองตามปีปัจจุบัน)
     window.ACP_YEAR_END = buildYearEnd(await fetchSheetBySpec('yearEnd'));
     // ผลตัวชี้วัดองค์กรและรายปี (ทุกปีงบ ไม่กรองตามปีปัจจุบัน) — ไม่ critical
@@ -6362,16 +6659,31 @@ async function loadAndRender(){
       if(cc && !isNonCode(cc)) mpCbe[code] = Object.assign({ code: cc, abbr: cc.replace(/^CBE-/,''), name: '' }, cbeMap[cc] || {});
     });
     window.ACP_LINKS = buildStrategyLinks({ strategyRows, orgKpiRows, initiativeRows, yearKpiRows, kpiLinkRows, linkRows, kpiRows });
-    const prjToMp = {};
-    linkRows.forEach(r=>{
+    // โครงการ → แผนแม่บท / กลยุทธ์แผนแม่บท (MPS_Code) พร้อมยุทธศาสตร์และกลยุทธ์องค์กรของแถวนั้น (rec.mp_links)
+    // ที่มา: ชีต "เชื่อมโยงโครงการ" · โครงการที่ไม่มีแถวในชีตนี้ใช้ MP_Code (และ MPS_Code ถ้ามี) ในชีตโครงการแทน
+    // MPS_Code ที่มีในชีต "กลยุทธ์แผนแม่บท" กำหนดแผนแม่บทเอง (ไม่ต้องกรอก MP_Code ซ้ำ)
+    window.ACP_MPS = buildMpStrategies(mpsRows);
+    const prjLinks = {};
+    const addMpLink = (r) => {
       const prj = normCode(r['PRJ_Code']);
-      const mp = (r['MP_Code']||'').trim();
-      if(!prj || !mp || mp === 'NON-MP') return;
-      if(!prjToMp[prj]) prjToMp[prj] = new Set();
-      prjToMp[prj].add(mp);
-    });
+      if(!prj) return;
+      const mpList = splitCodes(r['MP_Code']), mpsList = splitCodes(r['MPS_Code']);
+      const st = String(r['Strategy_Code']||'').trim(), si = String(r['SI_Code']||'').trim();
+      (mpsList.length ? mpsList : ['']).forEach(s => {
+        const own = s && window.ACP_MPS[s] && window.ACP_MPS[s].mp;
+        (own ? [own] : mpList).forEach(mp => {
+          const m = prjLinks[prj] || (prjLinks[prj] = new Map());
+          const k = [mp, s, st, si].join('|');
+          if(!m.has(k)) m.set(k, { mp, mps: s, st: isNonCode(st) ? '' : st, si: isNonCode(si) ? '' : si });
+        });
+      });
+    };
+    linkRows.forEach(addMpLink);
+    const linkedInSheet = new Set(Object.keys(prjLinks));
+    projectRows.forEach(r => { if(!linkedInSheet.has(normCode(r['PRJ_Code']))) addMpLink(r); });
     records.forEach(rec=>{
-      const codes = prjToMp[rec.code] ? Array.from(prjToMp[rec.code]) : [];
+      rec.mp_links = prjLinks[rec.code] ? Array.from(prjLinks[rec.code].values()) : [];
+      const codes = [...new Set(rec.mp_links.map(l => l.mp))];
       rec.master_plans = codes.map(c => ({ code: c, name: mpMap[c] || c }));
       rec.master_plans_label = rec.master_plans.length
         ? rec.master_plans.map(m => m.name).join(', ')
